@@ -1,0 +1,40 @@
+*** menu.pl~	Mon Mar 13 11:21:56 1995
+--- menu.pl	Mon Mar 13 11:53:46 1995
+***************
+*** 143,152 ****
+  #               OR if the demo doesn't appear to work (there's a bug in
+  #               some getcap()'s).
+  #
+  #require Term::Cap;                     # Get Tgetent package
+  #$Term::Cap::ospeed = 9600;             # Suppress "nospeed" warning
+  #Term::Cap::Tgetent();                  # Define entry
+! #*main'getcap = sub { $Term::Cap::TC{shift} };  # Define local subroutine
+  
+  #**********
+  #  MENU_CURSES_APPLICATION
+--- 143,167 ----
+  #               OR if the demo doesn't appear to work (there's a bug in
+  #               some getcap()'s).
+  #
++ #  This is for perl5.000
++ #
++ #if ($] == 5.000)
++ #{
+  #require Term::Cap;                     # Get Tgetent package
+  #$Term::Cap::ospeed = 9600;             # Suppress "nospeed" warning
+  #Term::Cap::Tgetent();                  # Define entry
+! #*main::getcap = sub { $Term::Cap::TC{shift} };  # Define local subroutine
+! #}
+! #
+! #  This is for perl5.001
+! #
+! #if ($] >= 5.001)
+! {
+! package Perl5::Menu_PL::Compat;        # Don't pollute menu.pl namespace
+! require Term::Cap;                     # Get Tgetent package
+! $term = Tgetent Term::Cap { OSPEED => 9600 };  # Define entry
+! sub main::getcap { $term->{shift()} };  # Define local subroutine
+! }
+  
+  #**********
+  #  MENU_CURSES_APPLICATION

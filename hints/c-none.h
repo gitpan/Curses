@@ -1,0 +1,25 @@
+/* Change <curses.h> below to the proper "include" file for curses. */
+#include <curses.h>
+
+/* Change each #undef below to #define if the answer to the question
+ * beside it is "yes".
+ */
+#undef  C_LONGNAME	/* Does longname() exist?		*/
+#undef  C_LONG0ARGS	/* Does longname() take 0 arguments?	*/
+#undef  C_LONG2ARGS	/* Does longname() take 2 arguments?	*/
+
+#undef  C_TOUCHLINE	/* Does touchline() exist?		*/
+#undef  C_TOUCH3ARGS	/* Does touchline() take 3 arguments?	*/
+#undef  C_TOUCH4ARGS	/* Does touchline() take 4 arguments?	*/
+
+/* Some Curses include files have problems interacting with perl,
+ * some are missing basic functionality, and some just plain do
+ * weird things.  Unfortunately, there's no way to anticipate all
+ * of the problems the curses include file + "perl.h" might create.
+ *
+ * If you find that you can't compile Curses.c because of these
+ * conflicts, you should insert C code before and after the "include"
+ * file above to try and fix the problems.  "See c-sunos.sysv.h"
+ * for an example of this.
+ */
+

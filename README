@@ -1,0 +1,106 @@
+    The Curses extension to perl5.000, version alpha8
+
+	 Copyright (c) 1994,1995  William Setzer
+                All rights reserved.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the Artistic License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    Artistic License for more details. 
+
+This is a dynamic loadable curses module for perl5.  If you've seen
+previous versions of Curses, you'll notice that very little remains of
+the old version.  This was necessary to fix some of the bad flaws in
+the old one.  So there's no more Configure or cursin.* or Curses.xs
+process.  Getting rid of Configure was a difficult decision, but I
+think it'll help more than hurt in the long run.
+
+Yes, it's been downgraded from beta back to alpha, but I never had
+a good reason to make it beta in the first place. :-)
+
+You can get this package from:
+
+   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses-a8.tar.gz
+
+Mirrors take note:  This is also available as:
+
+   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses/Curses-a8.tar.gz
+
+The name change is to keep people from confusing it with perl 4.X
+curseperl.
+
+Please see the INSTALL document for how to install it on your system,
+the Curses pod (located at the end of "Curses.pm") for
+incompatibilities with other Perl programs, and the end of this
+document for known compile or install problems.
+
+New for alpha 8:
+
+   o Tested on perl5.001
+
+   o Better Makefile support.  Now that we can use perl5.001 and the
+     much improved MakeMaker, you should be able to install Curses
+     more easily.
+
+   o Less compiling tests, so the symbol testing should go a little
+     faster.
+
+   o Fixes for various compiling problems.
+
+   o "make clean" now does the right thing.
+
+Features:
+
+   o This version is much faster.  Timing, including the dynamic
+     loading, of 5000 "addstr"s on a Sparc 5 under SunOS, SysV Curses:
+
+        Original Curses:  ~14 sec
+        Curses2:          3.9 sec
+        New Curses:       1.6 sec
+
+   o Unified functions are still in, even with the increase in speed.
+
+   o Better diagnostics.
+
+   o Much better documentation.  I think the new Curses pod is fairly
+     complete, but suggestions for revisions or additions are welcome.
+
+   o All supported Curses functions now exist.  If the vendor's
+     libcurses doesn't have the equivalent C function, the perl
+     function will complain and exit.
+
+   o All incompatibilities with curseperl 4.X should now be explicitly
+     noted.
+
+   o Every function has been wrapped with with an #ifdef, so if the
+     symbol finding script doesn't work, you can still easily configure
+     the module by hand.  Doing it the old way wasn't pretty.
+
+   o The "eval problem" has gone away.
+
+   o I've found the Linux getch() and getstr() problem.  See below.
+
+The "demo" program is for demonstration purposes only.  If it
+references a function your version of curses doesn't have, wrap it in
+an "eval" and try again.
+
+Many thanks Malcolm Beattie and Larry Wall, without whose code I could
+steal I wouldn't have written this.  Enjoy!
+
+
+William Setzer
+William_Setzer@ncsu.edu
+
+Known Problems
+--------------
+Linux:
+   getch() and getstr() don't work right.  This is because of a bug
+   in ncurses.  A patch to fix ncurses-1.8.5 can be found in the
+   file "ncurses.patch".  After applying the patch and reinstalling
+   ncurses, everything should work fine.
+
+
+

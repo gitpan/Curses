@@ -1,0 +1,53 @@
+First, this version *requires* perl5.001.  The enhancements to
+the MakeMaker system are too substantial to ignore.  You'll find
+that you can now install Curses into an already installed system.
+
+1)  Make sure perl5.001 has been built.  Unpack "Curses-a8.tar.gz".  If
+    you haven't installed perl5.001, move the "Curses" directory to
+    "perl5.001/ext/Curses".  Go into the "Curses" directory.
+
+2)  Look in the `hints' directory to see if any of the hint files are
+    appropriate to your machine's OS.  If so, symlink or copy it to
+    the file "c-config.h" in the current (Curses) directory.  If not,
+    copy "hints/c-none.h" to "c-config.h" in the current directory.
+    Then edit "c-config.h" and follow the directions.  If you have
+    to "roll your own", be sure and save a copy.  A "make clean"
+    will delete "c-config.h".  If you "rolled your own", please send
+    me a copy so I can include it in future distributions (see
+    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
+
+3)  Edit "Makefile.PL" and pick or add the appropriate options.
+
+4)  perl Makefile.PL
+
+5)  make
+
+    `make' will first run a perl script called `test.syms' that
+    generates the file "Curses.h".  It should do a pretty good job,
+    but if you find that it isn't picking up the correct values, you
+    can edit "Curses.h" by hand and follow the directions.  If you
+    have to "roll your own", be sure and save a copy.  A "make clean"
+    will delete "Curses.h".
+
+    `make' will then try to compile "Curses.c".  If you get any
+    undefined curses symbols, it means that your curses really doesn't
+    have those functions, and you should edit "Curses.h" and/or
+    "c-config.h" and change the #define to #undef for that function.
+
+    If you get other compile errors, it is probably because the curses
+    include file and the perl include files are conflicting.  You'll
+    have to figure out what's wrong and add proper C code to
+    "c-config.h".  See "hints/c-sunos.sysv.h" for an example of how to
+    do this.
+
+    One common problem: If the compile of Curses.c fails because of an
+    undefined type "chtype", put "#define chtype int" in "c-config.h"
+    after the include file (see "hints/c-sunos.bsd.h" for an example).
+
+6)  Enjoy!
+
+    If your enjoyment is ruined (:-) because the module doesn't work
+    right, peruse the Curses pod document (located at the end of
+    "Curses.pm") for incompatibilities with other Perl programs.  Also
+    check the end of the "README" for problems that may exist for your
+    particular libcurses.a or operating system.
