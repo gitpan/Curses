@@ -25,6 +25,9 @@ sub print_line { print OUT @_ }
 
 sub do_constant {
     my $con  = shift;
+
+    next unless $con->{DOIT};
+
     my $name = $con->{NAME};
     my $num  = $con->{NUM};
     my $def  = $name . ';' . " " x (20 - length $name);

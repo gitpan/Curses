@@ -85,7 +85,6 @@ PAUSE
 
     /* Variables masquerading as variables */ 
 
-    C_NEWXS("Curses::del_panel",              XS_Curses_del_panel);
     C_NEWXS("Curses::Vars::DESTROY",          XS_Curses_Vars_DESTROY);
     C_NEWXS("Curses::Vars::FETCH",            XS_Curses_Vars_FETCH);
     C_NEWXS("Curses::Vars::STORE",            XS_Curses_Vars_STORE);

@@ -8,7 +8,9 @@
 
 #include <curses.h>
 
-#define chtype int
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
 
 #define C_LONGNAME
 #undef  C_LONG0ARGS
@@ -16,4 +18,4 @@
 
 #define C_TOUCHLINE
 #undef  C_TOUCH3ARGS
-#define  C_TOUCH4ARGS
+#define C_TOUCH4ARGS

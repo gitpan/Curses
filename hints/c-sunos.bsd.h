@@ -6,11 +6,6 @@
 
 #include <curses.h>
 
-/* If you get an undefined type "chtype" error, you should place the
- * following line after the #include file in "c-config.h".
- */
-#define chtype int
-
 #define C_LONGNAME
 #define C_LONG0ARGS
 #undef  C_LONG2ARGS

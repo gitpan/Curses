@@ -436,6 +436,99 @@ XS(XS_Curses_constant)
 #ifdef KEY_UP
 	case 139:  ret = KEY_UP;                 break;
 #endif
+#ifdef KEY_MOUSE
+	case 140:  ret = KEY_MOUSE;              break;
+#endif
+#ifdef BUTTON1_RELEASED
+	case 141:  ret = BUTTON1_RELEASED;       break;
+#endif
+#ifdef BUTTON1_PRESSED
+	case 142:  ret = BUTTON1_PRESSED;        break;
+#endif
+#ifdef BUTTON1_CLICKED
+	case 143:  ret = BUTTON1_CLICKED;        break;
+#endif
+#ifdef BUTTON1_DOUBLE_CLICKED
+	case 144:  ret = BUTTON1_DOUBLE_CLICKED;   break;
+#endif
+#ifdef BUTTON1_TRIPLE_CLICKED
+	case 145:  ret = BUTTON1_TRIPLE_CLICKED;   break;
+#endif
+#ifdef BUTTON1_RESERVED_EVENT
+	case 146:  ret = BUTTON1_RESERVED_EVENT;   break;
+#endif
+#ifdef BUTTON2_RELEASED
+	case 147:  ret = BUTTON2_RELEASED;       break;
+#endif
+#ifdef BUTTON2_PRESSED
+	case 148:  ret = BUTTON2_PRESSED;        break;
+#endif
+#ifdef BUTTON2_CLICKED
+	case 149:  ret = BUTTON2_CLICKED;        break;
+#endif
+#ifdef BUTTON2_DOUBLE_CLICKED
+	case 150:  ret = BUTTON2_DOUBLE_CLICKED;   break;
+#endif
+#ifdef BUTTON2_TRIPLE_CLICKED
+	case 151:  ret = BUTTON2_TRIPLE_CLICKED;   break;
+#endif
+#ifdef BUTTON2_RESERVED_EVENT
+	case 152:  ret = BUTTON2_RESERVED_EVENT;   break;
+#endif
+#ifdef BUTTON3_RELEASED
+	case 153:  ret = BUTTON3_RELEASED;       break;
+#endif
+#ifdef BUTTON3_PRESSED
+	case 154:  ret = BUTTON3_PRESSED;        break;
+#endif
+#ifdef BUTTON3_CLICKED
+	case 155:  ret = BUTTON3_CLICKED;        break;
+#endif
+#ifdef BUTTON3_DOUBLE_CLICKED
+	case 156:  ret = BUTTON3_DOUBLE_CLICKED;   break;
+#endif
+#ifdef BUTTON3_TRIPLE_CLICKED
+	case 157:  ret = BUTTON3_TRIPLE_CLICKED;   break;
+#endif
+#ifdef BUTTON3_RESERVED_EVENT
+	case 158:  ret = BUTTON3_RESERVED_EVENT;   break;
+#endif
+#ifdef BUTTON4_RELEASED
+	case 159:  ret = BUTTON4_RELEASED;       break;
+#endif
+#ifdef BUTTON4_PRESSED
+	case 160:  ret = BUTTON4_PRESSED;        break;
+#endif
+#ifdef BUTTON4_CLICKED
+	case 161:  ret = BUTTON4_CLICKED;        break;
+#endif
+#ifdef BUTTON4_DOUBLE_CLICKED
+	case 162:  ret = BUTTON4_DOUBLE_CLICKED;   break;
+#endif
+#ifdef BUTTON4_TRIPLE_CLICKED
+	case 163:  ret = BUTTON4_TRIPLE_CLICKED;   break;
+#endif
+#ifdef BUTTON4_RESERVED_EVENT
+	case 164:  ret = BUTTON4_RESERVED_EVENT;   break;
+#endif
+#ifdef BUTTON_CTRL
+	case 165:  ret = BUTTON_CTRL;            break;
+#endif
+#ifdef BUTTON_SHIFT
+	case 166:  ret = BUTTON_SHIFT;           break;
+#endif
+#ifdef BUTTON_ALT
+	case 167:  ret = BUTTON_ALT;             break;
+#endif
+#ifdef ALL_MOUSE_EVENTS
+	case 168:  ret = ALL_MOUSE_EVENTS;       break;
+#endif
+#ifdef REPORT_MOUSE_POSITION
+	case 169:  ret = REPORT_MOUSE_POSITION;   break;
+#endif
+#ifdef NCURSES_MOUSE_VERSION
+	case 170:  ret = NCURSES_MOUSE_VERSION;   break;
+#endif
 	default:
 	  croak("Curses constant '%s' is not defined by your vendor", name);
 	}

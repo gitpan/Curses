@@ -8,6 +8,10 @@
 
 #include <ncurses.h>   /* or curses.h */
 
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 /* Defined in both Perl & Ncurses */
 #undef instr
 

@@ -15,5 +15,3 @@
 #define C_TOUCHLINE
 #undef  C_TOUCH3ARGS
 #define C_TOUCH4ARGS
-
-typedef long chtype;

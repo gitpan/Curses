@@ -53,38 +53,23 @@ sub do_function {
 sub print_function {
     my $fun   = shift;
 
-    ###
-    ##  Variables
-    #
     my $arg;
     my @argv;   # v = variables
     my @argb;   # b = body
-    my $num = $fun->{UNI} ? -1 : 0;
 
     foreach $arg (@{$fun->{ARGS}}) {
-	my $decl = $arg->{DECL};
-	my $name = $arg->{NAME};
+	my $pos  = $fun->{UNI} ? $arg->{UNI} : $arg->{NUM};
 
-	my $arg1 = $fun->{UNI} ?  $num == 0 ?
-	    "ST(c_arg)" : "ST(c_arg+$num)" : "ST($num)";
-	my $arg2 = $arg->{ARG2} || $num;
+	$arg->{ARG1}   = "ST($pos)";
+	$arg->{ARG2} ||= $pos;
 
-	my $def = "$decl\t$name\t= ";
+	my $tab = 'DECL_NOR';
+	if ($arg->{OUT})                      { $tab = 'DECL_OUT' }
+	if ($arg->{OPT})                      { $tab = 'DECL_OPT' }
+	if ($fun->{UNI} and $arg->{NUM} == 0) { $tab = 'DECL_UNI' }
 
-	if ($fun->{UNI} and $num < 0) {
-	    $def .= lookup('DECL_UNI', $decl, $name, "ST(0)", 0);
-	}
-	elsif ($arg->{OPTNULL}) {
-	    $def .= lookup('DECL_ODD', "optnull $decl", $name, $arg1, $arg2);
-	}
-	elsif ($arg->{OUT}) {
-	    $def .= lookup('DECL_OUT', $decl, $name, $arg1, $arg2);
-
-	    push @argb, lookup('OUT', $decl, $name, $arg1, $arg2); 
-	}
-	else {
-	    $def .= lookup('DECL_NOR', $decl, $name, $arg1, $arg2);
-	}
+	my $str = lookup($tab, $arg);
+	my $def = "$arg->{DECL}\t$arg->{NAME}\t= $str;";
 
 	if ($arg->{SHIFT}) {
 	    splice @argv, -$arg->{SHIFT}, 0, $def;
@@ -93,51 +78,47 @@ sub print_function {
 	    push @argv, $def;
 	}
 
-	$num++;
+	if ($arg->{OUT}) {
+	    push @argb, lookup('OUT', $arg);
+	}
+	if ($arg->{AMP}) {
+	    $arg->{NAME} = "&" . $arg->{NAME};
+	}
     }
-
-    my $opt  = grep { $_->{OPTNULL} }                       @{$fun->{ARGS}};
-    my @call = map  { ($_->{AMP} ? "&" : "") . $_->{NAME} } @{$fun->{ARGS}};
 
     ###
     ##  Return and body
     #
-    my $call  = $fun->{NAME} . '(' . join(', ', @call) . ')';
-    if ($fun->{UNI}) {
-	my $str = lookup('RET_UNI', $fun->{DECL});
-	my $win = $fun->{ARGS}[0]{NAME};
+    my $clist = join ", ", map { $_->{NAME} } @{$fun->{ARGS}};
+    my $call  = "$fun->{W}$fun->{NAME}($clist)";
 
-	$call = "w" . $call if $fun->{UNI} !~ /</;
-	$call = "$str( $win, $call )";
+    if ($fun->{UNI}) {
+	$fun->{ARG1} = $fun->{ARGS}[0]{NAME};
+	$fun->{ARG2} = $call;
+
+	$call = lookup('RET_UNI', $fun);
     }
-    if ($fun->{SPEC} =~ /{cast}/) {  $call = "($fun->{DECL})$call" }
-    $call .= ";";
+    if ($fun->{CAST}) {  $call = "($fun->{DECL})$call" }
 
     if ($fun->{DECL} eq 'void')   {
-	unshift @argb, $call;
+	unshift @argb, $call . ";";
     }
     else {
-	my $str  = lookup('RET_NOR', $fun->{DECL}, "ret", "ST(0)", 0);
-	my $def  = "$fun->{DECL}\tret\t= $call";
+	my $ret = { 'DECL' => $fun->{DECL}, 'NAME' => "ret",
+		    'ARG1' => "ST(0)",      'ARG2' => "0" };
 
-	push @argv, $def;
+	push @argv, "$ret->{DECL}\t$ret->{NAME}\t= $call;"; 
 	push @argb, "ST(0) = sv_newmortal();";
-	push @argb,  $str;
+	push @argb,  lookup('RET_NOR', $ret) . ";";
     }
 
-    my $xsret = $fun->{DECL} ne 'void' ? 1 : 0;
+
+    my $argc  = $fun->{ARGN} - ($fun->{UNI} ? 1 : 0);
+    my $count = $fun->{UNI} ? "count" : "exact";
     my $argv  = join("\n\t", @argv);
     my $argb  = ($argv ? "\n\n\t" : "") . join "\n\t", @argb;
-    my $count = qq{c_exactargs("$fun->{NAME}", items, $num);};
+    my $xsret = $fun->{DECL} ne 'void' ? 1 : 0;
 
-    if ($fun->{UNI}) {
-      $count = qq{c_countargs("$fun->{NAME}", items, $num);};
-    }
-    elsif ($opt) {
-      my $base = $num - $opt;
-
-      $count = qq{c_optargs("$fun->{NAME}", items, $base, $num);};
-    }
 
     print OUT Q<<AAA;
 ################
@@ -145,7 +126,7 @@ sub print_function {
 #	{
 #	    dXSARGS;
 #	#ifdef C_\U$fun->{NAME}\E
-#	    $count
+#	    c_${count}args("$fun->{NAME}", items, $argc);
 #	    {
 #		$argv$argb
 #	    }

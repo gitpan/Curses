@@ -27,6 +27,10 @@
 
 #include <curses.h>
 
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 /* vvvv */
 #undef sprintf
 #undef instr

@@ -1,6 +1,11 @@
 /* Change <curses.h> below to the proper "include" file for curses. */
 #include <curses.h>
 
+/* Change <panel.h> below to the proper "include" file for panels. */
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 /* Change each #undef below to #define if the answer to the question
  * beside it is "yes".
  */

@@ -8,7 +8,9 @@
 
 #include <curses.h>
 
-#define chtype int
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
 
 #define C_LONGNAME
 #undef  C_LONG0ARGS

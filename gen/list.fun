@@ -21,10 +21,11 @@
 /* I'm *not* going to provide another option for a char *standend/out() */
 > {cast} int {w}standend(WINDOW *win);
 > {cast} int {w}standout(WINDOW *win);
-> attr_t {w}attr_get(WINDOW *win);
-> int {w}attr_off(WINDOW *win, attr_t attrs);
-> int {w}attr_on(WINDOW *win, attr_t attrs);
-> int {w}attr_set(WINDOW *win, attr_t attrs);
+/* the following four prototypes are WRONG -XXX- */
+/* attr_t {w}attr_get(WINDOW *win); */
+/* int {w}attr_off(WINDOW *win, attr_t attrs); */
+/* int {w}attr_on(WINDOW *win, attr_t attrs); */
+/* int {w}attr_set(WINDOW *win, attr_t attrs); */
 > int {mvw}chgat(WINDOW *win, int n, attr_t attrs, short color, \
 		 const void *opts);
 > int COLOR_PAIR(int n);
@@ -120,7 +121,7 @@
 > int endwin(void);
 > int isendwin(void);
 /* Originally contributed by Santeri Paavolainen <sjpaavol@cc.helsinki.fi> */
-> SCREEN *newterm({optnull} char *type, FILE *outfd, FILE *infd);
+> SCREEN *newterm({opt} char *type, FILE *outfd, FILE *infd);
 > SCREEN *set_term(SCREEN *new);
 > void delscreen(SCREEN *sp);
 
@@ -171,6 +172,23 @@
 > int curs_set(int visibility);
 > int napms(int ms);
 
+/* curs_mouse (ncurses) */
+
+> int getmouse({out} MEVENT *event);
+> int ungetmouse(MEVENT *event);
+> mmask_t mousemask(mmask_t newmask, {out} mmask_t {amp}oldmask);
+> bool |w|enclose(WINDOW *win, int y, int x);
+/* args 2 and 3 were 'int *' */
+> bool |w|mouse_trafo(const WINDOW *win, {out} int {amp}pY, \
+			{out} int {amp}pX, bool to_screen);
+> int mouseinterval(int erval);
+> int BUTTON_RELEASE(mmask_t e, int x);
+> int BUTTON_PRESS(mmask_t e, int x);
+> int BUTTON_CLICK(mmask_t e, int x);
+> int BUTTON_DOUBLE_CLICK(mmask_t e, int x);
+> int BUTTON_TRIPLE_CLICK(mmask_t e, int x);
+> int BUTTON_RESERVED_EVENT(mmask_t e, int x);
+
 /* curs_move */
 
 > int {w}move(WINDOW *win, int y, int x);
@@ -197,8 +215,8 @@
 
 /* curs_pad */
 
-> WINDOW *newpad(int lines, int cols);
-> WINDOW *subpad(WINDOW *orig, int lines, int cols, int beginy, int beginx);
+> WINDOW *newpad(int lines_, int cols);
+> WINDOW *subpad(WINDOW *orig, int lines_, int cols, int beginy, int beginx);
 > int prefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow, \
 		int smincol, int smaxrow, int smaxcol);
 > int pnoutrefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow, \
@@ -285,7 +303,7 @@
 /* int tputs(const char *str, int affcnt, int (*putc)(char/int)); */
 /* int putp(const char *str); */
 /* int vidputs(chtype attrs, int (*putc)(char)); */
-/* int vidattr(chtype attrs);
+/* int vidattr(chtype attrs); */
 /* int mvcur(int oldrow, int oldcol, int newrow, int newcol); */
 /* int tigetflag(const char *capname); */
 /* int tigetnum(const char *capname); */
@@ -336,7 +354,7 @@
 
 /* resizeterm */
 
-> int {w}resize(WINDOW *win, int lines, int columns);
+> int {w}resize(WINDOW *win, int lines_, int columns);
 
 /* old BSD curses calls */
 
@@ -357,8 +375,8 @@
 > int replace_panel(PANEL *pan, WINDOW *window);
 > int move_panel(PANEL *pan, int starty, int startx);
 > int panel_hidden(const PANEL *pan);
-> PANEL *panel_above(const {optnull} PANEL *pan);
-> PANEL *panel_below(const {optnull} PANEL *pan);
+> PANEL *panel_above(const {opt} PANEL *pan);
+> PANEL *panel_below(const {opt} PANEL *pan);
 > int set_panel_userptr(PANEL *pan, const void *ptr);
 > const {cast} void *panel_userptr(const PANEL *pan);
 > int del_panel(PANEL *pan);

@@ -7,7 +7,11 @@
 /* These hints thanks to Lamont Granquist <lamontg@becker1.u.washington.edu> */
 
 #include <curses.h>
-#include <term.h>
+/* #include <term.h> */
+
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
 
 #define C_LONGNAME
 #define C_LONG0ARGS

@@ -241,85 +241,11 @@ XS(XS_Curses_standout)
 #endif
 }
 
-XS(XS_Curses_attr_get)
-{
-    dXSARGS;
-#ifdef C_ATTR_GET
-    c_countargs("attr_get", items, 0);
-    {
-	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
-	attr_t	ret	= CI_OPT_MV_AND( win, wattr_get(win) );
-
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (IV)ret);
-    }
-    XSRETURN(1);
-#else
-    c_fun_not_there("attr_get");
-    XSRETURN(0);
-#endif
-}
-
-XS(XS_Curses_attr_off)
-{
-    dXSARGS;
-#ifdef C_ATTR_OFF
-    c_countargs("attr_off", items, 1);
-    {
-	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
-	attr_t	attrs	= (attr_t)SvIV(ST(c_arg));
-	int	ret	= CI_OPT_MV_AND( win, wattr_off(win, attrs) );
-
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (IV)ret);
-    }
-    XSRETURN(1);
-#else
-    c_fun_not_there("attr_off");
-    XSRETURN(0);
-#endif
-}
-
-XS(XS_Curses_attr_on)
-{
-    dXSARGS;
-#ifdef C_ATTR_ON
-    c_countargs("attr_on", items, 1);
-    {
-	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
-	attr_t	attrs	= (attr_t)SvIV(ST(c_arg));
-	int	ret	= CI_OPT_MV_AND( win, wattr_on(win, attrs) );
-
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (IV)ret);
-    }
-    XSRETURN(1);
-#else
-    c_fun_not_there("attr_on");
-    XSRETURN(0);
-#endif
-}
-
-XS(XS_Curses_attr_set)
-{
-    dXSARGS;
-#ifdef C_ATTR_SET
-    c_countargs("attr_set", items, 1);
-    {
-	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
-	attr_t	attrs	= (attr_t)SvIV(ST(c_arg));
-	int	ret	= CI_OPT_MV_AND( win, wattr_set(win, attrs) );
-
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (IV)ret);
-    }
-    XSRETURN(1);
-#else
-    c_fun_not_there("attr_set");
-    XSRETURN(0);
-#endif
-}
-
+/* the following four prototypes are WRONG -XXX- */
+/* attr_t {w}attr_get(WINDOW *win); */
+/* int {w}attr_off(WINDOW *win, attr_t attrs); */
+/* int {w}attr_on(WINDOW *win, attr_t attrs); */
+/* int {w}attr_set(WINDOW *win, attr_t attrs); */
 XS(XS_Curses_chgat)
 {
     dXSARGS;
@@ -1268,9 +1194,9 @@ XS(XS_Curses_newterm)
 {
     dXSARGS;
 #ifdef C_NEWTERM
-    c_optargs("newterm", items, 2, 3);
+    c_exactargs("newterm", items, 3);
     {
-	char *	type	= c_x <= 0 ? (char *)SvPV(ST(0),PL_na) : NULL;
+	char *	type	= ST(0) != &PL_sv_undef ? (char *)SvPV(ST(0),PL_na) : NULL;
 	FILE *	outfd	= IoIFP(sv_2io(ST(1)));
 	FILE *	infd	= IoIFP(sv_2io(ST(2)));
 	Screen	ret	= newterm(type, outfd, infd);
@@ -2076,6 +2002,258 @@ XS(XS_Curses_napms)
 }
 
 
+/* curs_mouse (ncurses) */
+
+XS(XS_Curses_getmouse)
+{
+    dXSARGS;
+#ifdef C_GETMOUSE
+    c_exactargs("getmouse", items, 1);
+    {
+	MEvent	event	= (MEvent)sv_grow(ST(0), 2*sizeof(MEVENT));
+	int	ret	= getmouse(event);
+
+	if (ret != ERR) {
+	    SvCUR(ST(0)) = sizeof(MEVENT);
+	    SvPOK_only(ST(0));
+	    *SvEND(ST(0)) = 0;
+	}
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("getmouse");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_ungetmouse)
+{
+    dXSARGS;
+#ifdef C_UNGETMOUSE
+    c_exactargs("ungetmouse", items, 1);
+    {
+	MEvent	event	= (MEvent)SvPV(ST(0),PL_na);
+	int	ret	= ungetmouse(event);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("ungetmouse");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_mousemask)
+{
+    dXSARGS;
+#ifdef C_MOUSEMASK
+    c_exactargs("mousemask", items, 2);
+    {
+	mmask_t	newmask	= (mmask_t)SvIV(ST(0));
+	mmask_t	oldmask	= 0;
+	mmask_t	ret	= mousemask(newmask, &oldmask);
+
+	sv_setiv(ST(1), (IV)oldmask);
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("mousemask");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_enclose)
+{
+    dXSARGS;
+#ifdef C_ENCLOSE
+    c_countargs("enclose", items, 2);
+    {
+	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
+	int	y	= (int)SvIV(ST(c_arg));
+	int	x	= (int)SvIV(ST(c_arg+1));
+	int	ret	= CI_OPT_MV_AND( win, wenclose(win, y, x) );
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("enclose");
+    XSRETURN(0);
+#endif
+}
+
+/* args 2 and 3 were 'int *' */
+XS(XS_Curses_mouse_trafo)
+{
+    dXSARGS;
+#ifdef C_MOUSE_TRAFO
+    c_countargs("mouse_trafo", items, 3);
+    {
+	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
+	int	pY	= 0;
+	int	pX	= 0;
+	int	to_screen	= (int)SvIV(ST(c_arg+2));
+	int	ret	= CI_OPT_MV_AND( win, wmouse_trafo(win, &pY, &pX, to_screen) );
+
+	sv_setiv(ST(c_arg), (IV)pY);
+	sv_setiv(ST(c_arg+1), (IV)pX);
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("mouse_trafo");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_mouseinterval)
+{
+    dXSARGS;
+#ifdef C_MOUSEINTERVAL
+    c_exactargs("mouseinterval", items, 1);
+    {
+	int	erval	= (int)SvIV(ST(0));
+	int	ret	= mouseinterval(erval);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("mouseinterval");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_RELEASE)
+{
+    dXSARGS;
+#ifdef C_BUTTON_RELEASE
+    c_exactargs("BUTTON_RELEASE", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_RELEASE(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_RELEASE");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_PRESS)
+{
+    dXSARGS;
+#ifdef C_BUTTON_PRESS
+    c_exactargs("BUTTON_PRESS", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_PRESS(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_PRESS");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_CLICK)
+{
+    dXSARGS;
+#ifdef C_BUTTON_CLICK
+    c_exactargs("BUTTON_CLICK", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_CLICK(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_CLICK");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_DOUBLE_CLICK)
+{
+    dXSARGS;
+#ifdef C_BUTTON_DOUBLE_CLICK
+    c_exactargs("BUTTON_DOUBLE_CLICK", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_DOUBLE_CLICK(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_DOUBLE_CLICK");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_TRIPLE_CLICK)
+{
+    dXSARGS;
+#ifdef C_BUTTON_TRIPLE_CLICK
+    c_exactargs("BUTTON_TRIPLE_CLICK", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_TRIPLE_CLICK(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_TRIPLE_CLICK");
+    XSRETURN(0);
+#endif
+}
+
+XS(XS_Curses_BUTTON_RESERVED_EVENT)
+{
+    dXSARGS;
+#ifdef C_BUTTON_RESERVED_EVENT
+    c_exactargs("BUTTON_RESERVED_EVENT", items, 2);
+    {
+	mmask_t	e	= (mmask_t)SvIV(ST(0));
+	int	x	= (int)SvIV(ST(1));
+	int	ret	= BUTTON_RESERVED_EVENT(e, x);
+
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), (IV)ret);
+    }
+    XSRETURN(1);
+#else
+    c_fun_not_there("BUTTON_RESERVED_EVENT");
+    XSRETURN(0);
+#endif
+}
+
+
 /* curs_move */
 
 XS(XS_Curses_move)
@@ -2408,9 +2586,9 @@ XS(XS_Curses_newpad)
 #ifdef C_NEWPAD
     c_exactargs("newpad", items, 2);
     {
-	int	lines	= (int)SvIV(ST(0));
+	int	lines_	= (int)SvIV(ST(0));
 	int	cols	= (int)SvIV(ST(1));
-	Window	ret	= newpad(lines, cols);
+	Window	ret	= newpad(lines_, cols);
 
 	ST(0) = sv_newmortal();
 	c_Window2sv(ST(0), ret);
@@ -2429,11 +2607,11 @@ XS(XS_Curses_subpad)
     c_exactargs("subpad", items, 5);
     {
 	Window	orig	= c_sv2Window(ST(0), 0);
-	int	lines	= (int)SvIV(ST(1));
+	int	lines_	= (int)SvIV(ST(1));
 	int	cols	= (int)SvIV(ST(2));
 	int	beginy	= (int)SvIV(ST(3));
 	int	beginx	= (int)SvIV(ST(4));
-	Window	ret	= subpad(orig, lines, cols, beginy, beginx);
+	Window	ret	= subpad(orig, lines_, cols, beginy, beginx);
 
 	ST(0) = sv_newmortal();
 	c_Window2sv(ST(0), ret);
@@ -3181,7 +3359,7 @@ XS(XS_Curses_termname)
 /* int tputs(const char *str, int affcnt, int (*putc)(char/int)); */
 /* int putp(const char *str); */
 /* int vidputs(chtype attrs, int (*putc)(char)); */
-/* int vidattr(chtype attrs);
+/* int vidattr(chtype attrs); */
 /* int mvcur(int oldrow, int oldcol, int newrow, int newcol); */
 /* int tigetflag(const char *capname); */
 /* int tigetnum(const char *capname); */
@@ -3738,9 +3916,9 @@ XS(XS_Curses_resize)
     c_countargs("resize", items, 2);
     {
 	Window	win	= c_win ? c_sv2Window(ST(0), 0) : stdscr;
-	int	lines	= (int)SvIV(ST(c_arg));
+	int	lines_	= (int)SvIV(ST(c_arg));
 	int	columns	= (int)SvIV(ST(c_arg+1));
-	int	ret	= CI_OPT_MV_AND( win, wresize(win, lines, columns) );
+	int	ret	= CI_OPT_MV_AND( win, wresize(win, lines_, columns) );
 
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)ret);
@@ -4009,9 +4187,9 @@ XS(XS_Curses_panel_above)
 {
     dXSARGS;
 #ifdef C_PANEL_ABOVE
-    c_optargs("panel_above", items, 0, 1);
+    c_exactargs("panel_above", items, 1);
     {
-	Panel	pan	= c_x <= 0 ? c_sv2Panel(ST(0), 0) : NULL;
+	Panel	pan	= ST(0) != &PL_sv_undef ? c_sv2Panel(ST(0), 0) : NULL;
 	Panel	ret	= panel_above(pan);
 
 	ST(0) = sv_newmortal();
@@ -4028,9 +4206,9 @@ XS(XS_Curses_panel_below)
 {
     dXSARGS;
 #ifdef C_PANEL_BELOW
-    c_optargs("panel_below", items, 0, 1);
+    c_exactargs("panel_below", items, 1);
     {
-	Panel	pan	= c_x <= 0 ? c_sv2Panel(ST(0), 0) : NULL;
+	Panel	pan	= ST(0) != &PL_sv_undef ? c_sv2Panel(ST(0), 0) : NULL;
 	Panel	ret	= panel_below(pan);
 
 	ST(0) = sv_newmortal();

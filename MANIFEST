@@ -17,8 +17,10 @@ demo.panel
 gdc
 gen/Gen.pm
 gen/README
+gen/increase-version
 gen/list.con
 gen/list.fun
+gen/list.typ
 gen/list.var
 gen/make.Curses.pm
 gen/make.CursesBoot.c
@@ -59,3 +61,4 @@ list.syms
 test.syms
 testint.c
 testsym.c
+testtyp.c

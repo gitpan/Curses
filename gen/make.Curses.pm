@@ -156,7 +156,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = 1.04;
+$VERSION = 1.05;
 
 bootstrap Curses;
 
@@ -378,20 +378,15 @@ instead of C<$str = getstr()> and C<($y, $x) = getyx()>.
 
 =over 4
 
-=item * '%s' support not enabled for Curses function '%s'
-
-A necessary optional library (such as panels) was not enabled at
-compile time.
-
 =item * Curses function '%s' called with too %s arguments at ...
 
 You have called a C<Curses> function with a wrong number of
 arguments.
 
-=item * argument %d to Curses function '%s' is not a Curses window at ...
-=item * argument is not a Curses window at ...
+=item * argument %d to Curses function '%s' is not a Curses %s at ...
+=item * argument is not a Curses %s at ...
 
-The window argument you gave to the function wasn't really a window.
+The argument you gave to the function wasn't what it wanted.
 
 This probably means that you didn't give the right arguments to a
 I<unified> function.  See the DESCRIPTION section on L<Unified
@@ -400,6 +395,11 @@ Functions> for more information.
 =item * Curses function '%s' is not defined by your vendor at ...
 
 You have a C<Curses> function in your code that your system's curses(3)
+library doesn't define.
+
+=item * Curses variable '%s' is not defined by your vendor at ...
+
+You have a C<Curses> variable in your code that your system's curses(3)
 library doesn't define.
 
 =item * Curses constant '%s' is not defined by your vendor at ...

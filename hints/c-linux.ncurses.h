@@ -5,7 +5,13 @@
  */
 
 #undef  bool
+
 #include <curses.h>
+
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 #undef  instr
 #define instr _sigh_sigh_sigh_
 

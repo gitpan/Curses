@@ -5,6 +5,11 @@
 */
 
 #include <curses.h>
+
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 #undef instr
 
 #define C_LONGNAME

@@ -31,10 +31,6 @@ XS(boot_Curses)
     C_NEWXS("Curses::attrset",                XS_Curses_attrset);
     C_NEWXS("Curses::standend",               XS_Curses_standend);
     C_NEWXS("Curses::standout",               XS_Curses_standout);
-    C_NEWXS("Curses::attr_get",               XS_Curses_attr_get);
-    C_NEWXS("Curses::attr_off",               XS_Curses_attr_off);
-    C_NEWXS("Curses::attr_on",                XS_Curses_attr_on);
-    C_NEWXS("Curses::attr_set",               XS_Curses_attr_set);
     C_NEWXS("Curses::chgat",                  XS_Curses_chgat);
     C_NEWXS("Curses::COLOR_PAIR",             XS_Curses_COLOR_PAIR);
     C_NEWXS("Curses::PAIR_NUMBER",            XS_Curses_PAIR_NUMBER);
@@ -113,6 +109,18 @@ XS(boot_Curses)
     C_NEWXS("Curses::setsyx",                 XS_Curses_setsyx);
     C_NEWXS("Curses::curs_set",               XS_Curses_curs_set);
     C_NEWXS("Curses::napms",                  XS_Curses_napms);
+    C_NEWXS("Curses::getmouse",               XS_Curses_getmouse);
+    C_NEWXS("Curses::ungetmouse",             XS_Curses_ungetmouse);
+    C_NEWXS("Curses::mousemask",              XS_Curses_mousemask);
+    C_NEWXS("Curses::enclose",                XS_Curses_enclose);
+    C_NEWXS("Curses::mouse_trafo",            XS_Curses_mouse_trafo);
+    C_NEWXS("Curses::mouseinterval",          XS_Curses_mouseinterval);
+    C_NEWXS("Curses::BUTTON_RELEASE",         XS_Curses_BUTTON_RELEASE);
+    C_NEWXS("Curses::BUTTON_PRESS",           XS_Curses_BUTTON_PRESS);
+    C_NEWXS("Curses::BUTTON_CLICK",           XS_Curses_BUTTON_CLICK);
+    C_NEWXS("Curses::BUTTON_DOUBLE_CLICK",    XS_Curses_BUTTON_DOUBLE_CLICK);
+    C_NEWXS("Curses::BUTTON_TRIPLE_CLICK",    XS_Curses_BUTTON_TRIPLE_CLICK);
+    C_NEWXS("Curses::BUTTON_RESERVED_EVENT",  XS_Curses_BUTTON_RESERVED_EVENT);
     C_NEWXS("Curses::move",                   XS_Curses_move);
     C_NEWXS("Curses::clearok",                XS_Curses_clearok);
     C_NEWXS("Curses::idlok",                  XS_Curses_idlok);
@@ -227,7 +235,6 @@ XS(boot_Curses)
 
     /* Variables masquerading as variables */ 
 
-    C_NEWXS("Curses::del_panel",              XS_Curses_del_panel);
     C_NEWXS("Curses::Vars::DESTROY",          XS_Curses_Vars_DESTROY);
     C_NEWXS("Curses::Vars::FETCH",            XS_Curses_Vars_FETCH);
     C_NEWXS("Curses::Vars::STORE",            XS_Curses_Vars_STORE);

@@ -139,7 +139,8 @@ print OUTH
 
 my %tstfile = qw( E  testsym
                   I  testint
-                  V  testsym);
+                  V  testsym
+		  T  testtyp);
 while (<IN>) {
     next if /^\S*#/;
     next unless /\S/;
@@ -184,6 +185,12 @@ while (<IN>) {
 
 	$c_sym   = uc "C_$ssym";
 	$comment = "Does variable '$ssym' exist?";
+    }
+    elsif ($action eq 'T') {
+	print LOG "typedef '$sym' ", ($rc ? "NOT " : ""), "found\n";
+
+	$c_sym   = uc "C_TYP$ssym";
+	$comment = "Does typedef '$ssym' exist?";
     }
     else {
         warn "WARNING: internal error on symbol $_\n";

@@ -9,6 +9,13 @@
 
 use ExtUtils::MakeMaker;
 
+#  There are two arguments defined for this file:
+#
+#    PANELS   -- enable panel support
+#    GEN      -- add generation support to Makefile (developers only!)
+#
+#  Ex:  "perl Makefile.PL PANELS GEN"
+
 #  Curses needs the following two variables defined here in order to
 #  compile the library.  They are:
 #
@@ -24,8 +31,9 @@ my $libs;
 #  stupid fashion to pick them for you, along with a "c-config.h" file.
 #
 #  If you want to include the panels functions, set the following two
-#  variables appropriately, just as above.  If these variables are set,
-#  you are saying you want panel support:
+#  variables appropriately, just as above.  You must also give PANELS
+#  as an argument to this file in order to enable panel support (see
+#  above).
 
 my $p_inc;
 my $p_libs;
@@ -70,7 +78,7 @@ my $p_libs;
 #    combinations of "-I/usr/include" and "-DSYSV=1" in $inc to see if
 #    it fixes things.
 
-##   OS          default guess for $inc      default guess for $libs
+##   OS            default guess for $inc      default guess for $libs
 #
 my $guess_cfg = {
   'aix'       => [ ''                       => '-lcurses -ltermcap'        ],
@@ -128,17 +136,18 @@ my $guess_cfg = {
 ## You shouldn't need to change anything below
 #
 my $gen;
-if (@ARGV and $ARGV[0] eq 'GEN') {
-    $gen++;
-}
-
 my $panels;
-if (@ARGV and $ARGV[0] eq 'PANELS' or defined $p_inc or defined $p_libs) {
-    $panels = 'PANELS';
+
+while (@ARGV) {
+    my $arg = shift;
+
+    if ($arg eq 'GEN')    { $gen    = $arg }
+    if ($arg eq 'PANELS') { $panels = $arg }
 }
 
 my $guess  = $guess_cfg->{$^O};
 my $source = "hints/c-$^O";
+
 
 if (ref $guess eq 'HASH') {
     my $libtyp = $guess->{'default'};
@@ -148,6 +157,10 @@ if (ref $guess eq 'HASH') {
 if (ref $guess ne 'ARRAY') {
     die "FATAL: internal error: guess_cfg is bad\n";
 }
+
+print "GEN    support: ", ($gen    ? "enabled" : "not applicable"), "\n";
+print "PANELS support: ", ($panels ? "enabled" : "not enabled"), "\n";
+print "\n";
 
 if (not defined $inc or not defined $libs) {
     print qq{Making a guess for \$inc and/or \$libs...\n};
@@ -162,9 +175,10 @@ EOW
 	exit 1;
     }
 
-    $inc  ||= $guess->[0];
-    $libs ||= $guess->[1];
+    $inc  = $guess->[0];
+    $libs = $guess->[1];
 }
+
 
 if (not -e "c-config.h") {
     print qq{Making a guess for "c-config.h"...\n};
@@ -225,9 +239,9 @@ if ($panels and not defined $p_libs) {
 
 
 my $clean = 'CursesDef.h c-config.h cdemo testsym testint';
-my $realc = $gen ?
-    'list.syms Curses.pm CursesFun.c CursesCon.c CursesVar.c CursesBoot.c' :
-    "";
+my $realc = $gen
+    ? 'list.syms Curses.pm CursesFun.c CursesCon.c CursesVar.c CursesBoot.c'
+    : "";
 
 WriteMakefile(NAME      =>   'Curses',
 	      INC       =>   "$p_inc $inc",
@@ -236,14 +250,14 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean     },
 	      realclean => { FILES    => $realc     },
 	      dist      => { COMPRESS => 'gzip -9f' },
-	      VERSION   =>   '1.04',
+	      VERSION   =>   '1.05',
 );
 
 sub MY::postamble
 {
     my $echo = $^O eq 'VMS' ? 'write sys$output' : 'echo';
     my $mf   = <<EOM;
-CursesDef.h: c-config.h Makefile.PL
+CursesDef.h: c-config.h Makefile.PL list.syms
 	\$(PERL) test.syms $panels
 
 c-config.h:
@@ -270,7 +284,7 @@ EOM
 config      :: list.syms Curses.pm \\
 		CursesFun.c CursesVar.c CursesCon.c CursesBoot.c
 
-list.syms    : gen/make.list.syms
+list.syms    : gen/make.list.syms gen/list.fun gen/list.var gen/list.typ
 	\$(PERL) gen/make.list.syms
 
 CursesFun.c  : gen/make.CursesFun.c gen/list.fun

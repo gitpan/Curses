@@ -8,6 +8,10 @@
 
 #include <curses.h>
 
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 #define C_LONGNAME
 #undef  C_LONG0ARGS
 #define C_LONG2ARGS

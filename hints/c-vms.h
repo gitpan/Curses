@@ -8,6 +8,10 @@
 
 #include <curses.h>
 
+#ifdef C_PANELSUPPORT
+#include <panel.h>
+#endif
+
 #define C_LONGNAME
 #undef  C_LONG0ARGS
 #define C_LONG2ARGS
@@ -16,10 +20,5 @@
 #undef  C_TOUCH3ARGS
 #undef  C_TOUCH4ARGS
 
-#define chtype int
 #define cbreak()   crmode()
 #define nocbreak() nocrmode()
-
-#ifndef SCREEN
-#define SCREEN WINDOW
-#endif

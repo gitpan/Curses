@@ -63,10 +63,10 @@ my $w3 = panel_window($p3);
 move_panel($p3, 7, 34);
 showus("New Panel with XXX's");
 
-top_panel(panel_above(panel_above()));
+top_panel(panel_above(panel_above(undef)));
 showus("Moving the panel above the bottom panel to the top");
 
-bottom_panel(panel_below(panel_below()));
+bottom_panel(panel_below(panel_below(undef)));
 showus("Moving the panel below the top panel to the bottom");
 
 del_panel($p3);
@@ -79,4 +79,3 @@ del_panel($p1);
 del_panel($p2);
 endwin(); 
 $doendw = 0;
-print "ok 1\n";

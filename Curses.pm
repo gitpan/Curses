@@ -31,7 +31,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = 1.04;
+$VERSION = 1.05;
 
 bootstrap Curses;
 
@@ -97,17 +97,19 @@ sub KEY_F { return $_[0] + KEY_F0(); }
     $curscr $COLORS $COLOR_PAIRS
 
     addch echochar addchstr addchnstr addstr addnstr attroff attron
-    attrset standend standout attr_get attr_off attr_on attr_set chgat
-    COLOR_PAIR PAIR_NUMBER beep flash bkgd bkgdset getbkgd border box
-    hline vline erase clear clrtobot clrtoeol start_color init_pair
-    init_color has_colors can_change_color color_content pair_content
-    delch deleteln insdelln insertln getch ungetch has_key getstr
-    getnstr getyx getparyx getbegyx getmaxyx getmaxy getmaxx inch
-    inchstr inchnstr initscr endwin isendwin newterm set_term delscreen
-    cbreak nocbreak echo noecho halfdelay intrflush keypad meta nodelay
-    notimeout raw noraw qiflush noqiflush timeout typeahead insch insstr
-    insnstr instr innstr def_prog_mode def_shell_mode reset_prog_mode
-    reset_shell_mode resetty savetty getsyx setsyx curs_set napms move
+    attrset standend standout chgat COLOR_PAIR PAIR_NUMBER beep flash
+    bkgd bkgdset getbkgd border box hline vline erase clear clrtobot
+    clrtoeol start_color init_pair init_color has_colors can_change_color
+    color_content pair_content delch deleteln insdelln insertln getch
+    ungetch has_key getstr getnstr getyx getparyx getbegyx getmaxyx
+    getmaxy getmaxx inch inchstr inchnstr initscr endwin isendwin
+    newterm set_term delscreen cbreak nocbreak echo noecho halfdelay
+    intrflush keypad meta nodelay notimeout raw noraw qiflush noqiflush
+    timeout typeahead insch insstr insnstr instr innstr def_prog_mode
+    def_shell_mode reset_prog_mode reset_shell_mode resetty savetty
+    getsyx setsyx curs_set napms getmouse ungetmouse mousemask enclose
+    mouse_trafo mouseinterval BUTTON_RELEASE BUTTON_PRESS BUTTON_CLICK
+    BUTTON_DOUBLE_CLICK BUTTON_TRIPLE_CLICK BUTTON_RESERVED_EVENT move
     clearok idlok idcok immedok leaveok setscrreg scrollok nl nonl
     overlay overwrite copywin newpad subpad prefresh pnoutrefresh
     pechochar refresh noutrefresh doupdate redrawwin redrawln scr_dump
@@ -146,7 +148,15 @@ sub KEY_F { return $_[0] + KEY_F0(); }
     KEY_SMESSAGE KEY_SMOVE KEY_SNEXT KEY_SOPTIONS KEY_SPREVIOUS
     KEY_SPRINT KEY_SR KEY_SREDO KEY_SREPLACE KEY_SRESET KEY_SRIGHT
     KEY_SRSUME KEY_SSAVE KEY_SSUSPEND KEY_STAB KEY_SUNDO KEY_SUSPEND
-    KEY_UNDO KEY_UP
+    KEY_UNDO KEY_UP KEY_MOUSE BUTTON1_RELEASED BUTTON1_PRESSED
+    BUTTON1_CLICKED BUTTON1_DOUBLE_CLICKED BUTTON1_TRIPLE_CLICKED
+    BUTTON1_RESERVED_EVENT BUTTON2_RELEASED BUTTON2_PRESSED BUTTON2_CLICKED
+    BUTTON2_DOUBLE_CLICKED BUTTON2_TRIPLE_CLICKED BUTTON2_RESERVED_EVENT
+    BUTTON3_RELEASED BUTTON3_PRESSED BUTTON3_CLICKED BUTTON3_DOUBLE_CLICKED
+    BUTTON3_TRIPLE_CLICKED BUTTON3_RESERVED_EVENT BUTTON4_RELEASED
+    BUTTON4_PRESSED BUTTON4_CLICKED BUTTON4_DOUBLE_CLICKED BUTTON4_TRIPLE_CLICKED
+    BUTTON4_RESERVED_EVENT BUTTON_CTRL BUTTON_SHIFT BUTTON_ALT
+    ALL_MOUSE_EVENTS REPORT_MOUSE_POSITION NCURSES_MOUSE_VERSION
 );
 
 push(@EXPORT, @_CONSTANTS);
@@ -163,16 +173,16 @@ if ($OldCurses)
         waddch mvaddch mvwaddch wechochar waddchstr mvaddchstr
         mvwaddchstr waddchnstr mvaddchnstr mvwaddchnstr waddstr mvaddstr
         mvwaddstr waddnstr mvaddnstr mvwaddnstr wattroff wattron
-        wattrset wstandend wstandout wattr_get wattr_off wattr_on
-        wattr_set wchgat mvchgat mvwchgat wbkgd wbkgdset wborder whline
-        mvhline mvwhline wvline mvvline mvwvline werase wclear wclrtobot
-        wclrtoeol wdelch mvdelch mvwdelch wdeleteln winsdelln winsertln
-        wgetch mvgetch mvwgetch wgetstr mvgetstr mvwgetstr wgetnstr
-        mvgetnstr mvwgetnstr winch mvinch mvwinch winchstr mvinchstr
-        mvwinchstr winchnstr mvinchnstr mvwinchnstr wtimeout winsch
-        mvinsch mvwinsch winsstr mvinsstr mvwinsstr winsnstr mvinsnstr
-        mvwinsnstr winstr mvinstr mvwinstr winnstr mvinnstr mvwinnstr
-        wmove wsetscrreg wrefresh wnoutrefresh wredrawln wscrl wtouchln
+        wattrset wstandend wstandout wchgat mvchgat mvwchgat wbkgd
+        wbkgdset wborder whline mvhline mvwhline wvline mvvline mvwvline
+        werase wclear wclrtobot wclrtoeol wdelch mvdelch mvwdelch
+        wdeleteln winsdelln winsertln wgetch mvgetch mvwgetch wgetstr
+        mvgetstr mvwgetstr wgetnstr mvgetnstr mvwgetnstr winch mvinch
+        mvwinch winchstr mvinchstr mvwinchstr winchnstr mvinchnstr
+        mvwinchnstr wtimeout winsch mvinsch mvwinsch winsstr mvinsstr
+        mvwinsstr winsnstr mvinsnstr mvwinsnstr winstr mvinstr mvwinstr
+        winnstr mvinnstr mvwinnstr wenclose wmouse_trafo wmove
+        wsetscrreg wrefresh wnoutrefresh wredrawln wscrl wtouchln
         wsyncup wcursyncup wsyncdown wresize
     );
 
@@ -320,20 +330,15 @@ instead of C<$str = getstr()> and C<($y, $x) = getyx()>.
 
 =over 4
 
-=item * '%s' support not enabled for Curses function '%s'
-
-A necessary optional library (such as panels) was not enabled at
-compile time.
-
 =item * Curses function '%s' called with too %s arguments at ...
 
 You have called a C<Curses> function with a wrong number of
 arguments.
 
-=item * argument %d to Curses function '%s' is not a Curses window at ...
-=item * argument is not a Curses window at ...
+=item * argument %d to Curses function '%s' is not a Curses %s at ...
+=item * argument is not a Curses %s at ...
 
-The window argument you gave to the function wasn't really a window.
+The argument you gave to the function wasn't what it wanted.
 
 This probably means that you didn't give the right arguments to a
 I<unified> function.  See the DESCRIPTION section on L<Unified
@@ -342,6 +347,11 @@ Functions> for more information.
 =item * Curses function '%s' is not defined by your vendor at ...
 
 You have a C<Curses> function in your code that your system's curses(3)
+library doesn't define.
+
+=item * Curses variable '%s' is not defined by your vendor at ...
+
+You have a C<Curses> variable in your code that your system's curses(3)
 library doesn't define.
 
 =item * Curses constant '%s' is not defined by your vendor at ...
@@ -408,10 +418,6 @@ William Setzer <William_Setzer@ncsu.edu>
     attrset             Yes        wattrset
     standend            Yes        wstandend
     standout            Yes        wstandout
-    attr_get            Yes        wattr_get
-    attr_off            Yes        wattr_off
-    attr_on             Yes        wattr_on
-    attr_set            Yes        wattr_set
     chgat               Yes        wchgat mvchgat mvwchgat
     COLOR_PAIR          No 
     PAIR_NUMBER         No 
@@ -490,6 +496,18 @@ William Setzer <William_Setzer@ncsu.edu>
     setsyx              No 
     curs_set            No 
     napms               No 
+    getmouse            No 
+    ungetmouse          No 
+    mousemask           No 
+    enclose             Yes        wenclose
+    mouse_trafo         Yes        wmouse_trafo
+    mouseinterval       No 
+    BUTTON_RELEASE      No 
+    BUTTON_PRESS        No 
+    BUTTON_CLICK        No 
+    BUTTON_DOUBLE_CLICK No 
+    BUTTON_TRIPLE_CLICK No 
+    BUTTON_RESERVED_EVENTNo 
     move                Yes        wmove
     clearok             Yes
     idlok               Yes
@@ -633,7 +651,16 @@ example of this.
     KEY_SPREVIOUS   KEY_SPRINT      KEY_SR          KEY_SREDO
     KEY_SREPLACE    KEY_SRESET      KEY_SRIGHT      KEY_SRSUME
     KEY_SSAVE       KEY_SSUSPEND    KEY_STAB        KEY_SUNDO
-    KEY_SUSPEND     KEY_UNDO        KEY_UP         
+    KEY_SUSPEND     KEY_UNDO        KEY_UP          KEY_MOUSE
+    BUTTON1_RELEASED BUTTON1_PRESSED BUTTON1_CLICKED BUTTON1_DOUBLE_CLICKED
+    BUTTON1_TRIPLE_CLICKED BUTTON1_RESERVED_EVENT BUTTON2_RELEASED
+    BUTTON2_PRESSED BUTTON2_CLICKED BUTTON2_DOUBLE_CLICKED BUTTON2_TRIPLE_CLICKED
+    BUTTON2_RESERVED_EVENT BUTTON3_RELEASED BUTTON3_PRESSED BUTTON3_CLICKED
+    BUTTON3_DOUBLE_CLICKED BUTTON3_TRIPLE_CLICKED BUTTON3_RESERVED_EVENT
+    BUTTON4_RELEASED BUTTON4_PRESSED BUTTON4_CLICKED BUTTON4_DOUBLE_CLICKED
+    BUTTON4_TRIPLE_CLICKED BUTTON4_RESERVED_EVENT BUTTON_CTRL
+    BUTTON_SHIFT    BUTTON_ALT      ALL_MOUSE_EVENTS REPORT_MOUSE_POSITION
+    NCURSES_MOUSE_VERSION
 
 =head2 curses(3) items not supported by C<Curses>
 

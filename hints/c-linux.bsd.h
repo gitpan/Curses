@@ -6,8 +6,6 @@
 
 #include <curses.h>
 
-#define chtype int
-
 #undef  C_LONGNAME
 #define C_LONG0ARGS
 #undef  C_LONG2ARGS

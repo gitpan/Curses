@@ -1,17 +1,16 @@
 This package requires at least perl5.003.  You're on your own before
 then.
 
-1) Make sure perl has been built.  Unpack "Curses-1.04.tar.gz".
+1) Make sure perl has been built.  Unpack "Curses-1.05.tar.gz".
 
-     gunzip -c Curses-1.04.tar.gz | tar xvf -
+     gunzip -c Curses-1.05.tar.gz | tar xvf -
 
 2) Chdir to the "Curses" directory.
 
-     cd Curses-1.04
+     cd Curses-1.05
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
-   pretty dumb about it, but give it a try and skip to (5).  (But
-   be sure and read the last paragraph in (4) first.)
+   pretty dumb about it, but give it a try and skip to (4.5).
 
 4) Look in the "hints" directory to see if any of the hint files are
    appropriate to your machine's OS.  If so, symlink or copy it to the
@@ -25,11 +24,22 @@ then.
 
    Edit "Makefile.PL" and pick or add the appropriate options.
 
-   If you want panel support (from libpanel), you can either add the
-   appropriate flags now, or give auto-configure a whirl, by appending
-   "PANELS":
+4.5)
+
+   If you want panel support (from libpanel), you can either skip back
+   to (4) and add the appropriate flags, or give auto-configure a
+   whirl, by appending "PANELS":
 
      perl Makefile.PL PANELS
+
+   NOTE: You must have a panels library for this to work.  This
+   doesn't create the functions; it only enables them.  Enabling
+   PANELS support without a panels library is the surest way
+   to keep this package from compiling.
+
+   Currently, panels support is not available for the BSD versions of
+   the hints file (c-*.bsd.h), because I'm not aware of any panels
+   libraries for BSD curses.
 
 5) perl Makefile.PL [PANELS]  [options]
 

@@ -6,8 +6,8 @@
 **  or the GNU General Public License, as specified in the README file.
 */
 
-#include "c-config.h"
 #include "CursesDef.h"
+#include "c-config.h"
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -31,8 +31,34 @@
 #define C_NEWXS(A,B)         newXS(A,B,file)
 
 
+#ifndef C_PANELSUPPORT
+#define PANEL int
+#endif
+
+#ifndef C_TYPSCREEN
+#define SCREEN int
+#endif
+
+#ifndef C_TYPCHTYPE
+#define chtype int
+#endif
+
+#ifndef C_TYPATTR_T
+#define attr_t unsigned int
+#endif
+
+#ifndef C_TYPMEVENT
+#define MEVENT int
+#endif
+
+#ifndef C_TYPMMASK_T
+#define mmask_t unsigned int
+#endif
+
 typedef WINDOW *Window;
 typedef SCREEN *Screen;
+typedef PANEL  *Panel;
+typedef MEVENT *MEvent;  /* mouse event */
 
 /*
 ** Begin support variables and functions
@@ -135,6 +161,35 @@ int argnum;
 	croak("argument is not a Curses screen");
 }
 
+static Screen
+c_Screen2sv(sv, val)
+SV *sv;
+Screen val;
+{
+    sv_setref_pv(sv, "Curses::Screen", (void*)val);
+}
+
+static Panel
+c_sv2Panel(sv, argnum)
+SV *sv;
+int argnum;
+{
+    if (sv_isa(sv, "Curses::Panel")) { return (Panel)SvIV((SV*)SvRV(sv)); }
+    if (argnum >= 0)
+	croak("argument %d to Curses function '%s' is not a Curses panel",
+	      argnum, c_function);
+    else
+	croak("argument is not a Curses panel");
+}
+
+static void
+c_Panel2sv(sv, val)
+SV *sv;
+Panel val;
+{
+    sv_setref_pv(sv, "Curses::Panel", (void*)val);
+}
+
 /* Fix cast to do the "right thing" for characters bigger than 128.
 ** Shame on me for being ASCII-centric.	 Thanks to
 ** win@incom.rhein-main.de (Winfried Koenig).
@@ -164,6 +219,15 @@ chtype ch;
     }
 }
 
+static int
+c_chstrlen(str)
+chtype *str;
+{
+    int n = 0;
+    while (*str++) { n++; }
+    return n;
+}
+
 static void
 c_fun_not_there(fn)
 char *fn;
@@ -178,34 +242,6 @@ char *fn;
     croak("Curses variable '%s' is not defined by your vendor", fn);
 }
 
-#ifdef C_PANELSUPPORT
-
-#include <panel.h>
-
-typedef PANEL *Panel;
-
-static Panel
-c_sv2Panel(sv, argnum)
-SV *sv;
-int argnum;
-{
-    if (sv_isa(sv, "Curses::Panel")) { return (Panel)SvIV((SV*)SvRV(sv)); }
-    if (argnum >= 0)
-	croak("argument %d to Curses function '%s' is not a Curses panel",
-	      argnum, c_function);
-    else
-	croak("argument is not a Curses panel");
-}
-
-static void
-c_Panel2sv(sv, val)
-SV *sv;
-Panel val;
-{
-    sv_setref_pv(sv, "Curses::Panel", (void*)val);
-}
-
-#endif
 
 #include "CursesFun.c"
 #include "CursesVar.c"

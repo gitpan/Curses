@@ -129,39 +129,51 @@ XS(XS_Curses_Vars_FETCH)
 
 	ST(0) = sv_newmortal();
 	switch (num) {
-#ifdef C_LINES       
-	case  1:  sv_setiv(ST(0), (IV)LINES);                break;
+	case  1:
+#ifdef C_LINES
+	    sv_setiv(ST(0), (IV)LINES);
 #else
-	case  1:  c_var_not_there("LINES");                  break;
+	    c_var_not_there("LINES");
 #endif
-#ifdef C_COLS        
-	case  2:  sv_setiv(ST(0), (IV)COLS);                 break;
+	    break;
+	case  2:
+#ifdef C_COLS
+	    sv_setiv(ST(0), (IV)COLS);
 #else
-	case  2:  c_var_not_there("COLS");                   break;
+	    c_var_not_there("COLS");
 #endif
-#ifdef C_STDSCR      
-	case  3:  c_Window2sv(ST(0), stdscr);                break;
+	    break;
+	case  3:
+#ifdef C_STDSCR
+	    c_Window2sv(ST(0), stdscr);
 #else
-	case  3:  c_var_not_there("stdscr");                 break;
+	    c_var_not_there("stdscr");
 #endif
-#ifdef C_CURSCR      
-	case  4:  c_Window2sv(ST(0), curscr);                break;
+	    break;
+	case  4:
+#ifdef C_CURSCR
+	    c_Window2sv(ST(0), curscr);
 #else
-	case  4:  c_var_not_there("curscr");                 break;
+	    c_var_not_there("curscr");
 #endif
-#ifdef C_COLORS      
-	case  5:  sv_setiv(ST(0), (IV)COLORS);               break;
+	    break;
+	case  5:
+#ifdef C_COLORS
+	    sv_setiv(ST(0), (IV)COLORS);
 #else
-	case  5:  c_var_not_there("COLORS");                 break;
+	    c_var_not_there("COLORS");
 #endif
-#ifdef C_COLOR_PAIRS 
-	case  6:  sv_setiv(ST(0), (IV)COLOR_PAIRS);          break;
+	    break;
+	case  6:
+#ifdef C_COLOR_PAIRS
+	    sv_setiv(ST(0), (IV)COLOR_PAIRS);
 #else
-	case  6:  c_var_not_there("COLOR_PAIRS");            break;
+	    c_var_not_there("COLOR_PAIRS");
 #endif
-	  default:
-	      croak("Curses::Vars::FETCH called with bad index");
-	  /* NOTREACHED */
+	    break;
+	default:
+	    croak("Curses::Vars::FETCH called with bad index");
+	    /* NOTREACHED */
 	}
     }
     XSRETURN(1);
@@ -175,38 +187,50 @@ XS(XS_Curses_Vars_STORE)
 	int	num = (int)SvIV((SV*)SvRV(ST(0)));
 
 	switch (num) {
-#ifdef C_LINES       
-	case  1:  LINES        = (int)SvIV(ST(1));           break;
+	case  1:
+#ifdef C_LINES
+	    LINES = (int)SvIV(ST(1));
 #else
-	case  1:  c_var_not_there("LINES");                  break;
+	    c_var_not_there("LINES");
 #endif
-#ifdef C_COLS        
-	case  2:  COLS         = (int)SvIV(ST(1));           break;
+	    break;
+	case  2:
+#ifdef C_COLS
+	    COLS = (int)SvIV(ST(1));
 #else
-	case  2:  c_var_not_there("COLS");                   break;
+	    c_var_not_there("COLS");
 #endif
-#ifdef C_STDSCR      
-	case  3:  stdscr       = c_sv2Window(ST(1), -1);     break;
+	    break;
+	case  3:
+#ifdef C_STDSCR
+	    stdscr = c_sv2Window(ST(1), -1);
 #else
-	case  3:  c_var_not_there("stdscr");                 break;
+	    c_var_not_there("stdscr");
 #endif
-#ifdef C_CURSCR      
-	case  4:  curscr       = c_sv2Window(ST(1), -1);     break;
+	    break;
+	case  4:
+#ifdef C_CURSCR
+	    curscr = c_sv2Window(ST(1), -1);
 #else
-	case  4:  c_var_not_there("curscr");                 break;
+	    c_var_not_there("curscr");
 #endif
-#ifdef C_COLORS      
-	case  5:  COLORS       = (int)SvIV(ST(1));           break;
+	    break;
+	case  5:
+#ifdef C_COLORS
+	    COLORS = (int)SvIV(ST(1));
 #else
-	case  5:  c_var_not_there("COLORS");                 break;
+	    c_var_not_there("COLORS");
 #endif
-#ifdef C_COLOR_PAIRS 
-	case  6:  COLOR_PAIRS  = (int)SvIV(ST(1));           break;
+	    break;
+	case  6:
+#ifdef C_COLOR_PAIRS
+	    COLOR_PAIRS = (int)SvIV(ST(1));
 #else
-	case  6:  c_var_not_there("COLOR_PAIRS");            break;
+	    c_var_not_there("COLOR_PAIRS");
 #endif
-	  default:
-	      croak("Curses::Vars::STORE called with bad index");
+	    break;
+	default:
+	    croak("Curses::Vars::STORE called with bad index");
 	    /* NOTREACHED */
 	}
 	ST(0) = &PL_sv_yes;

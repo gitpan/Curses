@@ -39,11 +39,12 @@ sub do_variable {
 
     next unless $var->{DOIT};
 
-    my $decl  = $var->{DECL};
+    $var->{ARG2} = -1;
+    $var->{ARG1} = "ST(0)";
+    my $fetch = lookup('RET_NOR',  $var);
+    $var->{ARG1} = "ST(1)";
+    my $store = lookup('DECL_NOR', $var);
     my $name  = $var->{NAME};
-    my $fetch = lookup('RET_NOR',  $decl, $name, "ST(0)", -1);
-    my $store = lookup('DECL_NOR', $decl, $name, "ST(1)", -1);
-    my $unsup = qq[c_var_not_there("$name");];
 
     print OUT Q<<AAA;
 ################
@@ -54,11 +55,11 @@ sub do_variable {
 #	    c_exactargs("$name", items, 0);
 #	    {
 #		ST(0) = sv_newmortal();
-#		$fetch
+#		$fetch;
 #	    }
 #	    XSRETURN(1);
 #	#else
-#	    $unsup
+#	    c_var_not_there("$name");
 #	    XSRETURN(0);
 #	#endif
 #	}
@@ -66,30 +67,29 @@ sub do_variable {
 ################
 AAA
     my $num   = $var->{NUM};
-
     $num      = " " x ( 2 - length $num) . $num;
-    $name    .= " " x (12 - length $name);
-    $fetch   .= " " x (40 - length $fetch);
-    $store   .= " " x (25 - length $store);
-    $unsup   .= " " x (40 - length $unsup);
 
     push @fetch, Q<<AAA;
 ################
+#		case $num:
 #	#ifdef \UC_$name\E
-#		case $num:  $fetch   break;
+#		    $fetch;
 #	#else
-#		case $num:  $unsup   break;
+#		    c_var_not_there("$name");
 #	#endif
+#		    break;
 ################
 AAA
 
     push @store, Q<<AAA;
 ################
+#		case $num:
 #	#ifdef \UC_$name\E
-#		case $num:  $name = $store   break;
+#		    $name = $store;
 #	#else
-#		case $num:  $unsup   break;
+#		    c_var_not_there("$name");
 #	#endif
+#		    break;
 ################
 AAA
 
@@ -136,9 +136,9 @@ XS(XS_Curses_Vars_FETCH)
 	ST(0) = sv_newmortal();
 	switch (num) {
 PAUSE
-	  default:
-	      croak("Curses::Vars::FETCH called with bad index");
-	  /* NOTREACHED */
+	default:
+	    croak("Curses::Vars::FETCH called with bad index");
+	    /* NOTREACHED */
 	}
     }
     XSRETURN(1);
@@ -153,8 +153,8 @@ XS(XS_Curses_Vars_STORE)
 
 	switch (num) {
 PAUSE
-	  default:
-	      croak("Curses::Vars::STORE called with bad index");
+	default:
+	    croak("Curses::Vars::STORE called with bad index");
 	    /* NOTREACHED */
 	}
 	ST(0) = &PL_sv_yes;
