@@ -13,6 +13,14 @@
 #include <panel.h>
 #endif
 
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
+
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
 /* Defined in both Perl & Ncurses */
 #undef instr
 

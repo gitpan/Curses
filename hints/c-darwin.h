@@ -1,10 +1,10 @@
-/*  Hint file for the NeXT platform.
+/*  Hint file for the darwin platform.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.
  */
 
-/* These hints thanks to Anno Siegel <anno4000@w172zrz.zrz.tu-berlin.d400.de>*/
+/* These hints thanks to Scott Dietrich <sdietrich@emlab.com> */
 
 #include <curses.h>
 

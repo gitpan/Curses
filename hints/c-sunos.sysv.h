@@ -31,6 +31,14 @@
 #include <panel.h>
 #endif
 
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
+
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
 /* vvvv */
 #undef sprintf
 #undef instr

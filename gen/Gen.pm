@@ -10,162 +10,175 @@ my $list_var = "gen/list.var";
 my $list_con = "gen/list.con";
 my $list_typ = "gen/list.typ";
 
-##  Variable types we want to masquerade
-#
-my $MORPH = {
-    'WINDOW *' => 'Window',
-    'SCREEN *' => 'Screen',
-    'PANEL *'  => 'Panel',
-    'MEVENT *' => 'MEvent',
-    'void *'   => 'char *',
-    'bool'     => 'int',
-};
-
 ###
 ##  Declaration entries
 #
-my $tables = {
-    ##  Normal variable declarations
-    #
-    'DECL_NOR' => {
-	'int'      => '(int)SvIV($arg1)',
-	'short'    => '(short)SvIV($arg1)',
-	'attr_t'   => '(attr_t)SvIV($arg1)',
-	'short *'  => '(short *)SvPV($arg1,PL_na)',
-	'char *'   => '(char *)SvPV($arg1,PL_na)',
-	'chtype'   => 'c_sv2chtype($arg1)',
-	'chtype *' => '(chtype *)SvPV($arg1,PL_na)',
-	'Window'   => 'c_sv2Window($arg1, $arg2)',
-	'Screen'   => 'c_sv2Screen($arg1, $arg2)',
-	'Panel'    => 'c_sv2Panel($arg1, $arg2)',
-	'FILE *'   => 'IoIFP(sv_2io($arg1))',
-	'MEvent'   => '(MEvent)SvPV($arg1,PL_na)',
-	'mmask_t'  => '(mmask_t)SvIV($arg1)',
+my $MAP = {
+    'attr_t' => {
+	'DECL_NOR' => '(attr_t)SvIV($A)',
+	'RETN_NOR' => 'sv_setiv($A, (IV)$N)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '0',
+	'RETN_OUT' => 'sv_setiv($A, (IV)$N);',
+	'TEST_OUT' => 'LINES',
+	'RETN_NUL' => 'ERR',
     },
 
-    ## "output" declarations; variables that will be assigned to
-
-    'DECL_OUT' => {
-	'int'      => '0',
-	'short'    => '0',
-	'mmask_t'  => '0',
-	'char *'   => '(char *)sv_grow($arg1, $arg2)',
-	'chtype *' => '(chtype *)sv_grow($arg1, ($arg2)*sizeof(chtype))',
-	'MEvent'   => '(MEvent)sv_grow($arg1, 2*sizeof(MEVENT))',
-    },
-    
-    ##  Optional declarations
-    #
-    'DECL_OPT' => {
-	'char *'  => '$arg1 != &PL_sv_undef ? (char *)SvPV($arg1,PL_na) : NULL',
-	'Panel'   => '$arg1 != &PL_sv_undef ? c_sv2Panel($arg1, $arg2) : NULL',
-	'mmask_t' => '$arg1 != &PL_sv_undef ? (mmask_t)SvIV($arg1) : NULL',
-
+    'bool' => {
+	'DECL_NOR' => '(int)SvIV($A)',
+	'RETN_NOR' => 'sv_setiv($A, (IV)$N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'ERR',
     },
 
-    ##  Unified variable declarations
-    #
-    'DECL_UNI' => {
-	'Window'   => 'c_win ? c_sv2Window($arg1, $arg2) : stdscr',
+    'char' => {
+	'RETN_NOR' => 'sv_setpvn($A, (char *)&$N, 1)',
+	'RETN_NUL' => 'ERR',
     },
 
-    ##  The actual assignment to "output" declarations
-    #
-    'OUT'      => {
-	'int'      => 'sv_setiv($arg1, (IV)$name);',
-	'short'    => 'sv_setiv($arg1, (IV)$name);',
-	'char *'   =>
-	q[if (ret != ERR) {
-	    SvCUR($arg1) = strlen($name);
-	    SvPOK_only($arg1);
-	    *SvEND($arg1) = 0;
-	}],
-	'chtype *' =>
-	q[if (ret != ERR) {
-	    SvCUR($arg1) = c_chstrlen($name);
-	    SvPOK_only($arg1);
-	    *(chtype *)SvEND($arg1) = 0;
-	}],
-	'MEvent'  =>
-	q[if (ret != ERR) {
-	    SvCUR($arg1) = sizeof(MEVENT);
-	    SvPOK_only($arg1);
-	    *SvEND($arg1) = 0;
-	}],
-	'mmask_t' => 'sv_setiv($arg1, (IV)$name);',
+    'char *' => {
+	'DECL_NOR' => '(char *)SvPV($A,PL_na)',
+	'RETN_NOR' => 'sv_setpv((SV*)$A, $N)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '(char *)sv_grow($A, $B)',
+	'RETN_OUT' => 'c_setchar($A, $N)',
+	'TEST_OUT' => '0',
+	'DECL_OPT' => '$A != &PL_sv_undef ? (char *)SvPV($A,PL_na) : NULL',
+	'TEST_OPT' => '0',
+	'RETN_NUL' => 'NULL',
     },
 
-    ##  Partial format for actual function call in a unified function
-    #
-    'RET_UNI' => {
-	'void'     => 'CV_OPT_MV_AND( $arg1, $arg2 )',
-	'int'      => 'CI_OPT_MV_AND( $arg1, $arg2 )',
-	'attr_t'   => 'CI_OPT_MV_AND( $arg1, $arg2 )',
-	'char *'   => 'CP_OPT_MV_AND( $arg1, $arg2 )',
-	'chtype'   => 'CI_OPT_MV_AND( $arg1, $arg2 )',
-	'Window'   => 'CP_OPT_MV_AND( $arg1, $arg2 )',
+    'chtype' => {
+	'DECL_NOR' => 'c_sv2chtype($A)',
+	'RETN_NOR' => 'c_chtype2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'ERR',
     },
 
-    ##  Normal format for function call
-    #
-    'RET_NOR' => {
-	'int'      => 'sv_setiv($arg1, (IV)$name)',
-	'attr_t'   => 'sv_setiv($arg1, (IV)$name)',
-	'char'     => 'sv_setpvn($arg1, (char *)&$name, 1)',
-	'char *'   => 'sv_setpv((SV*)$arg1, $name)',
-	'chtype'   => 'c_chtype2sv($arg1, $name)',
-	'Window'   => 'c_Window2sv($arg1, $name)',
-	'Panel'    => 'c_Panel2sv($arg1, $name)',
-	'Screen'   => 'c_Screen2sv($arg1, $name)',
-	'mmask_t'  => 'sv_setiv($arg1, (IV)$name)',
+    'chtype *' => {
+	'DECL_NOR' => '(chtype *)SvPV($A,PL_na)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '(chtype *)sv_grow($A, ($B)*sizeof(chtype))',
+	'RETN_OUT' => 'c_setchtype($A, $N)',
+	'TEST_OUT' => '0',
     },
 
-    ##  Variable substitution in symbol testing
-    ##  (some functions are really macros that manipulate variables)
-    #
-    'TEST_NOR' => {
-	'Window'   => 'stdscr',
-	'Screen'   => '0',
-	'Panel'    => '0',
-	'int'      => '0',
-	'char *'   => '0',
-	'chtype'   => '0',
-	'chtype *' => '0',
-	'short'    => '0',
-	'FILE *'   => '0',
-	'attr_t'   => '0',
-	'MEvent'   => '0',
-	'mmask_t'  => '0',
+    'FIELD *' => {
+	'DECL_NOR' => 'c_sv2field($A, $B)',
+	'RETN_NOR' => 'c_field2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'NULL',
     },
 
-    'TEST_OUT' => {
-	'int'      => 'LINES',
-	'char *'   => '0',
-	'chtype *' => '0',
-	'short'    => '0',
-	'MEvent'   => '0',
-	'mmask_t'  => '0',
+    'FIELD **' => {
+	'DECL_NOR' => '(FIELD **)SvPV($A,PL_na)',
+	'RETN_NOR' => 'sv_setpv((SV*)$A, (char *)$N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => '0',
     },
-};
 
+    'FILE *' => {
+	'DECL_NOR' => 'IoIFP(sv_2io($A))',
+	'TEST_NOR' => '0',
+    },
 
-##  Do variable translation in above tables
-#
-sub lookup {
-    my $table = shift;
-    my $hash  = shift;
-    my $decl  = $hash->{DECL};
-    my $name  = $hash->{NAME};
-    my $arg1  = $hash->{ARG1};
-    my $arg2  = $hash->{ARG2};
-    my $str   = $tables->{$table}->{$decl};
+    'FORM *' => {
+	'DECL_NOR' => 'c_sv2form($A, $B)',
+	'RETN_NOR' => 'c_form2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'NULL',
+    },
 
-    if (not defined $str) {
-	warn "$table: bad table lookup: [$decl / $name / $arg1 / $arg2 ]\n";
-	return;
+    'int' => {
+	'DECL_NOR' => '(int)SvIV($A)',
+	'RETN_NOR' => 'sv_setiv($A, (IV)$N)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '0',
+	'RETN_OUT' => 'sv_setiv($A, (IV)$N);',
+	'TEST_OUT' => 'LINES',
+	'RETN_NUL' => 'ERR',
+    },
+
+    'ITEM *' => {
+	'DECL_NOR' => 'c_sv2item($A, $B)',
+	'RETN_NOR' => 'c_item2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'NULL',
+    },
+
+    'ITEM **' => {
+	'DECL_NOR' => '(ITEM **)SvPV($A,PL_na)',
+	'RETN_NOR' => 'sv_setpv((SV*)$A, (char *)$N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => '0',
+    },
+
+    'MENU *' => {
+	'DECL_NOR' => 'c_sv2menu($A, $B)',
+	'RETN_NOR' => 'c_menu2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'NULL',
+    },
+
+    'MEVENT *' => {
+	'DECL_NOR' => '(MEVENT *)SvPV($A,PL_na)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '(MEVENT *)sv_grow($A, 2 * sizeof(MEVENT))',
+	'RETN_OUT' => 'c_setmevent($A, $N)',
+	'TEST_OUT' => '0',
+    },
+
+    'mmask_t' => {
+	'DECL_NOR' => '(mmask_t)SvIV($A)',
+	'RETN_NOR' => 'sv_setiv($A, (IV)$N)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '0',
+	'RETN_OUT' => 'sv_setiv($A, (IV)$N);',
+	'TEST_OUT' => 'LINES',
+	'RETN_NUL' => 'ERR',
+    },
+
+    'PANEL *' => {
+	'DECL_NOR' => 'c_sv2panel($A, $B)',
+	'RETN_NOR' => 'c_panel2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'DECL_OPT' => '$A != &PL_sv_undef ? c_sv2panel($A, $B) : NULL',
+        'TEST_OPT' => '0',
+	'RETN_NUL' => 'NULL',
+    },
+
+    'SCREEN *' => {
+	'DECL_NOR' => 'c_sv2screen($A, $B)',
+	'RETN_NOR' => 'c_screen2sv($A, $N)',
+	'TEST_NOR' => '0',
+	'RETN_NUL' => 'NULL',
+    },
+
+    'short' => {
+	'DECL_NOR' => '(short)SvIV($A)',
+	'TEST_NOR' => '0',
+	'DECL_OUT' => '0',
+	'RETN_OUT' => 'sv_setiv($A, (IV)$N);',
+	'TEST_OUT' => 'LINES',
+    },
+
+    'void' => {
+	'RETN_NOR' => 'not gonna happen',
+	'RETN_NUL' => 'not gonna happen',
+    },
+
+    'void *' => {
+	'DECL_NOR' => '0',
+	'TEST_NOR' => '0',
+    },
+
+    'WINDOW *' => {
+	'DECL_NOR' => 'c_sv2window($A, $B)',
+	'RETN_NOR' => 'c_window2sv($A, $N)',
+	'TEST_NOR' => 'stdscr',
+	'RETN_NUL' => 'NULL',
     }
-    return eval qq("$str");
-}
+};
 
 ##  Allow us to put some quoting around here documents to make them stand out
 #
@@ -193,16 +206,19 @@ sub process_DATA_chunk {
 }
 
 my $pattern = '^\s* (?:const \s+)? ( (?:[{<|] [^}>|]+ [}>|])* )' .
-    '\s* (\S+) (\s+ \*+)? \s* ( [{<|] \w+ [}>|] )* (\w+)';
+    '\s* (\S+ (?: \s+ \*+)?) \s* ( [{<|] \w+ [}>|] )* \s* (\w+)';
 
 
-my $numf = 0;
 sub process_functions {
     my $proc = shift;
+    my $numf = 1;
 
-    open INF, $list_fun  or die "Can't open $list_fun: $!\n";
+    open INF, $list_fun or die "Can't open $list_fun: $!\n";
 
+    FCN:
     while (<INF>) {
+	next if /^!/;
+
 	while (s/\\\n//) {
 	    $_ .= <INF>;
 	    die "$list_fun: Unterminated backslash\n" if eof;
@@ -218,54 +234,88 @@ sub process_functions {
 	    my $args = $2;
 
 	    unless ($lhs =~ /$pattern/xo) {
-		warn "$list_fun: bad function proto [$lhs]\n";
-		next;
+		warn "$lhs($args): bad function prototype\n";
+		next FCN;
 	    }
-	    $fun->{DOIT}++;
+
 	    $fun->{SPEC} = $1;
-	    $fun->{DECL} = $MORPH->{$2 . $3} || $2 . $3;
-	    $fun->{UNI}  = $4;
-	    $fun->{NAME} = $5;
-	    $fun->{NUM}  = ++$numf;
-	    $fun->{W}    = $fun->{UNI} =~ /[{|]/ ? "w" : "";
+	    $fun->{DECL} = $2;
+	    $fun->{UNI}  = $3;
+	    $fun->{NAME} = $4;
+	    $fun->{DOIT} = 1;
+	    $fun->{NUM}  = $numf++;
+	    $fun->{ARGV} = [ ];
 
-	    while ($fun->{SPEC} =~ /{(.+?)}/g) {
-		$fun->{"\U$1"}++;
+	    $fun->{SPEC} = { map { uc($_) => 1 } $fun->{SPEC} =~ /{(.+?)}/g };
+	    $fun->{W}    = $fun->{UNI} && $fun->{UNI} =~ /[{|]/ ? 'w' : '';
+	    my $argc = 0;
+	    foreach my $entry (split /\s*,\s*/, $args) {
+		next if $entry eq 'void';
+
+		unless ($entry =~ /$pattern/xo) {
+		    warn "$fun->{NAME}( $entry ): bad arg prototype\n";
+		    next FCN;
+		}
+
+		my $arg = $fun->{ARGV}[$argc] = { };
+		$arg->{SPEC} = $1;
+		$arg->{DECL} = $2;
+		$arg->{NAME} = $4;
+
+		$arg->{SPEC} = { map { /=/ ? (uc($`) => $') : (uc($_) => 1) }
+				  $arg->{SPEC} =~ /{(.+?(?:=.+?)?)}/g };
+
+		$arg->{MAP}  = { };
+		$arg->{NUM}  = $argc++;
+
+		my $typ = 'NOR';
+		if    ($arg->{SPEC}{OUT}) { $typ = 'OUT' }
+		elsif ($arg->{SPEC}{OPT}) { $typ = 'OPT' }
+
+		my $decl = $MAP->{$arg->{DECL}}{"DECL_$typ"};
+		if (not defined $decl) {
+		    warn "$fun->{NAME}( $arg->{DECL} $arg->{NAME} ): " .
+			"no map rewrite for DECL_$typ\n";
+		    next FCN;
+		}
+		$arg->{M_DECL} = $decl;
+
+		if ($typ eq 'OUT') {
+		    my $retn = $MAP->{$arg->{DECL}}{"RETN_$typ"};
+		    if (not defined $retn) {
+			warn "$fun->{NAME}( $arg->{DECL} $arg->{NAME} ): " .
+			    "no map rewrite for RETN_$typ\n";
+			next FCN;
+		    }
+		    $arg->{M_RETN} = $retn;
+		}
+
+		my $test = $MAP->{$arg->{DECL}}{"TEST_$typ"};
+		if (not defined $test) {
+		    warn "$fun->{NAME}( $arg->{DECL} $arg->{NAME} ): " .
+			"no map rewrite for TEST_$typ\n";
+		    next FCN;
+		}
+		$arg->{M_TEST} = $test;
 	    }
 
-	    my $arg;
-
-	    my $numa = 0;
-	    foreach $arg (split /\s*,\s*/, $args) {
-		next if $arg eq 'void';
-
-		unless ($arg =~ /$pattern/xo) {
-		    warn "$list_fun: bad arg proto [$arg] for [$lhs]\n";
-		    next;
-		}
-		my $argh = $fun->{ARGS}->[$numa] = { };
-
-		$argh->{DECL} = $MORPH->{$2 . $3} || $2 . $3;
-		$argh->{NAME} = $5;
-		$argh->{UNI}  = $numa;
-
-		if ($numa) {
-		    $argh->{UNI} = "c_arg+" . ($numa - 1);
-		    $argh->{UNI} =~ s/\+0//;
-		}
-
-		my $spec         = $1;
-		my $uni          = $4;
-
-		while ($spec =~ /{(.+?)(?:=(.+?))?}/g) {
-		    $argh->{"\U$1"} = $2 || 1;
-		}
-		while ($uni =~ /{(.+?)}/g) {
-		    $argh->{"\U$1"}++;
-		}
-		$argh->{NUM}  = $numa++;
+	    my $retn = $MAP->{$fun->{DECL}}{RETN_NOR};
+	    if (not defined $retn) {
+		warn "$fun->{DECL} $fun->{NAME}( ): " .
+		    "no map rewrite for RETN_NOR\n";
+		next FCN;
 	    }
-	    $fun->{ARGN} = $numa;
+
+	    my $null = $MAP->{$fun->{DECL}}{RETN_NUL};
+	    if (not defined $null) {
+		warn "$fun->{DECL} $fun->{NAME}( ): " .
+		    "no map rewrite for RETN_NUL\n";
+		next FCN;
+	    }
+
+	    $fun->{M_RETN} = $retn;
+	    $fun->{M_NULL} = $null;
+	    $fun->{ARGC}   = $argc;
 	}
 	&{$proc}($fun);
     }
@@ -273,13 +323,15 @@ sub process_functions {
     close INF;
 }
 
-my $numv = 0;
 sub process_variables {
     my $proc = shift;
+    my $numv = 1;
 
-    open INV, $list_var  or die "Can't open $list_var: $!\n";
+    open INV, $list_var or die "Can't open $list_var: $!\n";
 
     while (<INV>) {
+	next if /^!/;
+
 	while (s/\\\n//) {
 	    $_ .= <INV>;
 	    die "$list_var: Unterminated backslash\n" if eof;
@@ -294,15 +346,34 @@ sub process_variables {
 	    my $lhs  = $1;
 
 	    unless ($lhs =~ /$pattern/xo) {
-		warn "$list_var: bad variable proto [$lhs]\n";
+		warn "$lhs: bad variable prototype\n";
 		next;
 	    }
-	    $var->{DOIT}++;
+
 	    $var->{SPEC} = $1;
-	    $var->{DECL} = $MORPH->{$2 . $3} || $2 . $3;
-	    $var->{UNI}  = $4;
-	    $var->{NAME} = $5;
-	    $var->{NUM}  = ++$numv;
+	    $var->{DECL} = $2;
+	    $var->{NAME} = $4;
+	    $var->{DOIT} = 1;
+	    $var->{NUM}  = $numv++;
+
+	    $var->{SPEC} = { map { uc($_) => 1 } $var->{SPEC} =~ /{(.+?)}/g };
+
+	    my $decl = $MAP->{$var->{DECL}}{DECL_NOR};
+	    if (not defined $decl) {
+		warn "$var->{DECL} $var->{NAME}: " .
+		    "no map rewrite for DECL_$typ\n";
+		next;
+	    }
+
+	    my $retn = $MAP->{$var->{DECL}}{RETN_NOR};
+	    if (not defined $retn) {
+		warn "$var->{DECL} $var->{NAME}: " .
+		    "no map rewrite for RETN_NOR\n";
+		next;
+	    }
+
+	    $var->{M_DECL} = $decl;
+	    $var->{M_RETN} = $retn;
 	}
 	&{$proc}($var);
     }
@@ -310,13 +381,15 @@ sub process_variables {
     close INV;
 }
 
-my $numc = 0;
 sub process_constants {
     my $proc = shift;
+    my $numc = 1;
 
-    open INC, $list_con  or die "Can't open $list_con: $!\n";
+    open INC, $list_con or die "Can't open $list_con: $!\n";
 
     while (<INC>) {
+	next if /^!/;
+
 	while (s/\\\n//) {
 	    $_ .= <INC>;
 	    die "$list_con: Unterminated backslash\n" if eof;
@@ -327,10 +400,22 @@ sub process_constants {
 	    DOIT  => 0
 	};
 
-	if (/^> \s+ (\S+) /x) {
-	    $con->{DOIT}++;
-	    $con->{NAME} = $1;
-	    $con->{NUM}  = ++$numc;
+	if (/^> (.+) ; /x) {
+	    my $lhs  = $1;
+
+	    unless ($lhs =~ /$pattern/xo) {
+		warn "$lhs: bad variable prototype\n";
+		next;
+	    }
+
+	    $con->{SPEC} = $1;
+	    $con->{DECL} = $2;
+	    $con->{NAME} = $4;
+	    $con->{DOIT} = 1;
+	    $con->{NUM}  = $numc++;
+
+	    $con->{SPEC} = { map { uc($_) => 1 } $con->{SPEC} =~ /{(.+?)}/g };
+
 	}
 	&{$proc}($con);
     }
@@ -338,13 +423,15 @@ sub process_constants {
     close INC;
 }
 
-my $numt = 0;
 sub process_typedefs {
     my $proc = shift;
+    my $numt = 1;
 
     open INT, $list_typ  or die "Can't open $list_typ: $!\n";
 
     while (<INT>) {
+	next if /^!/;
+
 	while (s/\\\n//) {
 	    $_ .= <INT>;
 	    die "$list_typ: Unterminated backslash\n" if eof;
@@ -359,21 +446,23 @@ sub process_typedefs {
 	    my $lhs  = $1;
 
 	    unless ($lhs =~ /$pattern/xo) {
-		warn "$list_typ: bad typedef proto [$lhs]\n";
+		warn "$lhs: bad typedef prototype\n";
 		next;
 	    }
 
-	    $typ->{DOIT}++;
-	    $typ->{DECL} = $2 . $3;
-	    $typ->{NAME} = $5;
-	    $typ->{NUM}  = ++$numt;
+	    $typ->{SPEC} = $1;
+	    $typ->{DECL} = $2;
+	    $typ->{NAME} = $4;
+	    $typ->{DOIT} = 1;
+	    $typ->{NUM}  = $numt++;
+
+	    $typ->{SPEC} = { map { uc($_) => 1 } $typ->{SPEC} =~ /{(.+?)}/g };
+
 	}
 	&{$proc}($typ);
     }
 
     close INT;
 }
-
-
 
 1;

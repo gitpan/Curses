@@ -13,6 +13,14 @@
 #include <panel.h>
 #endif
 
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
+
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
 #define C_LONGNAME
 #define C_LONG0ARGS
 #undef  C_LONG2ARGS

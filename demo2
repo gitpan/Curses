@@ -20,8 +20,6 @@ sub message {
     sleep 2;
 }
 
-initscr();
-
 my $win = Curses->new  or die "Can't get new window\n";
 
 ##  You have to pack chtypes.  Be sure to get that trailing zero.

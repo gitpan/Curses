@@ -6,8 +6,9 @@
 **  or the GNU General Public License, as specified in the README file.
 */
 
+#include "CursesDef.h"
+#include "CursesTyp.h"
 #include "c-config.h"
-#include "pCurses.h"
 #ifdef VMS
 #include <unistd.h>  /* not in perl.h ??? */
 #endif

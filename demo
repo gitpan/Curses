@@ -75,5 +75,5 @@ eval
 
 move($LINES - 1, 0);
 refresh();
-sleep 5;
+sleep 2;
 endwin();

@@ -12,8 +12,15 @@
 #include <panel.h>
 #endif
 
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
+
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
 #undef  instr
-#define instr _sigh_sigh_sigh_
 
 #define C_LONGNAME
 #define C_LONG0ARGS

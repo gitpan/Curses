@@ -6,6 +6,16 @@
 #include <panel.h>
 #endif
 
+/* Change <menu.h> below to the proper "include" file for menus. */
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
+
+/* Change <form.h> below to the proper "include" file for forms. */
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
 /* Change each #undef below to #define if the answer to the question
  * beside it is "yes".
  */

@@ -1,5 +1,5 @@
              The Curses extension to perl v5
-                       Version 1.05
+                       Version 1.06
 
 
 	 Copyright (c) 1994-2000  William Setzer
@@ -34,34 +34,92 @@ the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-New in 1.05:
+*** SECURITY NOTICE ***
 
- o Added the missing support functions c_chstrlen, c_Screen2sv.
-   Oops. :)
+It has always been the case with the curses functions, but please note
+that the following functions:
 
- o Updated DIAGNOSTICS section of pod.
+    getstr()   (and optional wgetstr(), mvgetstr(), and mvwgetstr())
+    inchstr()  (and optional winchstr(), mvinchstr(), and mvwinchstr())
+    instr()    (and optional winstr(), mvinstr(), and mvwinstr())
 
- o Added typedef detection support.
+are subject to buffer overflow attack.  This is because you pass in
+the buffer to be filled in, which has to be of finite length, but
+there is no way to stop a bad guy from typing.
 
- o Rearranged PANELS support a little.
+In order to avoid this problem, use the alternate functions:
 
- o Removed support for wattr_get, wattr_off, wattr_on, and
-   wattr_set (for now).  I got the prototypes from ncurses-1.9.9g,
-   but they apparently differ from the "standard" ones.
+   getnstr()
+   inchnstr()
+   innstr()
 
- o Renamed "lines" everywhere, 'cause some curses library writer
-   was stupid enough to #define it.  (Go figure.)
+which take an extra "size of buffer" argument.
 
- o Reworked "optional" arguments, which only affects newterm(),
-   panel_above() and panel_below().  Now, if you want to specify
-   "NULL" as an argument, use "undef" instead of omitting the
-   argument.  (Don't worry if this doesn't make sense.  You
-   probably aren't affected anyway.)
 
- o Added the ncurses "curs_mouse" functions, but I have no idea
-   if they work.  I couldn't even get the C versions to work, so
-   I had no way of testing them.  Feedback on these functions
-   would be appreciated.
+New in 1.06:
+
+ o Now requires perl5.005 or better to run.  (You can probably run it
+   in perl5.002-perl5.004 by grabbing newCONSTSUB out of the IO
+   distribution on CPAN and editing all uses of "foreach my $var" in
+   my perl scripts.)
+
+ o Did lots of fiddling with the file generation in an effort to make
+   it more comprehensible.  In doing so, I moved around the way some
+   things were done and probably broke it on some systems with weird
+   compilers.  Please let me know.
+
+ o changed the "Curses->new()" function to be a bit less clever.
+
+ o Support for libmenu!  Many thanks to Yury Pshenichny <yura at zp.ua>
+   who did most of the actual work.
+
+   Update: Well, sort of support.  For some reason beyond my ken, it
+   doesn't work with Solaris (2.6) libmenu. (The items won't attach to
+   the menu.)  ncurses menu, both 1.9.9 and 5.2, seem to work fine.
+
+ o libform support added, too.  Ho hum.  ;)  This one does appear to
+   work with Solaris libform.
+
+ o Added the following ncurses extension functions:
+
+   use_default_colors()
+   assume_default_colors()
+   define_key()
+   keybound()
+   keyok()
+   resizeterm()
+
+   (Thanks to neild at misago.org, hans at kolej.mff.cuni.cz)
+
+ o Re-enabled the functions:
+
+   attr_get()
+   attr_off()
+   attr_on()
+   attr_set()
+
+ o Between the functions supported and the functions listed in the
+   pod as not supported, those are all the ones I know about.
+   Got any more?  Let me know.
+
+ o Fixed 64 bit issue with getch() and possibly others, truncating
+   returns of `chtype' to 32 bits.  Note that this could possibly
+   break some OSes.  Please let me know.
+   (Thanks to Randall.G.Steiner at bankofamerica.com)
+
+ o Fixed bug where @ARGV was always being cleared, and so no arguments
+   ever got to MakeMaker.
+   (Thanks to bdlow at nortelnetworks.com)
+
+ o Added hints for Darwin/Mac OS X system.
+   (Thanks to sdietrich at emlab.com)
+
+ o Added note to NETBSD users at the bottom of this README.
+
+ o Added a security notice to the README and pod.
+   (Thanks to connor at ing.umu.se)
+
+ o Has anyone successfully used the mouse event stuff?
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in
@@ -69,6 +127,14 @@ an "eval" and try again.  Same goes double for the "gdc" program.
 You can type "make cdemo" to make a C language version of the demo.
 If you get the same results via "demo" and "cdemo", but they don't
 look right, then it's a bug in your libcurses, not in Curses.
+
+
+* Personal Note *
+
+I'm very grateful to all those that send in reports and patches, and
+I'm very sorry that I don't release the Curses modules more often.
+Yury's excellent libmenu patches have sat around for many months
+because I've been too lazy to give Curses another round of polish.
 
 Enjoy!
 
@@ -87,3 +153,17 @@ NCurses
 
    Actually, there are several problems in v1.9.9g.  Please upgrade
    to a newer version.
+
+NETBSD
+
+   I continue to get conflicting reports about the correct number of
+   arguments for longname() and touchline(), controlled via the file
+   `hints/c-netbsd.h'.  Before compiling, you may want to look them up
+   yourself, confirm them, and then editing `hints/c-netbsd.h'.
+
+   Any NETBSD guru that can resolve this problem for all versions of
+   their OS will get my undying gratitude.
+
+Solaris 2.6
+
+   The menu stuff doesn't appear to work.  I have no idea why.

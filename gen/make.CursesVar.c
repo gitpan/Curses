@@ -10,20 +10,14 @@
 use lib 'gen';
 use Gen;
 
-my @fetch;
-my @store;
-
 open OUT, "> CursesVar.c"   or die "Can't open CursesVar.c: $!\n";
 
 process_DATA_chunk  \&print_line;
-process_variables   \&do_variable;
-
+process_variables   \&print_function;
 process_DATA_chunk  \&print_line;
-print OUT @fetch;
-
+process_variables   \&print_fetch;
 process_DATA_chunk  \&print_line;
-print OUT @store;
-
+process_variables   \&print_store;
 process_DATA_chunk  \&print_line;
 
 close OUT;
@@ -34,60 +28,76 @@ close OUT;
 #
 sub print_line { print OUT @_ }
 
-sub do_variable {
+sub print_function {
     my $var = shift;
 
-    next unless $var->{DOIT};
+    return unless $var->{DOIT};
 
-    $var->{ARG2} = -1;
-    $var->{ARG1} = "ST(0)";
-    my $fetch = lookup('RET_NOR',  $var);
-    $var->{ARG1} = "ST(1)";
-    my $store = lookup('DECL_NOR', $var);
-    my $name  = $var->{NAME};
+    my $A    = "ST(0)";
+    my $N    = $var->{NAME};
+    my $body = eval qq("$var->{M_RETN}");
 
     print OUT Q<<AAA;
 ################
-#	XS(XS_Curses_$name)
+#	XS(XS_Curses_$var->{NAME})
 #	{
 #	    dXSARGS;
-#	#ifdef \UC_$name\E
-#	    c_exactargs("$name", items, 0);
+#	#ifdef \UC_$var->{NAME}\E
+#	    c_exactargs("$var->{NAME}", items, 0);
 #	    {
 #		ST(0) = sv_newmortal();
-#		$fetch;
+#		$body;
 #	    }
 #	    XSRETURN(1);
 #	#else
-#	    c_var_not_there("$name");
+#	    c_var_not_there("$var->{NAME}");
 #	    XSRETURN(0);
 #	#endif
 #	}
 #
 ################
 AAA
-    my $num   = $var->{NUM};
-    $num      = " " x ( 2 - length $num) . $num;
+}
 
-    push @fetch, Q<<AAA;
+sub print_fetch {
+    my $var = shift;
+
+    return unless $var->{DOIT};
+
+    my $A    = "ST(0)";
+    my $N    = $var->{NAME};
+    my $body = eval qq("$var->{M_RETN}");
+
+    print OUT Q<<AAA;
 ################
-#		case $num:
-#	#ifdef \UC_$name\E
-#		    $fetch;
+#		case $var->{NUM}:
+#	#ifdef \UC_$var->{NAME}\E
+#		    $body;
 #	#else
-#		    c_var_not_there("$name");
+#		    c_var_not_there("$var->{NAME}");
 #	#endif
 #		    break;
 ################
 AAA
+}
 
-    push @store, Q<<AAA;
+sub print_store {
+    my $var = shift;
+
+    return unless $var->{DOIT};
+
+    my $A    = "ST(1)";
+    my $B    = -1;
+    my $N    = $var->{NAME};
+    my $body = eval qq("$var->{M_DECL}");
+
+    print OUT Q<<AAA;
 ################
-#		case $num:
-#	#ifdef \UC_$name\E
-#		    $name = $store;
+#		case $var->{NUM}:
+#	#ifdef \UC_$var->{NAME}\E
+#		    $var->{NAME} = $body;
 #	#else
-#		    c_var_not_there("$name");
+#		    c_var_not_there("$var->{NAME}");
 #	#endif
 #		    break;
 ################
@@ -129,7 +139,6 @@ XS(XS_Curses_Vars_TIESCALAR)
 XS(XS_Curses_Vars_FETCH)
 {
     dXSARGS;
-    c_exactargs("FETCH", items, 1);
     {
 	int	num = (int)SvIV(SvRV((SV*)ST(0)));
 
@@ -147,7 +156,6 @@ PAUSE
 XS(XS_Curses_Vars_STORE)
 {
     dXSARGS;
-    c_exactargs("STORE", items, 2);
     {
 	int	num = (int)SvIV((SV*)SvRV(ST(0)));
 
@@ -165,7 +173,6 @@ PAUSE
 XS(XS_Curses_Vars_DESTROY)
 {
     dXSARGS;
-    c_exactargs("DESTROY", items, 1);
     {
 	SV *	rv = ST(0);
 

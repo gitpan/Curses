@@ -1,32 +1,38 @@
+!!  Note 1: "void *" declarations are always set to zero.
+!!  Note 2: "void *"s meant to handle real pointers were made "{cast} char *".
+!!  Note 3: "{out}{amp} <decl> <var>" were all originally "decl *var".
+!!  Note 4: "{cast}"ing a function is usually to shut up the compiler
+!!          complaining about discarding const from pointer.
+!!  Note 5: Some insane curses return "char *" for standout()/standend().
+!!          I don't feel like handling it, hence the "{cast}".
+!
 /* curs_addch */
 
-> int {mvw}addch(WINDOW *win, chtype ch);
-> int {w}echochar(WINDOW *win, chtype ch);
+> int {mvw}addch(chtype ch);
+> int {w}echochar(chtype ch);
 
 /* curs_addchstr */
 
-> int {mvw}addchstr(WINDOW *win, const chtype *str);
-> int {mvw}addchnstr(WINDOW *win, const chtype *str, int n);
+> int {mvw}addchstr(const chtype *str);
+> int {mvw}addchnstr(const chtype *str, int n);
 
 /* curs_addstr */
 
-> int {mvw}addstr(WINDOW *win, const char *str);
-> int {mvw}addnstr(WINDOW *win, const char *str, int n);
+> int {mvw}addstr(const char *str);
+> int {mvw}addnstr(const char *str, int n);
 
 /* curs_attr */
 
-> int {w}attroff(WINDOW *win, int attrs);
-> int {w}attron(WINDOW *win, int attrs);
-> int {w}attrset(WINDOW *win, int attrs);
-/* I'm *not* going to provide another option for a char *standend/out() */
-> {cast} int {w}standend(WINDOW *win);
-> {cast} int {w}standout(WINDOW *win);
-/* the following four prototypes are WRONG -XXX- */
-/* attr_t {w}attr_get(WINDOW *win); */
-/* int {w}attr_off(WINDOW *win, attr_t attrs); */
-/* int {w}attr_on(WINDOW *win, attr_t attrs); */
-/* int {w}attr_set(WINDOW *win, attr_t attrs); */
-> int {mvw}chgat(WINDOW *win, int n, attr_t attrs, short color, \
+> int {w}attroff(int attrs);
+> int {w}attron(int attrs);
+> int {w}attrset(int attrs);
+> {cast} int {w}standend(void);
+> {cast} int {w}standout(void);
+> int {w}attr_get({out}{amp} attr_t attrs, {out}{amp} short color, void *opts);
+> int {w}attr_off(attr_t attrs, void *opts);
+> int {w}attr_on(attr_t attrs, void *opts);
+> int {w}attr_set(attr_t attrs, short color, void *opts);
+> int {mvw}chgat(int n, attr_t attrs, short color, \
 		 const void *opts);
 > int COLOR_PAIR(int n);
 > int PAIR_NUMBER(int attrs);
@@ -38,25 +44,24 @@
 
 /* curs_bkgd */
 
-> int {w}bkgd(WINDOW *win, chtype ch);
-> void {w}bkgdset(WINDOW *win, chtype ch);
-> chtype <w>getbkgd(WINDOW *win);
+> int {w}bkgd(chtype ch);
+> void {w}bkgdset(chtype ch);
+> chtype <w>getbkgd(void);
 
 /* curs_border */
 
-/* the variable name 'rs' conflicts with threads */
-> int {w}border(WINDOW *win, chtype ls, chtype rs_, chtype ts, chtype bs, \
+> int {w}border(chtype ls, chtype rs_, chtype ts, chtype bs, \
 		chtype tl, chtype tr, chtype bl, chtype br);
-> int <w>box(WINDOW *win, chtype verch, chtype horch);
-> int {mvw}hline(WINDOW *win, chtype ch, int n);
-> int {mvw}vline(WINDOW *win, chtype ch, int n);
+> int <w>box(chtype verch, chtype horch);
+> int {mvw}hline(chtype ch, int n);
+> int {mvw}vline(chtype ch, int n);
 
 /* curs_clear */
 
-> int {w}erase(WINDOW *win);
-> int {w}clear(WINDOW *win);
-> int {w}clrtobot(WINDOW *win);
-> int {w}clrtoeol(WINDOW *win);
+> int {w}erase(void);
+> int {w}clear(void);
+> int {w}clrtobot(void);
+> int {w}clrtoeol(void);
 
 /* curs_color */
 
@@ -65,98 +70,113 @@
 > int init_color(short color, short r, short g, short b);
 > bool has_colors(void);
 > bool can_change_color(void);
-/* technically "short *", but this does the right thing */
-> int color_content(short color, {out} short {amp}r, {out} short {amp}g, \
-			{out} short {amp}b);
-/* technically "short *", but this does the right thing */
-> int pair_content(short pair, {out} short {amp}f, {out} short {amp}b);
+> int color_content(short color, {out}{amp} short r, {out}{amp} short g, \
+			{out}{amp} short b);
+> int pair_content(short pair, {out}{amp} short f, {out}{amp} short b);
 
 /* curs_delch */
 
-> int {mvw}delch(WINDOW *win);
+> int {mvw}delch(void);
 
 /* curs_deleteln */
 
-> int {w}deleteln(WINDOW *win);
-> int {w}insdelln(WINDOW *win, int n);
-> int {w}insertln(WINDOW *win);
+> int {w}deleteln(void);
+> int {w}insdelln(int n);
+> int {w}insertln(void);
 
 /* curs_getch */
 
-/* return code was 'int' */
-> chtype {mvw}getch(WINDOW *win);
-/* arg was 'int' */
+> chtype {mvw}getch(void);
 > int ungetch(chtype ch);
 > int has_key(int ch);
+> chtype KEY_F(int n);
 
 /* curs_getstr */
 
-> int {mvw}getstr(WINDOW *win, {arg2=250}{out} char *str);
-> int {mvw}getnstr(WINDOW *win, {arg2=n+1}{out} char *str, {shift=1} int n);
+> int {mvw}getstr({b=250}{out} char *str);
+> int {mvw}getnstr({b=n+1}{out} char *str, {shift=-1} int n);
 
 /* curs_getyx */
 
-> void <w>getyx(WINDOW *win, {out} int y, {out} int x);
-> void <w>getparyx(WINDOW *win, {out} int y, {out} int x);
-> void <w>getbegyx(WINDOW *win, {out} int y, {out} int x);
-> void <w>getmaxyx(WINDOW *win, {out} int y, {out} int x);
-
-/* DEC curses, I think */
-
-> int <w>getmaxy(WINDOW *win);
-> int <w>getmaxx(WINDOW *win);
+> void <w>getyx({out} int y, {out} int x);
+> void <w>getparyx({out} int y, {out} int x);
+> void <w>getbegyx({out} int y, {out} int x);
+> void <w>getmaxyx({out} int y, {out} int x);
 
 /* curs_inch */
 
-> chtype {mvw}inch(WINDOW *win);
+> chtype {mvw}inch(void);
 
 /* curs_inchstr */
 
-> int {mvw}inchstr(WINDOW *win, {arg2=250}{out} chtype *str);
-> int {mvw}inchnstr(WINDOW *win,{arg2=n+1}{out} chtype *str, {shift=1} int n);
+> int {mvw}inchstr({b=250}{out} chtype *str);
+> int {mvw}inchnstr({b=n+1}{out} chtype *str, {shift=-1} int n);
 
 /* curs_initscr */
 
 > WINDOW *initscr(void);
 > int endwin(void);
 > int isendwin(void);
-/* Originally contributed by Santeri Paavolainen <sjpaavol@cc.helsinki.fi> */
 > SCREEN *newterm({opt} char *type, FILE *outfd, FILE *infd);
 > SCREEN *set_term(SCREEN *new);
 > void delscreen(SCREEN *sp);
 
 /* curs_inopts */
 
-> int/void cbreak(void);
-> int/void nocbreak(void);
-> int/void echo(void);
-> int/void noecho(void);
+#ifdef C_INTCBREAK
+> {itest} int cbreak(void);
+#else
+> {dup} void cbreak(void);
+#endif
+#ifdef C_INTNOCBREAK
+> {itest} int nocbreak(void);
+#else
+> {dup} void nocbreak(void);
+#endif
+#ifdef C_INTECHO
+> {itest} int echo(void);
+#else
+> {dup} void echo(void);
+#endif
+#ifdef C_INTNOECHO
+> {itest} int noecho(void);
+#else
+> {dup} void noecho(void);
+#endif
 > int halfdelay(int tenths);
-> int <w>intrflush(WINDOW *win, bool bf);
-> int <w>keypad(WINDOW *win, bool bf);
-> int <w>meta(WINDOW *win, bool bf);
-> int <w>nodelay(WINDOW *win, bool bf);
-> int <w>notimeout(WINDOW *win, bool bf);
-> int/void raw(void);
-> int/void noraw(void);
+> int <w>intrflush(bool bf);
+> int <w>keypad(bool bf);
+> int <w>meta(bool bf);
+> int <w>nodelay(bool bf);
+> int <w>notimeout(bool bf);
+#ifdef C_INTRAW
+> {itest} int raw(void);
+#else
+> {dup} void raw(void);
+#endif
+#ifdef C_INTNORAW
+> {itest} int noraw(void);
+#else
+> {dup} void noraw(void);
+#endif
 > void qiflush(void);
 > void noqiflush(void);
-> void {w}timeout(WINDOW *win, int delay);
+> void {w}timeout(int delay);
 > int typeahead(int fd);
 
 /* curs_insch */
 
-> int {mvw}insch(WINDOW *win, chtype ch);
+> int {mvw}insch(chtype ch);
 
 /* curs_insstr */
 
-> int {mvw}insstr(WINDOW *win, const char *str);
-> int {mvw}insnstr(WINDOW *win, const char *str, int n);
+> int {mvw}insstr(const char *str);
+> int {mvw}insnstr(const char *str, int n);
 
 /* curs_instr */
 
-> int {mvw}instr(WINDOW *win, {arg2=250}{out} char *str);
-> int {mvw}innstr(WINDOW *win, {arg2=n+1}{out} char *str, {shift=1} int n);
+> int {mvw}instr({b=250}{out} char *str);
+> int {mvw}innstr({b=n+1}{out} char *str, {shift=-1} int n);
 
 /* curs_kernel */
 
@@ -166,44 +186,46 @@
 > int reset_shell_mode(void);
 > int resetty(void);
 > int savetty(void);
-> int/void getsyx({out} int y, {out} int x);
-> int/void setsyx(int y, int x);
-/* int ripoffline(int line, int (*init)(WINDOW *, int)); */
+#ifdef C_INTGETSYX
+> {itest} int getsyx({out} int y, {out} int x);
+#else
+> {dup} void getsyx({out} int y, {out} int x);
+#endif
+#ifdef C_INTSETSYX
+> {itest} int setsyx(int y, int x);
+#else
+> {dup} void setsyx(int y, int x);
+#endif
 > int curs_set(int visibility);
 > int napms(int ms);
 
-/* curs_mouse (ncurses) */
-
-> int getmouse({out} MEVENT *event);
-> int ungetmouse(MEVENT *event);
-> mmask_t mousemask(mmask_t newmask, {out} mmask_t {amp}oldmask);
-> bool |w|enclose(WINDOW *win, int y, int x);
-/* args 2 and 3 were 'int *' */
-> bool |w|mouse_trafo(const WINDOW *win, {out} int {amp}pY, \
-			{out} int {amp}pX, bool to_screen);
-> int mouseinterval(int erval);
-> int BUTTON_RELEASE(mmask_t e, int x);
-> int BUTTON_PRESS(mmask_t e, int x);
-> int BUTTON_CLICK(mmask_t e, int x);
-> int BUTTON_DOUBLE_CLICK(mmask_t e, int x);
-> int BUTTON_TRIPLE_CLICK(mmask_t e, int x);
-> int BUTTON_RESERVED_EVENT(mmask_t e, int x);
-
 /* curs_move */
 
-> int {w}move(WINDOW *win, int y, int x);
+> int {w}move(int y, int x);
 
 /* curs_outopts */
 
-> int <w>clearok(WINDOW *win, bool bf);
-> int/void <w>idlok(WINDOW *win, bool bf);
-> void <w>idcok(WINDOW *win, bool bf);
-> void <w>immedok(WINDOW *win, bool bf);
-> int <w>leaveok(WINDOW *win, bool bf);
-> int {w}setscrreg(WINDOW *win, int top, int bot);
-> int <w>scrollok(WINDOW *win, bool bf);
-> int/void nl(void);
-> int/void nonl(void);
+> int <w>clearok(bool bf);
+#ifdef C_INTIDLOK
+> {itest} int <w>idlok(bool bf);
+#else
+> {dup} void <w>idlok(bool bf);
+#endif
+> void <w>idcok(bool bf);
+> void <w>immedok(bool bf);
+> int <w>leaveok(bool bf);
+> int {w}setscrreg(int top, int bot);
+> int <w>scrollok(bool bf);
+#ifdef C_INTNL
+> {itest} int nl(void);
+#else
+> {dup} void nl(void);
+#endif
+#ifdef C_INTNONL
+> {itest} int nonl(void);
+#else
+> {dup} void nonl(void);
+#endif
 
 /* curs_overlay */
 
@@ -229,11 +251,11 @@
 
 /* curs_refresh */
 
-> int {w}refresh(WINDOW *win);
-> int |w|noutrefresh(WINDOW *win);
+> int {w}refresh(void);
+> int |w|noutrefresh(void);
 > int doupdate(void);
-> int <w>redrawwin(WINDOW *win);
-> int |w|redrawln(WINDOW *win, int beg_line, int num_lines);
+> int <w>redrawwin(void);
+> int |w|redrawln(int beg_line, int num_lines);
 
 /* curs_scanw */
 
@@ -248,8 +270,8 @@
 
 /* curs_scroll */
 
-> int <w>scroll(WINDOW *win);
-> int {w}scrl(WINDOW *win, int n);
+> int <w>scroll(void);
+> int {w}scrl(int n);
 
 /* curs_slk */
 
@@ -277,59 +299,35 @@
 #ifdef C_LONG0ARGS
 > {notest} char *longname(void);
 #else
-> {notest} char *longname(char *a, char *b);
+> {dup} char *longname(char *a, char *b);
 #endif
 
 > chtype termattrs(void);
 > char *termname(void);
 
-/* curs_termcap */
-
-/* int tgetent(const char *bp, char *name); */
-/* int tgetflag(const char *id); */
-/* int tgetnum(const char *id); */
-/* char *tgetstr(const char *id], char **area); */
-/* char *tgoto(const char *cap, int col, int row); */
-/* int tputs(const char *str, int affcnt, int (*putc)(void/int)); */
-
-/* curs_terminfo */
-
-/* int setupterm(const char *term, int fildes, int *errret); */
-/* int setterm(const char *term); */
-/* int/TERMINAL* set_curterm(TERMINAL *nterm); */
-/* int del_curterm(TERMINAL *oterm); */
-/* int restartterm(const char *term, int fildes, int *errret); */
-/* char *tparm(const char *str, ...); */
-/* int tputs(const char *str, int affcnt, int (*putc)(char/int)); */
-/* int putp(const char *str); */
-/* int vidputs(chtype attrs, int (*putc)(char)); */
-/* int vidattr(chtype attrs); */
-/* int mvcur(int oldrow, int oldcol, int newrow, int newcol); */
-/* int tigetflag(const char *capname); */
-/* int tigetnum(const char *capname); */
-/* char *tigetstr(const char *capname); */
-
 /* curs_touch */
 
-> int <w>touchwin(WINDOW *win);
+> int <w>touchwin(void);
 #ifdef C_TOUCH3ARGS
-> {notest} int <w>touchline(WINDOW *win, int start, int count);
+> {notest} int <w>touchline(int start, int count);
 #else
-> {notest} int <w>touchline(WINDOW *win, int y, int sx, int ex);
+> {dup} int <w>touchline(int y, int sx, int ex);
 #endif
 
-> int <w>untouchwin(WINDOW *win);
-> int |w|touchln(WINDOW *win, int y, int n, int changed);
-> int <w>is_linetouched(WINDOW *win, int line);
-> int <w>is_wintouched(WINDOW *win);
+> int <w>untouchwin(void);
+> int |w|touchln(int y, int n, int changed);
+> int <w>is_linetouched(int line);
+> int <w>is_wintouched(void);
 
 /* curs_util */
 
 > char *unctrl(chtype ch);
-/* the cast shuts up "discard const from pointer" errors */
 > {cast} char *keyname(int k);
-> int/void filter(void);
-/* arg was 'char', var was 'bool' */
+#ifdef C_INTFILTER
+> {itest} int filter(void);
+#else
+> {dup} void filter(void);
+#endif
 > void use_env(bool bf);
 > int putwin(WINDOW *win, FILE *filep);
 > WINDOW *getwin(FILE *filep);
@@ -339,27 +337,48 @@
 /* curs_window */
 
 > WINDOW *newwin(int nlines, int ncols, int beginy, int beginx);
-> int <w>delwin(WINDOW *win);
-> int <w>mvwin(WINDOW *win, int y, int x);
-> WINDOW *<w>subwin(WINDOW *orig, int nlines, int ncols, int beginy, \
-		    int beginx);
-> WINDOW *<w>derwin(WINDOW *orig, int nlines, int ncols, int beginy, \
-		    int beginx);
-> int <w>mvderwin(WINDOW *win, int par_y, int par_x);
-> WINDOW *<w>dupwin(WINDOW *win);
-> void |w|syncup(WINDOW *win);
-> int <w>syncok(WINDOW *win, bool bf);
-> void |w|cursyncup(WINDOW *win);
-> void |w|syncdown(WINDOW *win);
+> int <w>delwin(void);
+> int <w>mvwin(int y, int x);
+> WINDOW *<w>subwin(int nlines, int ncols, int beginy, int beginx);
+> WINDOW *<w>derwin(int nlines, int ncols, int beginy, int beginx);
+> int <w>mvderwin(int par_y, int par_x);
+> WINDOW *<w>dupwin(void);
+> void |w|syncup(void);
+> int <w>syncok(bool bf);
+> void |w|cursyncup(void);
+> void |w|syncdown(void);
 
-/* resizeterm */
+/* ncurses extension functions */
 
-> int {w}resize(WINDOW *win, int lines_, int columns);
+> int getmouse({out} MEVENT *event);
+> int ungetmouse(MEVENT *event);
+> mmask_t mousemask(mmask_t newmask, {out}{amp} mmask_t oldmask);
+> bool |w|enclose(int y, int x);
+> bool |w|mouse_trafo({out}{amp} int pY, {out}{amp} int pX, bool to_screen);
+> int mouseinterval(int erval);
+> int BUTTON_RELEASE(mmask_t e, int x);
+> int BUTTON_PRESS(mmask_t e, int x);
+> int BUTTON_CLICK(mmask_t e, int x);
+> int BUTTON_DOUBLE_CLICK(mmask_t e, int x);
+> int BUTTON_TRIPLE_CLICK(mmask_t e, int x);
+> int BUTTON_RESERVED_EVENT(mmask_t e, int x);
+
+> int use_default_colors(void);
+> int assume_default_colors(int fg, int bg);
+> int define_key(char *definition, int keycode);
+> char *keybound(int keycode, int count);
+> int keyok(int keycode, bool enable);
+> int resizeterm(int lines, int cols);
+> int {w}resize(int lines_, int columns);
+
+/* DEC curses, I think */
+
+> int <w>getmaxy(void);
+> int <w>getmaxx(void);
 
 /* old BSD curses calls */
 
-> void <w>flusok(WINDOW *win, bool bf);
-/* I forget why I cast'ed this one */
+> void <w>flusok(bool bf);
 > {cast} char *getcap(char *term);
 > int touchoverlap(WINDOW *src, WINDOW *dst);
 
@@ -377,6 +396,250 @@
 > int panel_hidden(const PANEL *pan);
 > PANEL *panel_above(const {opt} PANEL *pan);
 > PANEL *panel_below(const {opt} PANEL *pan);
-> int set_panel_userptr(PANEL *pan, const void *ptr);
-> const {cast} void *panel_userptr(const PANEL *pan);
+> int set_panel_userptr(PANEL *pan, const {cast} char *ptr);
+> const {cast} char *panel_userptr(const PANEL *pan);
 > int del_panel(PANEL *pan);
+
+/* Menu support */
+
+/* menu_attributes */
+
+> int set_menu_fore(MENU *menu, chtype attr);
+> chtype menu_fore(MENU *menu);
+> int set_menu_back(MENU *menu, chtype attr);
+> chtype menu_back(MENU *menu);
+> int set_menu_grey(MENU *menu, chtype attr);
+> chtype menu_grey(MENU *menu);
+> int set_menu_pad(MENU *menu, int pad);
+> int menu_pad(MENU *menu);
+
+/* menu_cursor */
+
+> int pos_menu_cursor(MENU *menu);
+
+/* menu_driver */
+
+> int menu_driver(MENU *menu, int c);
+
+/* menu_format */
+
+> int set_menu_format(MENU *menu, int rows, int cols);
+> void menu_format(MENU *menu, {out}{amp} int rows, {out}{amp} int cols);
+
+/* menu_items */
+
+> int set_menu_items(MENU *menu, ITEM **items);
+> ITEM **menu_items(MENU *menu);
+> int item_count(MENU *menu);
+
+/* menu_mark */
+
+> int set_menu_mark(MENU *menu, char *mark);
+> const {cast} char *menu_mark( const MENU *menu);
+
+/* menu_new */
+
+> MENU *new_menu(ITEM **items);
+> int free_menu(MENU *menu);
+
+/* menu_opts */
+
+> int menu_opts(MENU *menu);
+> int set_menu_opts(MENU *menu, int opts);
+> int menu_opts_on(MENU *menu, int opts);
+> int menu_opts_off(MENU *menu, int opts);
+
+/* menu_pattern */
+
+> int set_menu_pattern(MENU *menu, const char *pattern);
+> char *menu_pattern(const MENU *menu);
+
+/* menu_post */
+
+> int post_menu(MENU *menu);
+> int unpost_menu(MENU *menu);
+
+/* menu_userptr */
+
+> int set_menu_userptr(MENU *item, char *userptr);
+> char *menu_userptr(MENU *item);
+
+/* menu_win */
+
+> int set_menu_win(MENU *menu, WINDOW *win);
+> WINDOW *menu_win(MENU *menu);
+> int set_menu_sub(MENU *menu, WINDOW *win);
+> WINDOW *menu_sub(MENU *menu);
+> int scale_menu(MENU *menu, {out}{amp} int rows, {out}{amp} int cols);
+
+/* menu_item_current */
+
+> int set_current_item(MENU *menu, const ITEM *item);
+> ITEM *current_item(const MENU *menu);
+> int set_top_row(MENU *menu, int row);
+> int top_row(const MENU *menu);
+> int item_index(const ITEM *item);
+
+/* menu_item_name */
+
+> const {cast} char *item_name( const ITEM *item);
+> const {cast} char *item_description( const ITEM *item);
+
+/* menu_item_new */
+
+> ITEM *new_item(const char *name, const char *descr);
+> int free_item(ITEM *item);
+
+/* menu_item_opts */
+
+> int set_item_opts(ITEM *item, int opts);
+> int item_opts_on(ITEM *item, int opts);
+> int item_opts_off(ITEM *item, int opts);
+> int item_opts(ITEM *item);
+
+/* menu_item_userptr */
+
+> const {cast} char *item_userptr(const ITEM *item);
+> int set_item_userptr(ITEM *item, const {cast} char *ptr);
+
+/* menu_item_value */
+
+> int set_item_value(ITEM *item, bool val);
+> bool item_value(ITEM *item);
+
+/* menu_item_visible */
+
+> bool item_visible(ITEM *item);
+
+/* ncurses menu extension functions */
+
+> const {cast} char *menu_request_name(int request);
+> int menu_request_by_name(const char *name);
+> int set_menu_spacing(MENU *menu, int descr, int rows, int cols);
+> int menu_spacing(const MENU *menu, {out}{amp} int descr, \
+		   {out}{amp} int rows, {out}{amp} int cols);
+
+/* Form support */
+
+/* form_cursor */
+
+> int pos_form_cursor(FORM *form);
+
+/* form_data */
+
+> bool data_ahead(const FORM *form);
+> bool data_behind(const FORM *form);
+
+/* form_driver */
+
+> int form_driver(FORM *form, int c);
+
+/* form_field */
+
+> int set_form_fields(FORM *form, FIELD **fields);
+> FIELD **form_fields(const FORM *form);
+> int field_count(const FORM *form);
+> int move_field(FIELD *field, int frow, int fcol);
+
+/* form_new */
+
+> FORM *new_form(FIELD **fields);
+> int free_form(FORM *form);
+
+/* form_new_page */
+
+> int set_new_page(FIELD *field, bool new_page_flag);
+> bool new_page(const FIELD *field);
+
+/* form_opts */
+
+> int set_form_opts(FORM *form, int opts);
+> int form_opts_on(FORM *form, int opts);
+> int form_opts_off(FORM *form, int opts);
+> int form_opts(const FORM *form);
+
+/* form_page */
+
+> int set_current_field(FORM *form, FIELD *field);
+> FIELD *current_field(const FORM *form);
+> int set_form_page(FORM *form, int n);
+> int form_page(const FORM *form);
+> int field_index(const FIELD *field);
+
+/* form_post */
+
+> int post_form(FORM *form);
+> int unpost_form(FORM *form);
+
+/* form_userptr */
+
+> int set_form_userptr(FORM *form, char *userptr);
+> char *form_userptr(const FORM *form);
+
+/* form_win */
+
+> int set_form_win(FORM *form, WINDOW *win);
+> WINDOW *form_win(const FORM *form);
+> int set_form_sub(FORM *form, WINDOW *sub);
+> WINDOW *form_sub(const FORM *form);
+> int scale_form(const FORM *form, {out}{amp} int rows, {out}{amp} int cols);
+
+/* form_field_attributes */
+
+> int set_field_fore(FIELD *field, chtype attr);
+> chtype field_fore(const FIELD *field);
+> int set_field_back(FIELD *field, chtype attr);
+> chtype field_back(const FIELD *field);
+> int set_field_pad(FIELD *field, int pad);
+> chtype field_pad(const FIELD *field);
+
+/* form_field_buffer */
+
+> int set_field_buffer(FIELD *field, int buf, const char *value);
+> char *field_buffer(const FIELD *field, int buffer);
+> int set_field_status(FIELD *field, bool status);
+> bool field_status(const FIELD *field);
+> int set_max_field(FIELD *field, int max);
+
+/* form_field_info */
+
+> int field_info(const FIELD *field, {out}{amp} int rows, \
+                 {out}{amp} int cols, {out}{amp} int frow, \
+                 {out}{amp} int fcol, {out}{amp} int nrow, \
+                 {out}{amp} int nbuf);
+> int dynamic_field_info(const FIELD *field, {out}{amp} int rows, \
+	                 {out}{amp} int cols, {out}{amp} int max);
+
+/* form_field_just */
+
+> int set_field_just(FIELD *field, int justif);
+> int field_just(const FIELD *field);
+
+/* form_field_new */
+
+> FIELD *new_field(int height, int width, int toprow, int leftcol, \
+                 int offscreen, int nbuffers);
+> FIELD *dup_field(FIELD *field, int toprow, int leftcol);
+> FIELD *link_field(FIELD *field, int toprow, int leftcol);
+> int free_field(FIELD *field);
+
+/* form_field_opts */
+
+> int set_field_opts(FIELD *field, int opts);
+> int field_opts_on(FIELD *field, int opts);
+> int field_opts_off(FIELD *field, int opts);
+> int field_opts(const FIELD *field);
+
+/* form_field_userptr */
+
+> int set_field_userptr(FIELD *field, char *userptr);
+> char *field_userptr(const FIELD *field);
+
+/* form_field_validation */
+
+> char *field_arg(const FIELD *field);
+
+/* ncurses form extension functions */
+
+> const {cast} char *form_request_name(int request);
+> int form_request_by_name(const char *name);

@@ -48,7 +48,7 @@ XS(XS_Curses_stdscr)
     c_exactargs("stdscr", items, 0);
     {
 	ST(0) = sv_newmortal();
-	c_Window2sv(ST(0), stdscr);
+	c_window2sv(ST(0), stdscr);
     }
     XSRETURN(1);
 #else
@@ -64,7 +64,7 @@ XS(XS_Curses_curscr)
     c_exactargs("curscr", items, 0);
     {
 	ST(0) = sv_newmortal();
-	c_Window2sv(ST(0), curscr);
+	c_window2sv(ST(0), curscr);
     }
     XSRETURN(1);
 #else
@@ -123,48 +123,47 @@ XS(XS_Curses_Vars_TIESCALAR)
 XS(XS_Curses_Vars_FETCH)
 {
     dXSARGS;
-    c_exactargs("FETCH", items, 1);
     {
 	int	num = (int)SvIV(SvRV((SV*)ST(0)));
 
 	ST(0) = sv_newmortal();
 	switch (num) {
-	case  1:
+	case 1:
 #ifdef C_LINES
 	    sv_setiv(ST(0), (IV)LINES);
 #else
 	    c_var_not_there("LINES");
 #endif
 	    break;
-	case  2:
+	case 2:
 #ifdef C_COLS
 	    sv_setiv(ST(0), (IV)COLS);
 #else
 	    c_var_not_there("COLS");
 #endif
 	    break;
-	case  3:
+	case 3:
 #ifdef C_STDSCR
-	    c_Window2sv(ST(0), stdscr);
+	    c_window2sv(ST(0), stdscr);
 #else
 	    c_var_not_there("stdscr");
 #endif
 	    break;
-	case  4:
+	case 4:
 #ifdef C_CURSCR
-	    c_Window2sv(ST(0), curscr);
+	    c_window2sv(ST(0), curscr);
 #else
 	    c_var_not_there("curscr");
 #endif
 	    break;
-	case  5:
+	case 5:
 #ifdef C_COLORS
 	    sv_setiv(ST(0), (IV)COLORS);
 #else
 	    c_var_not_there("COLORS");
 #endif
 	    break;
-	case  6:
+	case 6:
 #ifdef C_COLOR_PAIRS
 	    sv_setiv(ST(0), (IV)COLOR_PAIRS);
 #else
@@ -182,47 +181,46 @@ XS(XS_Curses_Vars_FETCH)
 XS(XS_Curses_Vars_STORE)
 {
     dXSARGS;
-    c_exactargs("STORE", items, 2);
     {
 	int	num = (int)SvIV((SV*)SvRV(ST(0)));
 
 	switch (num) {
-	case  1:
+	case 1:
 #ifdef C_LINES
 	    LINES = (int)SvIV(ST(1));
 #else
 	    c_var_not_there("LINES");
 #endif
 	    break;
-	case  2:
+	case 2:
 #ifdef C_COLS
 	    COLS = (int)SvIV(ST(1));
 #else
 	    c_var_not_there("COLS");
 #endif
 	    break;
-	case  3:
+	case 3:
 #ifdef C_STDSCR
-	    stdscr = c_sv2Window(ST(1), -1);
+	    stdscr = c_sv2window(ST(1), -1);
 #else
 	    c_var_not_there("stdscr");
 #endif
 	    break;
-	case  4:
+	case 4:
 #ifdef C_CURSCR
-	    curscr = c_sv2Window(ST(1), -1);
+	    curscr = c_sv2window(ST(1), -1);
 #else
 	    c_var_not_there("curscr");
 #endif
 	    break;
-	case  5:
+	case 5:
 #ifdef C_COLORS
 	    COLORS = (int)SvIV(ST(1));
 #else
 	    c_var_not_there("COLORS");
 #endif
 	    break;
-	case  6:
+	case 6:
 #ifdef C_COLOR_PAIRS
 	    COLOR_PAIRS = (int)SvIV(ST(1));
 #else
@@ -241,7 +239,6 @@ XS(XS_Curses_Vars_STORE)
 XS(XS_Curses_Vars_DESTROY)
 {
     dXSARGS;
-    c_exactargs("DESTROY", items, 1);
     {
 	SV *	rv = ST(0);
 

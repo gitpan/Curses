@@ -7,43 +7,30 @@
 ##  You may distribute under the terms of either the Artistic License
 ##  or the GNU General Public License, as specified in the README file.
 
+require 5.005;
 use lib 'gen';
 use Gen;
 
-my @fun;
-my @var;
-my @con;
-my @old;
+my $roff = 0;
 
 open OUT, "> Curses.pm"    or die "Can't open Curses.pm: $!\n";
 
 process_DATA_chunk  \&print_line;
-process_variables   \&do_variable;
+process_variables   \&print_variable1;
 process_DATA_chunk  \&print_line;
-
-process_functions   \&do_function;
-process_constants   \&do_constant;
-
-my @var2 = map { '$' . $_ } @var;
-print OUT roff("@var @var2", 4), "\n";
-print OUT roff("@fun", 4);
+process_variables   \&print_variable2;  print OUT "\n";  $roff = 0;
 process_DATA_chunk  \&print_line;
-
-print OUT roff("@con", 4);
+process_functions   \&print_function1;  print OUT "\n";  $roff = 0;
 process_DATA_chunk  \&print_line;
-
-print OUT roff("@old", 8);
+process_constants   \&print_constant1;  print OUT "\n";  $roff = 0;
 process_DATA_chunk  \&print_line;
-
-process_functions   \&do_function2;
+process_functions   \&print_function2;  print OUT "\n";  $roff = 0;
 process_DATA_chunk  \&print_line;
-
-my @roff = map { $_ . " " x (15 - length $_) } @var;
-print OUT roff("@roff", 4);
+process_functions   \&print_function3;
 process_DATA_chunk  \&print_line;
-
-my @roff = map { $_ . " " x (15 - length $_) } @con;
-print OUT roff("@roff", 4);
+process_variables   \&print_variable3;  print OUT "\n";  $roff = 0;
+process_DATA_chunk  \&print_line;
+process_constants   \&print_constant2;  print OUT "\n";  $roff = 0;
 process_DATA_chunk  \&print_line;
 
 close OUT;
@@ -53,73 +40,156 @@ close OUT;
 #
 sub print_line { print OUT @_ }
 
-sub roff {
-    my $roff   = shift;
-    my $indent = shift;
-    my $space  = " " x $indent;
-    my $min    = 62 - $indent;
-    my $max    = 72 - $indent;
+sub print_function1 {
+    my $fun = shift;
 
-    $roff = $space . $roff;
+    return unless $fun->{DOIT};
+    return if     $fun->{SPEC}{DUP};
 
-    $roff =~ s/(.{$min,$max}) /$1\n$space/g;
-    $roff =~ s/\s+\n/\n/g;
-    $roff =~ s/\n*\Z/\n/;
-    $roff;
+    my $L = 1 + length $fun->{NAME};
+
+    if ($roff < 4)       { print OUT "   ";    $roff = 4 }
+    if ($roff + $L > 76) { print OUT "\n   ";  $roff = 4 }
+    print OUT ' ', $fun->{NAME};
+
+    $roff += $L;
 }
 
-sub do_function {
-    my $fun  = shift;
-    next unless $fun->{DOIT};
+sub print_function2 {
+    my $fun = shift;
 
-    my $name = $fun->{NAME};
+    return unless $fun->{DOIT};
+    return if     $fun->{SPEC}{DUP};
+    return unless $fun->{W};
 
-    push @fun, $name;
+    my $L = 2 + length $fun->{NAME};
 
-    if    ($fun->{UNI} =~ /{mvw}/) {
-	push @old, "w$name", "mv$name", "mvw$name";
-    }
-    elsif ($fun->{UNI} =~ /[|{]w[}|]/) {
-	push @old, "w$name";
+    if ($roff < 8)       { print OUT "       ";    $roff = 8 }
+    if ($roff + $L > 76) { print OUT "\n       ";  $roff = 8 }
+    print OUT ' w', $fun->{NAME};
+
+    $roff += $L;
+
+    if ($fun->{UNI} =~ /mv/) {
+	$L += 2;
+
+	if ($roff < 8)       { print OUT "       ";    $roff = 8 }
+	if ($roff + $L > 76) { print OUT "\n       ";  $roff = 8 }
+	print OUT ' mv', $fun->{NAME};
+
+	$roff += $L;
+	$L ++;
+
+	if ($roff < 8)       { print OUT "       ";    $roff = 8 }
+	if ($roff + $L > 76) { print OUT "\n       ";  $roff = 8 }
+	print OUT ' mvw', $fun->{NAME};
+
+	$roff += $L;
     }
 }
 
-sub do_function2 {
-    my $fun  = shift;
+sub print_function3 {
+    my $fun = shift;
 
-    next unless $fun->{DOIT};
+    return unless $fun->{DOIT};
+    return if     $fun->{SPEC}{DUP};
 
-    my $name  = $fun->{NAME};
-    my $yesno = $fun->{UNI} ? "Yes" : "No ";
+    my $S = " " x (23 - length $fun->{NAME});
 
-    print OUT "    $name", " " x (20 - length $name), $yesno;
+    print OUT "    ", $fun->{NAME}, $S, $fun->{UNI} ? "Yes" : " No";
 
-    if    ($fun->{UNI} =~ /{mvw}/) {
-	print OUT "        w$name mv$name mvw$name";
-    }
-    elsif ($fun->{UNI} =~ /[|{]w[}|]/) {
-	print OUT "        w$name";
+    if ($fun->{W}) {
+	print OUT "        w$fun->{NAME}";
+
+	if ($fun->{UNI} =~ /mv/) {
+	    print OUT " mv$fun->{NAME} mvw$fun->{NAME}";
+	}
     }
     print OUT "\n";
 }
 
-sub do_variable {
-    my $var  = shift;
-    next unless $var->{DOIT};
 
-    my $name = $var->{NAME};
-    my $num  = $var->{NUM};
+sub print_variable1 {
+    my $var = shift;
 
-    push @var, $name;
-    $name .= "," . " " x (12 - length $name);
-    print OUT "tie \$$name Curses::Vars, $num;\n";
+    return unless $var->{DOIT};
+
+    my $S = " " x (12 - length $var->{NAME});
+
+    print OUT qq{tie \$$var->{NAME},}, $S, qq{Curses::Vars, $var->{NUM};\n};
 }
 
-sub do_constant {
+sub print_variable2 {
+    my $var = shift;
+
+    return unless $var->{DOIT};
+
+    my $L = 1 + length $var->{NAME};
+
+    if ($roff < 4)       { print OUT "   ";    $roff = 4 }
+    if ($roff + $L > 76) { print OUT "\n   ";  $roff = 4 }
+    print OUT ' ', $var->{NAME};
+ 
+    $roff += $L;
+    $L++;
+
+    if ($roff < 4)       { print OUT "   ";    $roff = 4 }
+    if ($roff + $L > 76) { print OUT "\n   ";  $roff = 4 }
+    print OUT ' $', $var->{NAME};
+
+    $roff += $L;
+}
+
+sub print_variable3 {
+    my $var = shift;
+
+    return unless $var->{DOIT};
+
+    my $L = length $var->{NAME};
+    my $M = 24 - $L % 24;
+
+    if ($roff < 4)       { print OUT "    ";    $roff = 4 }
+    if ($roff > 52)      { print OUT "\n    ";  $roff = 4 }
+    print OUT $var->{NAME};
+
+    $roff += $L;
+
+    if ($M < 2)           { $M += 24           }
+    if ($roff + $M <= 52) { print OUT " " x $M }
+    $roff += $M;
+}
+
+sub print_constant1 {
     my $con = shift;
 
-    next unless $con->{DOIT};
-    push @con, $con->{NAME};
+    return unless $con->{DOIT};
+
+    my $L = 1 + length $con->{NAME};
+
+    if ($roff < 4)       { print OUT "   ";    $roff = 4 }
+    if ($roff + $L > 76) { print OUT "\n   ";  $roff = 4 }
+    print OUT ' ', $con->{NAME};
+ 
+    $roff += $L;
+}
+
+sub print_constant2 {
+    my $con = shift;
+
+    return unless $con->{DOIT};
+
+    my $L = length $con->{NAME};
+    my $M = 24 - $L % 24;
+
+    if ($roff < 4)       { print OUT "    ";    $roff = 4 }
+    if ($roff > 52)      { print OUT "\n    ";  $roff = 4 }
+    print OUT $con->{NAME};
+
+    $roff += $L;
+
+    if ($M < 2)           { $M += 24           }
+    if ($roff + $M <= 52) { print OUT " " x $M }
+    $roff += $M;
 }
 
 __END__
@@ -133,122 +203,111 @@ __END__
 ##  You may distribute under the terms of either the Artistic License
 ##  or the GNU General Public License, as specified in the README file.
 
-package Curses::Screen;
-
-sub new {
-    my $term = (@_ == 1 or @_ == 3) ? shift : undef;
-    my $OUT  = (@_ > 0)             ? shift : 'STDOUT';
-    my $IN   = (@_ > 0)             ? shift : 'STDIN';
-
-    return newterm $term, $OUT, $IN;
-}
-
-sub DESTROY { }
-
+###
+##  For the brave object-using person
+#
 package Curses::Window;
 
 @ISA = qw(Curses);
 
+package Curses::Screen;
+
+@ISA = qw(Curses);
+sub new     { newterm(@_) }
+sub DESTROY { }
+
+package Curses::Panel;
+
+@ISA = qw(Curses);
+sub new     { new_panel(@_) }
+sub DESTROY { }
+
+package Curses::Menu;
+
+@ISA = qw(Curses);
+sub new     { new_menu(@_) }
+sub DESTROY { }
+
+package Curses::Item;
+
+@ISA = qw(Curses);
+sub new     { new_item(@_) }
+sub DESTROY { }
+
+package Curses::Form;
+
+@ISA = qw(Curses);
+sub new     { new_form(@_) }
+sub DESTROY { }
+
+package Curses::Field;
+
+@ISA = qw(Curses);
+sub new     { new_field(@_) }
+sub DESTROY { }
+
+
 package Curses;
+
+$VERSION = 1.06;
 
 use Carp;
 require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = 1.05;
-
 bootstrap Curses;
 
-PAUSE
+sub new      {
+    my $pkg = shift;
+    my ($nl, $nc, $by, $bx) = (@_,0,0,0,0);
 
-sub new {
-  my ($obj,$nl,$nc,$by,$bx) = (@_, 0, 0, 0, 0);
-
-  unless ($_initscr)    { initscr(); $_initscr++; }
-
-  if ($obj =~ /Curses/) { return newwin($nl, $nc, $by, $bx); }
-  else                  { return subwin($obj, $nl, $nc, $by, $bx); }
+    unless ($_initscr++) { initscr() }
+    return newwin($nl, $nc, $by, $bx);
 }
+
+sub DESTROY  { }
 
 sub AUTOLOAD {
-    my $name = $AUTOLOAD;
-    $name =~ s/.*:://;
-    croak "Curses does not support the curses constant '$name', used"
-	unless $_al{$name};
+    my $N = $AUTOLOAD;
+       $N =~ s/^.*:://;
 
-    my $val = constant($name, $_al{$name});
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
+    croak "Curses constant '$N' is not defined by your vendor";
 }
 
-sub DESTROY { }
+sub printw   { addstr(sprintf shift, @_) }
 
-###
-##
-#
-#
-##
-###
-
-package Curses;
-
-sub _unimpl {
-    croak "Curses does not support the curses function '$_[0]', used";
-}
-
-sub tstp     { _unimpl('tstp')      }
-sub scanw    { _unimpl('scanw')     }
-sub _putchar { _unimpl('_putchar')  }
-sub fullname { _unimpl('fullname')  }
-
-#  printw and friends are apparently popular enough that people want
-#  them around.  I'm including versions written by:
-#  emf@addams.att.com (Ed Freedenburg)
-
-sub printw { addstr(sprintf(shift, @_)) }
-
-sub KEY_F { return $_[0] + KEY_F0(); }
+PAUSE
 
 @EXPORT = qw(
-    &tstp &printw &scanw &_putchar &fullname KEY_F
+    printw
+
+PAUSE
+
+PAUSE
 
 PAUSE
 );
-
-@_CONSTANTS = qw(
-PAUSE
-);
-
-push(@EXPORT, @_CONSTANTS);
-for (@_CONSTANTS) { $_al{$_} = ++$_i; }
-
-# require 'assert.pl';
-# assert('@_CONSTANTS == 139');
 
 if ($OldCurses)
 {
     @_OLD = qw(
-        &wprintw &mvprintw &wmvprintw &wscanw &mvscanw &mvwscanw
+        wprintw mvprintw wmvprintw
 
 PAUSE
     );
 
-    push(@EXPORT, @_OLD);
+    push (@EXPORT, @_OLD);
     for (@_OLD)
     {
-	next if /^[\$&]/;
 	/^(?:mv)?(?:w)?(.*)/;
 	eval "sub $_ { $1(\@_); }";
     }
 
     eval <<EOS;
-    sub wprintw   { addstr(shift,               sprintf(shift, @_)) }
-    sub mvprintw  { addstr(shift, shift,        sprintf(shift, @_)) }
-    sub mvwprintw { addstr(shift, shift, shift, sprintf(shift, @_)) }
-    sub wscanw    { _unimpl('wscanw')    }
-    sub mvscanw   { _unimpl('mvscanw')   }
-    sub mvwscanw  { _unimpl('mvwscanw')  }
+    sub wprintw   { addstr(shift,               sprintf shift, @_) }
+    sub mvprintw  { addstr(shift, shift,        sprintf shift, @_) }
+    sub mvwprintw { addstr(shift, shift, shift, sprintf shift, @_) }
 EOS
 }
 
@@ -267,6 +326,10 @@ Curses - terminal screen handling and optimization
     initscr;
     ...
     endwin;
+
+
+   Curses::supports_function($function);
+   Curses::supports_contsant($constant);
 
 =head1 DESCRIPTION
 
@@ -335,6 +398,27 @@ can be called as a method for a Curses object.
 
 Do not use C<initscr()> if using objects, as the first call to get
 a C<new Curses> will do it for you.
+
+=head2 Security Concerns
+
+It has always been the case with the curses functions, but please note
+that the following functions:
+
+    getstr()   (and optional wgetstr(), mvgetstr(), and mvwgetstr())
+    inchstr()  (and optional winchstr(), mvinchstr(), and mvwinchstr())
+    instr()    (and optional winstr(), mvinstr(), and mvwinstr())
+
+are subject to buffer overflow attack.  This is because you pass in
+the buffer to be filled in, which has to be of finite length, but
+there is no way to stop a bad guy from typing.
+
+In order to avoid this problem, use the alternate functions:
+
+   getnstr()
+   inchnstr()
+   innstr()
+
+which take an extra "size of buffer" argument.
 
 =head1 COMPATIBILITY
 
@@ -407,21 +491,6 @@ library doesn't define.
 You have a C<Curses> constant in your code that your system's curses(3)
 library doesn't define.
 
-=item * Curses does not support the curses function '%s', used at ...
-
-You have a curses(3) function in your code that the C<Curses> module
-doesn't support.
-
-=item * Curses does not support the curses variable '%s', used at ...
-
-You have a curses(3) variable in your code that the C<Curses> module
-doesn't support.
-
-=item * Curses does not support the curses constant '%s', used at ...
-
-You have a bareword in your code that is trying to be interpreted as
-a C<Curses> constant, but C<Curses> doesn't know anything about it.
-
 =item * Curses::Vars::FETCH called with bad index at ...
 =item * Curses::Vars::STORE called with bad index at ...
 
@@ -453,8 +522,8 @@ William Setzer <William_Setzer@ncsu.edu>
 
 =head2 Supported Functions
 
-    Supported         Unified?     Supported via $OldCurses[*]
-    ---------         --------     ------------------------
+    Supported            Unified?     Supported via $OldCurses[*]
+    ---------            --------     ------------------------
 PAUSE
 
 [*] To use any functions in this column, the variable
@@ -470,12 +539,21 @@ PAUSE
 
 PAUSE
 
-=head2 curses(3) items not supported by C<Curses>
+=head2 curses(3) functions not supported by C<Curses>
 
-    Functions
-    ---------
-    tstp scanw wscanw mvscanw mvwscanw _putchar fullname
+    tstp _putchar fullname scanw wscanw mvscanw mvwscanw ripoffline
+    setupterm setterm set_curterm del_curterm restartterm tparm tputs
+    putp vidputs vidattr mvcur tigetflag tigetnum tigetstr tgetent
+    tgetflag tgetnum tgetstr tgoto tputs
 
-[*] stdscr and curscr are also available via the Perl functions C<stdscr>
-and C<curscr>.  See L<"Perl 4.X cursperl Compatibility"> for more
-information.
+=head2 menu(3) functions not supported by C<Curses>
+
+    set_item_init item_init set_item_term item_term set_menu_init
+    menu_init set_menu_term menu_term
+
+=head2 form(3) functions not supported by C<Curses>
+
+    new_fieldtype free_fieldtype set_fieldtype_arg
+    set_fieldtype_choice link_fieldtype set_form_init form_init
+    set_form_term form_term set_field_init field_init set_field_term
+    field_term set_field_type field_type

@@ -19,7 +19,8 @@
 
 my $verbose;
 my $panels;
-
+my $menus;
+my $forms;
 
 open IN,  "list.syms"       or die "Can't open list.syms: $!\n";
 open(OUTH, ">CursesDef.h")  or die "Can't open CursesDef.h: $!\n";
@@ -29,6 +30,8 @@ while (@ARGV) {
     my $arg = shift;
 
     $arg eq 'PANELS' and ++$panels and next;
+    $arg eq 'MENUS'  and ++$menus  and next;
+    $arg eq 'FORMS'  and ++$forms  and next;
     $arg =~ /^-h/    and Usage();
     $arg =~ /^-v/    and ++$verbose and next;
     $arg =~ /^-l/    and do {
@@ -131,6 +134,16 @@ print OUTH
     "C_PANELSUPPORT          /* Add in panel library support?             */",
     "\n\n";
 
+print OUTH 
+    $menus ? "#define " : "#undef  ",
+    "C_MENUSUPPORT           /* Add in menu library support?              */",
+    "\n\n";
+
+print OUTH 
+    $forms ? "#define " : "#undef  ",
+    "C_FORMSUPPORT           /* Add in form library support?              */",
+    "\n\n";
+
 # Some functions return either int or void, depending on what compiler
 # and libcurses.a you are using.  For the int/void test, if the
 # compiler doesn't complain about assigning the sym to an int
@@ -204,11 +217,13 @@ while (<IN>) {
 	"*/\n";
 }
 
-unlink "testsym",  "testsym.o";
-unlink "testinvd", "testinvd.o";
+unlink "testsym";
+unlink "testint";
+unlink "testtyp";
 
 1 while unlink "testsym.obj";   # Possibly pointless VMSism
-1 while unlink "testinvd.obj";  # Possibly pointless VMSism
+1 while unlink "testint.obj";   # Possibly pointless VMSism
+1 while unlink "testtyp.obj";   # Possibly pointless VMSism
 
 close IN;
 close OUTH;

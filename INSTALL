@@ -1,13 +1,13 @@
-This package requires at least perl5.003.  You're on your own before
+This package requires at least perl5.005.  You're on your own before
 then.
 
-1) Make sure perl has been built.  Unpack "Curses-1.05.tar.gz".
+1) Make sure perl has been built.  Unpack "Curses-1.06.tar.gz".
 
-     gunzip -c Curses-1.05.tar.gz | tar xvf -
+     gunzip -c Curses-1.06.tar.gz | tar xvf -
 
 2) Chdir to the "Curses" directory.
 
-     cd Curses-1.05
+     cd Curses-1.06
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
    pretty dumb about it, but give it a try and skip to (4.5).
@@ -32,16 +32,50 @@ then.
 
      perl Makefile.PL PANELS
 
-   NOTE: You must have a panels library for this to work.  This
-   doesn't create the functions; it only enables them.  Enabling
-   PANELS support without a panels library is the surest way
-   to keep this package from compiling.
+   NOTE: You must have a panel library for this to work.  This doesn't
+   create the functions; it only enables them.  Enabling PANELS
+   support without a panel library is the surest way to keep this
+   package from compiling.
 
-   Currently, panels support is not available for the BSD versions of
-   the hints file (c-*.bsd.h), because I'm not aware of any panels
+   Currently, panel support is not available for the BSD versions of
+   the hints file (c-*.bsd.h), because I'm not aware of any panel
    libraries for BSD curses.
 
-5) perl Makefile.PL [PANELS]  [options]
+4.6)
+
+   If you want menu support (from libmenu), you can either skip back
+   to (4) and add the appropriate flags, or give auto-configure a
+   whirl, by appending "MENUS":
+
+     perl Makefile.PL MENUS
+
+   NOTE: You must have a menu library for this to work.  This doesn't
+   create the functions; it only enables them.  Enabling MENUS support
+   without a menu library is the surest way to keep this package from
+   compiling.
+
+   Currently, menu support is not available for the BSD versions of
+   the hints file (c-*.bsd.h), because I'm not aware of any menu
+   libraries for BSD curses.
+
+4.7)
+
+   If you want form support (from libform), you can either skip back
+   to (4) and add the appropriate flags, or give auto-configure a
+   whirl, by appending "FORMS":
+
+     perl Makefile.PL FORMS
+
+   NOTE: You must have a form library for this to work.  This doesn't
+   create the functions; it only enables them.  Enabling FORMS support
+   without a form library is the surest way to keep this package from
+   compiling.
+
+   Currently, form support is not available for the BSD versions of
+   the hints file (c-*.bsd.h), because I'm not aware of any form
+   libraries for BSD curses.
+
+5) perl Makefile.PL [PANELS] [MENUS] [FORMS]  [options]
 
    This package needs the perl header files.  If you've already
    installed perl, the "Makefile.PL" will magically know where they
@@ -63,15 +97,15 @@ then.
 6) make
 
    `make' will first run a perl script called `test.syms' that
-   generates the file "pCurses.h".  It should do a pretty good job,
+   generates the file "CursesDef.h".  It should do a pretty good job,
    but if you find that it isn't picking up the correct values, you
-   can edit "pCurses.h" by hand and follow the directions.  If you
+   can edit "CursesDef.h" by hand and follow the directions.  If you
    have to "roll your own", be sure and save a copy.  A "make clean"
-   will delete "pCurses.h".
+   will delete "CursesDef.h".
 
    `make' will then try to compile "Curses.c".  If you get any
    undefined curses symbols, it means that your curses really doesn't
-   have those functions, and you should edit "pCurses.h" and/or
+   have those functions, and you should edit "CursesDef.h" and/or
    "c-config.h" and change the #define to #undef for that function.
 
    If you get other compile errors, it is probably because the curses
@@ -80,29 +114,14 @@ then.
    "c-config.h".  See "hints/c-sunos.sysv.h" for an example of how to
    do this.
 
-   One common problem: If the compile of Curses.c fails because of an
-   undefined type "chtype", put "#define chtype int" in "c-config.h"
-   after the include file (see "hints/c-sunos.bsd.h" for an example).
-
-   Another problem: Depending on the version of ncurses and the
-   compiler you use, you might get an error that looks approximately
-   like:
-
-      Curses.c: In function `XS_Curses_keyname':
-      Curses.c:1531: warning: initialization discards `const' from pointer
-      target type
-
-   Ignore it; it's only a warning.  Newer ncurses prototype keyname()
-   to returning a const char*, and I didn't feel like going through a
-   bunch of pain to both support older compilers and to make the
-   warning go away.
-
 7) Optionally test the distribution:
 
    perl demo
    perl gdc
-   perl panel.demo  [if you enabled panel support]
    perl demo2       [stuff that has a 50/50 chance of showing up right]
+   perl demo.panel  [if you enabled panel support]
+   perl demo.menu   [if you enabled menu support]
+   perl demo.form   [if you enabled form support]
 
    "gdc" is a digital clock ported from the "ncurses" distribution.
 

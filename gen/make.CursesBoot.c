@@ -14,9 +14,11 @@ use Gen;
 open OUT, "> CursesBoot.c"  or die "Can't open CursesBoot.c: $!\n";
 
 process_DATA_chunk  \&print_line;
-process_functions   \&do_function;
+process_functions   \&print_function;
 process_DATA_chunk  \&print_line;
-process_variables   \&do_variable;
+process_variables   \&print_variable;
+process_DATA_chunk  \&print_line;
+process_constants   \&print_constant;
 process_DATA_chunk  \&print_line;
 
 close OUT;
@@ -27,32 +29,52 @@ close OUT;
 #
 sub print_line { print OUT @_ }
 
-sub do_function {
-    my $fun  = shift;
+sub print_function {
+    my $fun = shift;
 
     if (not $fun->{DOIT}) {
 	print OUT $fun->{LINE}  if $fun->{LINE} =~ /^#/;    # cpp directives
-	next;
+	return;
     }
 
-    my $name = qq{"Curses::$fun->{NAME}",};
-    my $func = qq{XS_Curses_$fun->{NAME}};
+    my $S = " " x (22 - length $fun->{NAME});
 
-    $name   .= " " x (34 - length $name);
-    print OUT "    C_NEWXS($name$func);\n";
+    print OUT qq{    C_NEWXS("Curses::$fun->{NAME}", } . $S .
+	      qq{XS_Curses_$fun->{NAME});\n};
 }
 
-sub do_variable {
-    my $var  = shift;
+sub print_variable {
+    my $var = shift;
 
-    next unless $var->{DOIT};
+    return unless $var->{DOIT};
 
-    my $name = qq{"Curses::$var->{NAME}",};
-    my $func = qq{XS_Curses_$var->{NAME}};
+    my $S = " " x (22 - length $var->{NAME});    
 
-    $name    .= " " x (34 - length $name);
-    print OUT "    C_NEWXS($name$func);\n";
+    print OUT qq{    C_NEWXS("Curses::$var->{NAME}", } . $S .
+	      qq{XS_Curses_$var->{NAME});\n};
 }
+
+sub print_constant {
+    my $con = shift;
+
+    return unless $con->{DOIT};
+
+    if ($con->{SPEC}{DEFER}) {
+      my $S = " " x (22 - length $con->{NAME});
+
+      print OUT qq{    C_NEWXS("Curses::$con->{NAME}", } . $S .
+		qq{XS_Curses_$con->{NAME});\n};
+    }
+    else {
+      my $S = " " x (30 - length $con->{NAME});
+
+      print OUT "#ifdef $con->{NAME}\n";
+      print OUT qq{    C_NEWCS("$con->{NAME}", } . $S .
+		qq{$con->{NAME});\n};
+      print OUT "#endif\n";
+    }
+}
+
 
 __END__
 /*  This file can be automatically generated; changes may be lost.
@@ -66,12 +88,18 @@ __END__
 **  or the GNU General Public License, as specified in the README file.
 */
 
+#define C_NEWXS(A,B)   newXS(A,B,file)
+#define C_NEWCS(A,B)   newCONSTSUB(stash,A,newSViv(B))
+
 XS(boot_Curses)
 {
   int i;
 
     dXSARGS;
-    char* file = __FILE__;
+    char *file  = __FILE__;
+    HV   *stash = gv_stashpv("Curses", TRUE);
+    IV   tmp;
+    SV  *t2;
 
     XS_VERSION_BOOTCHECK;
 
@@ -92,7 +120,7 @@ PAUSE
 
     /* Constants */
 
-    C_NEWXS("Curses::constant",               XS_Curses_constant);
+PAUSE
 
     /* traceon(); */
     ST(0) = &PL_sv_yes;

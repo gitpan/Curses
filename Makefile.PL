@@ -7,14 +7,17 @@
 ##  You may distribute under the terms of either the Artistic License
 ##  or the GNU General Public License, as specified in the README file.
 
+require 5.005;
 use ExtUtils::MakeMaker;
 
-#  There are two arguments defined for this file:
+#  Here are the arguments defined for this file:
 #
 #    PANELS   -- enable panel support
+#    MENUS    -- enable menus support
+#    FORMS    -- enable forms support
 #    GEN      -- add generation support to Makefile (developers only!)
 #
-#  Ex:  "perl Makefile.PL PANELS GEN"
+#  Ex:  "perl Makefile.PL PANELS MENUS GEN"
 
 #  Curses needs the following two variables defined here in order to
 #  compile the library.  They are:
@@ -37,6 +40,22 @@ my $libs;
 
 my $p_inc;
 my $p_libs;
+
+#  If you want to include the menus functions, set the following two
+#  variables appropriately, just as above.  You must also give MENUS
+#  as an argument to this file in order to enable menus support (see
+#  above).
+
+my $m_inc;
+my $m_libs;
+
+#  If you want to include the forms functions, set the following two
+#  variables appropriately, just as above.  You must also give FORMS
+#  as an argument to this file in order to enable forms support (see
+#  above).
+
+my $f_inc;
+my $f_libs;
 
 #  If you do not set these explicitly, Makefile.PL will try in an
 #  even more stupid fashion to pick them for you.
@@ -85,6 +104,7 @@ my $guess_cfg = {
   'bsd386'    => [ ''                       => '-lcurses -ltermcap'        ],
   'bsdos'     => [ ''                       => '-lcurses -ltermcap'        ],
   'cygwin'    => [ '-I/usr/local/include'   => '-lncurses'                 ],
+  'darwin'    => [ ''                       => '-lcurses'                  ],
   'dec_osf'   => [ ''                       => '-lcurses -ltermcap'        ],
   'dgux'      => [ ''                       => '-lcurses -ltermcap'        ],
   'dynixptx'  => [ ''                       => '-lcurses -lc'              ],
@@ -137,13 +157,20 @@ my $guess_cfg = {
 #
 my $gen;
 my $panels;
+my $menus;
+my $forms;
 
+my @argv;
 while (@ARGV) {
     my $arg = shift;
 
-    if ($arg eq 'GEN')    { $gen    = $arg }
-    if ($arg eq 'PANELS') { $panels = $arg }
+    if    ($arg eq 'GEN')    { $gen    = $arg   }
+    elsif ($arg eq 'PANELS') { $panels = $arg   }
+    elsif ($arg eq 'MENUS')  { $menus  = $arg   }
+    elsif ($arg eq 'FORMS')  { $forms  = $arg   }
+    else                     { push @argv, $arg }
 }
+@ARGV = @argv;   # pass non-Curses arguments to MakeMaker
 
 my $guess  = $guess_cfg->{$^O};
 my $source = "hints/c-$^O";
@@ -160,6 +187,8 @@ if (ref $guess ne 'ARRAY') {
 
 print "GEN    support: ", ($gen    ? "enabled" : "not applicable"), "\n";
 print "PANELS support: ", ($panels ? "enabled" : "not enabled"), "\n";
+print "MENUS  support: ", ($menus  ? "enabled" : "not enabled"), "\n";
+print "FORMS  support: ", ($forms  ? "enabled" : "not enabled"), "\n";
 print "\n";
 
 if (not defined $inc or not defined $libs) {
@@ -234,23 +263,49 @@ if ($panels and not defined $p_libs) {
     while ($libs =~ m!(-L\S+)!g) {
 	$p_libs .= $1;
     }
-    $p_libs .= " -lpanel";
+    $p_libs .= " -lpanel ";
 }
 
+#  More major cheese alert.  Any -L for the curses library is probably
+#  also needed for the menus library.
+#
+if ($menus and not defined $m_libs) {
+    while ($libs =~ m!(-L\S+)!g) {
+	$m_libs .= $1;
+    }
+    $m_libs .= " -lmenu ";
+}
 
-my $clean = 'CursesDef.h c-config.h cdemo testsym testint';
+#  More major cheese alert.  Any -L for the curses library is probably
+#  also needed for the forms library.
+#
+if ($forms and not defined $f_libs) {
+    while ($libs =~ m!(-L\S+)!g) {
+	$f_libs .= $1;
+    }
+    $f_libs .= " -lform ";
+}
+
+#  Aiee!  Perl also has a <form.h>.  This bites.
+#
+if ($forms and "$inc $p_inc $m_inc $f_inc" !~ /-I/) {
+    $f_inc .= " -I/usr/include ";
+}
+
+my $clean = 'CursesDef.h c-config.h cdemo testsym testint testtyp';
 my $realc = $gen
-    ? 'list.syms Curses.pm CursesFun.c CursesCon.c CursesVar.c CursesBoot.c'
+    ? 'list.syms Curses.pm ' . 
+      'CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c'
     : "";
 
 WriteMakefile(NAME      =>   'Curses',
-	      INC       =>   "$p_inc $inc",
-	      LIBS      => [ "$p_libs $libs"        ],
-	      H         => [ 'CursesDef.h'          ],
-	      clean     => { FILES    => $clean     },
-	      realclean => { FILES    => $realc     },
-	      dist      => { COMPRESS => 'gzip -9f' },
-	      VERSION   =>   '1.05',
+	      INC       =>   "$p_inc $m_inc $f_inc $inc",
+	      LIBS      => [ "$p_libs $m_libs $f_libs $libs" ],
+	      H         => [ 'CursesDef.h'                   ],
+	      clean     => { FILES    => $clean              },
+	      realclean => { FILES    => $realc              },
+	      dist      => { COMPRESS => 'gzip -9f'          },
+	      VERSION   =>   '1.06',
 );
 
 sub MY::postamble
@@ -258,7 +313,7 @@ sub MY::postamble
     my $echo = $^O eq 'VMS' ? 'write sys$output' : 'echo';
     my $mf   = <<EOM;
 CursesDef.h: c-config.h Makefile.PL list.syms
-	\$(PERL) test.syms $panels
+	\$(PERL) test.syms $panels $menus $forms
 
 c-config.h:
 	@ $echo "You need to make a c-config.h.  See the INSTALL document.";
@@ -281,11 +336,17 @@ EOM
     if ($gen) {
 	$mf .= <<EOM;
 
+Curses.c    :: CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c
+	@\$(NOOP)
+
 config      :: list.syms Curses.pm \\
-		CursesFun.c CursesVar.c CursesCon.c CursesBoot.c
+	       CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c
 
 list.syms    : gen/make.list.syms gen/list.fun gen/list.var gen/list.typ
 	\$(PERL) gen/make.list.syms
+
+Curses.pm    : gen/make.Curses.pm gen/list.fun gen/list.var gen/list.con
+	\$(PERL) gen/make.Curses.pm
 
 CursesFun.c  : gen/make.CursesFun.c gen/list.fun
 	\$(PERL) gen/make.CursesFun.c
@@ -296,11 +357,11 @@ CursesVar.c  : gen/make.CursesVar.c gen/list.var
 CursesCon.c  : gen/make.CursesCon.c gen/list.con
 	\$(PERL) gen/make.CursesCon.c
 
-CursesBoot.c : gen/make.CursesBoot.c gen/list.fun gen/list.var
-	\$(PERL) gen/make.CursesBoot.c
+CursesTyp.h : gen/make.CursesTyp.h gen/list.typ
+	\$(PERL) gen/make.CursesTyp.h
 
-Curses.pm    : gen/make.Curses.pm gen/list.fun gen/list.var gen/list.con
-	\$(PERL) gen/make.Curses.pm
+CursesBoot.c : gen/make.CursesBoot.c gen/list.fun gen/list.var gen/list.con
+	\$(PERL) gen/make.CursesBoot.c
 
 EOM
     }
@@ -308,4 +369,3 @@ EOM
     return $mf;
 }
 __END__
-

@@ -16,8 +16,8 @@
 #  * 10-18-89 added signal handling
 #  */
 
-use Curses;
 use ExtUtils::testlib;
+use Curses;
 
 $YBASE   = 10;
 $XBASE   = 10;

@@ -13,9 +13,9 @@ use Gen;
 open OUT, "> list.syms"    or die "Can't open list.syms: $!\n";
 
 process_DATA_chunk  \&print_line;
-process_functions   \&do_function;
-process_variables   \&do_variable;
-process_typedefs    \&do_typedef;
+process_functions   \&print_function;
+process_variables   \&print_variable;
+process_typedefs    \&print_typedef;
 
 close OUT;
 
@@ -24,36 +24,35 @@ close OUT;
 #
 sub print_line { print OUT @_ }
 
-sub do_function {
+sub print_function {
     my $fun = shift;
 
-    next unless $fun->{DOIT};
-    next if $fun->{SPEC} =~ /{notest}/;
+    return unless $fun->{DOIT};
+    return if     $fun->{SPEC}{DUP};
+    return if     $fun->{SPEC}{NOTEST};
 
-    my @call;
-    foreach $arg (@{$fun->{ARGS}}) {
-	push @call, lookup($arg->{OUT} ? 'TEST_OUT' : 'TEST_NOR', $arg);
-    }
+    my @argv = map { $_->{SPEC}{AMP} ? '&' . $_->{M_TEST} : $_->{M_TEST} }
+                   @{$fun->{ARGV}};
+    unshift @argv, "stdscr"  if $fun->{UNI};
 
-    my $w   = ($fun->{UNI} =~ /[{|](?:mv)?w[}|]/) ? "w" : "";
-    my $def = $w . $fun->{NAME} . "(" . join(',', @call) . ")";
+    my $call = $fun->{W} . $fun->{NAME} . "(" . join(',', @argv) . ")";
 
-    print OUT "E  $def\n";
-    print OUT "I  $def\n" if $fun->{DECL} eq 'int/void';
+    print OUT "E  $call\n";
+    print OUT "I  $call\n" if $fun->{SPEC}{ITEST};
 }
 
-sub do_variable {
+sub print_variable {
     my $var = shift;
 
-    next unless $var->{DOIT};
+    return unless $var->{DOIT};
 
     print OUT "V  $var->{NAME}\n";
 }
 
-sub do_typedef {
+sub print_typedef {
     my $typ = shift;
 
-    next unless $typ->{DOIT};
+    return unless $typ->{DOIT};
 
     print OUT "T  $typ->{DECL}\n";
 }

@@ -6,16 +6,30 @@
 
 /* These hints thanks to matthew green <mrg@mame.mu.oz.au> */
 
+/* Note to NETBSD users: I have gotten several conflicting reports
+ * about the correct number of arguments for longname() and
+ * touchline().  You may have to look them up and edit this file to
+ * reflect the reality for your system.
+ */
+
 #include <curses.h>
 
 #ifdef C_PANELSUPPORT
 #include <panel.h>
 #endif
 
-#define C_LONGNAME
-#undef  C_LONG0ARGS
-#define C_LONG2ARGS
+#ifdef C_MENUSUPPORT
+#include <menu.h>
+#endif
 
-#define C_TOUCHLINE
-#undef  C_TOUCH3ARGS
-#define C_TOUCH4ARGS
+#ifdef C_FORMSUPPORT
+#include <form.h>
+#endif
+
+#define C_LONGNAME      /* Does longname() exist?               */
+#define C_LONG0ARGS     /* Does longname() take 0 arguments?    */
+#undef  C_LONG2ARGS     /* Does longname() take 2 arguments?    */
+
+#define C_TOUCHLINE     /* Does touchline() exist?              */
+#define C_TOUCH3ARGS    /* Does touchline() take 3 arguments?   */
+#undef  C_TOUCH4ARGS    /* Does touchline() take 4 arguments?   */

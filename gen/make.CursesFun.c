@@ -14,7 +14,8 @@ use Gen;
 open OUT, "> CursesFun.c"  or die "Can't open CursesFun.c: $!\n";
 
 process_DATA_chunk  \&print_line;
-process_functions   \&do_function;
+process_functions   \&print_function;
+
 close OUT;
 
 
@@ -23,7 +24,7 @@ close OUT;
 #
 sub print_line { print OUT @_ }
 
-sub do_function {
+sub print_function {
     my $fun = shift;
 
     unless ($fun->{DOIT}) {
@@ -31,94 +32,70 @@ sub do_function {
 	return;
     }
 
-    if ($fun->{DECL} eq 'int/void') {
-	print OUT "#ifdef \UC_INT$fun->{NAME}\n";
-
-	$fun->{DECL} = 'int';
-	print_function($fun);
-
-	print OUT "#else\n";
-
-	$fun->{DECL} = 'void';
-	print_function($fun);
-
-	print OUT "#endif\n";
-    }
-    else {
-	print_function($fun);
-    }
-    print OUT "\n";
-}
-
-sub print_function {
-    my $fun   = shift;
-
-    my $arg;
-    my @argv;   # v = variables
-    my @argb;   # b = body
-
-    foreach $arg (@{$fun->{ARGS}}) {
-	my $pos  = $fun->{UNI} ? $arg->{UNI} : $arg->{NUM};
-
-	$arg->{ARG1}   = "ST($pos)";
-	$arg->{ARG2} ||= $pos;
-
-	my $tab = 'DECL_NOR';
-	if ($arg->{OUT})                      { $tab = 'DECL_OUT' }
-	if ($arg->{OPT})                      { $tab = 'DECL_OPT' }
-	if ($fun->{UNI} and $arg->{NUM} == 0) { $tab = 'DECL_UNI' }
-
-	my $str = lookup($tab, $arg);
-	my $def = "$arg->{DECL}\t$arg->{NAME}\t= $str;";
-
-	if ($arg->{SHIFT}) {
-	    splice @argv, -$arg->{SHIFT}, 0, $def;
-	}
-	else {
-	    push @argv, $def;
-	}
-
-	if ($arg->{OUT}) {
-	    push @argb, lookup('OUT', $arg);
-	}
-	if ($arg->{AMP}) {
-	    $arg->{NAME} = "&" . $arg->{NAME};
-	}
-    }
-
-    ###
-    ##  Return and body
-    #
-    my $clist = join ", ", map { $_->{NAME} } @{$fun->{ARGS}};
-    my $call  = "$fun->{W}$fun->{NAME}($clist)";
+    my @decl;
+    my @retn;
+    my @argv;
 
     if ($fun->{UNI}) {
-	$fun->{ARG1} = $fun->{ARGS}[0]{NAME};
-	$fun->{ARG2} = $call;
+	push @decl, "WINDOW *win\t= c_win ? c_sv2window(ST(0), 0) : stdscr;";
+	push @decl, "int\tc_mret\t= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;";
 
-	$call = lookup('RET_UNI', $fun);
+	push @argv, "win";
     }
-    if ($fun->{CAST}) {  $call = "($fun->{DECL})$call" }
+
+    foreach my $arg (@{$fun->{ARGV}}) {
+	my $pos = $fun->{UNI} ? $arg->{NUM} ? "c_arg+$arg->{NUM}" : "c_arg"
+	                      : $arg->{NUM};
+
+	my $A = "ST($pos)";
+	my $B = $arg->{SPEC}{B} || $pos;
+	my $N = $arg->{NAME};
+	my $T = length($arg->{DECL}) < 8 ? "\t" : "";
+	my $D = eval qq("$arg->{DECL}$T$arg->{NAME}\t= $arg->{M_DECL};");
+
+	if ($arg->{SPEC}{SHIFT}) {
+	    splice @decl, $arg->{SPEC}{SHIFT}, 0, $D;
+	}
+	else {
+	    push @decl, $D;
+	}
+
+	if ($arg->{M_RETN}) {
+	  push @retn, eval qq("$arg->{M_RETN};");
+	}
+
+	push @argv, $arg->{SPEC}{AMP} ? "&" . $arg->{NAME} : $arg->{NAME};
+    }
+
+    my $pref = $fun->{SPEC}{CAST} ? "($fun->{DECL})" . $fun->{W} : $fun->{W};
+    my $call = $pref . $fun->{NAME} . "(" . join(", ", @argv) . ");";
+
+    if ($fun->{UNI}) {
+	if ($fun->{DECL} eq 'void') {
+	    $call = "if (c_mret == OK) { $call }";
+	}
+	else {
+	    $call = eval qq("c_mret == ERR ? $fun->{M_NULL} : $call");
+	}
+    }
 
     if ($fun->{DECL} eq 'void')   {
-	unshift @argb, $call . ";";
+	unshift @retn, $call;
     }
     else {
-	my $ret = { 'DECL' => $fun->{DECL}, 'NAME' => "ret",
-		    'ARG1' => "ST(0)",      'ARG2' => "0" };
+	my $A = "ST(0)";
+	my $N = "ret";
 
-	push @argv, "$ret->{DECL}\t$ret->{NAME}\t= $call;"; 
-	push @argb, "ST(0) = sv_newmortal();";
-	push @argb,  lookup('RET_NOR', $ret) . ";";
+	push @decl, "$fun->{DECL}\tret\t= $call";
+	push @retn, "ST(0) = sv_newmortal();";
+	push @retn,  eval qq("$fun->{M_RETN};");
     }
 
+    push @decl, '' if @decl;
 
-    my $argc  = $fun->{ARGN} - ($fun->{UNI} ? 1 : 0);
     my $count = $fun->{UNI} ? "count" : "exact";
-    my $argv  = join("\n\t", @argv);
-    my $argb  = ($argv ? "\n\n\t" : "") . join "\n\t", @argb;
+    my $body  = join "\n\t", @decl, @retn;
     my $xsret = $fun->{DECL} ne 'void' ? 1 : 0;
-
 
     print OUT Q<<AAA;
 ################
@@ -126,9 +103,9 @@ sub print_function {
 #	{
 #	    dXSARGS;
 #	#ifdef C_\U$fun->{NAME}\E
-#	    c_${count}args("$fun->{NAME}", items, $argc);
+#	    c_${count}args("$fun->{NAME}", items, $fun->{ARGC});
 #	    {
-#		$argv$argb
+#		$body
 #	    }
 #	    XSRETURN($xsret);
 #	#else
@@ -136,6 +113,24 @@ sub print_function {
 #	    XSRETURN(0);
 #	#endif
 #	}
+#
+################
+AAA
+}
+
+sub print_function2 {
+    my $fun = shift;
+
+    return unless $fun->{DOIT};
+    return if     $fun->{SPEC}{DUP};
+
+    my $S     = " " x (3 - length $fun->{NUM});
+
+    print OUT Q<<AAA;
+################
+#	#ifdef C_\U$fun->{NAME}\E
+#		case $S$fun->{NUM}:  ret = 1;  break;
+#	#endif
 ################
 AAA
 }
