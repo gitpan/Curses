@@ -272,7 +272,7 @@ c_sv2window(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (Perl_sv_isa(sv, "Curses::Window")) {
+    if (sv_isa(sv, "Curses::Window")) {
       WINDOW *ret = (WINDOW *)SvIV((SV*)SvRV(sv));
       return ret;
     }

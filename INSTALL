@@ -1,13 +1,10 @@
 This package requires at least perl5.005.  You're on your own before
 then.
 
-1) Make sure perl has been built.  Unpack "Curses-1.06.tar.gz".
+1) Make sure perl has been built.  
 
-     gunzip -c Curses-1.06.tar.gz | tar xvf -
-
-2) Chdir to the "Curses" directory.
-
-     cd Curses-1.06
+2) Chdir into the Curses source directory (which you unpacked from the
+   .tgz file you downloaded from CPAN)
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
    pretty dumb about it, but give it a try and skip to (4.5).

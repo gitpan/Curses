@@ -54,7 +54,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = 1.06;
+$VERSION = 1.07;
 
 use Carp;
 require Exporter;

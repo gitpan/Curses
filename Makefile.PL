@@ -305,7 +305,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },
 	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.06',
+	      VERSION   =>   '1.07',
 );
 
 sub MY::postamble

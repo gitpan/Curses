@@ -1,30 +1,9 @@
-             The Curses extension to perl v5
-                       Version 1.06
+                           The Curses Perl Module
 
 
-	 Copyright (c) 1994-2000  William Setzer
-                   All rights reserved.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the same terms as perl, specifically:
-
-        a) the GNU General Public License as published by the Free
-        Software Foundation; either version 1, or (at your option) any
-        later version, or
-
-        b) the "Artistic License" which comes with this Kit.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    Artistic License for more details. 
-
-    You should have received a copy of the Artistic License with this
-    Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
-
-    You should also have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+============================================================
+COPYRIGHT AND LICENSE INFORMATION IS AT THE END OF THIS FILE
+============================================================
 
 This is a dynamic loadable curses module for perl.  You can get this
 package at any CPAN archive.
@@ -55,71 +34,12 @@ In order to avoid this problem, use the alternate functions:
 
 which take an extra "size of buffer" argument.
 
+The changes for Release 1.07 are as follows.  The complete change
+history is in the file HISTORY.
 
-New in 1.06:
-
- o Now requires perl5.005 or better to run.  (You can probably run it
-   in perl5.002-perl5.004 by grabbing newCONSTSUB out of the IO
-   distribution on CPAN and editing all uses of "foreach my $var" in
-   my perl scripts.)
-
- o Did lots of fiddling with the file generation in an effort to make
-   it more comprehensible.  In doing so, I moved around the way some
-   things were done and probably broke it on some systems with weird
-   compilers.  Please let me know.
-
- o changed the "Curses->new()" function to be a bit less clever.
-
- o Support for libmenu!  Many thanks to Yury Pshenichny <yura at zp.ua>
-   who did most of the actual work.
-
-   Update: Well, sort of support.  For some reason beyond my ken, it
-   doesn't work with Solaris (2.6) libmenu. (The items won't attach to
-   the menu.)  ncurses menu, both 1.9.9 and 5.2, seem to work fine.
-
- o libform support added, too.  Ho hum.  ;)  This one does appear to
-   work with Solaris libform.
-
- o Added the following ncurses extension functions:
-
-   use_default_colors()
-   assume_default_colors()
-   define_key()
-   keybound()
-   keyok()
-   resizeterm()
-
-   (Thanks to neild at misago.org, hans at kolej.mff.cuni.cz)
-
- o Re-enabled the functions:
-
-   attr_get()
-   attr_off()
-   attr_on()
-   attr_set()
-
- o Between the functions supported and the functions listed in the
-   pod as not supported, those are all the ones I know about.
-   Got any more?  Let me know.
-
- o Fixed 64 bit issue with getch() and possibly others, truncating
-   returns of `chtype' to 32 bits.  Note that this could possibly
-   break some OSes.  Please let me know.
-   (Thanks to Randall.G.Steiner at bankofamerica.com)
-
- o Fixed bug where @ARGV was always being cleared, and so no arguments
-   ever got to MakeMaker.
-   (Thanks to bdlow at nortelnetworks.com)
-
- o Added hints for Darwin/Mac OS X system.
-   (Thanks to sdietrich at emlab.com)
-
- o Added note to NETBSD users at the bottom of this README.
-
- o Added a security notice to the README and pod.
-   (Thanks to connor at ing.umu.se)
-
- o Has anyone successfully used the mouse event stuff?
+  - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't
+    work on some systems (causes a build failure).
+ 
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in
@@ -129,18 +49,16 @@ If you get the same results via "demo" and "cdemo", but they don't
 look right, then it's a bug in your libcurses, not in Curses.
 
 
-* Personal Note *
+MAINTENANCE
+-----------
 
-I'm very grateful to all those that send in reports and patches, and
-I'm very sorry that I don't release the Curses modules more often.
-Yury's excellent libmenu patches have sat around for many months
-because I've been too lazy to give Curses another round of polish.
+Bryan Henderson maintains the Perl Curses module.  Bryan doesn't actually
+know much about it, and is functioning mainly as a coordinator.  Go ahead
+and report bugs to and ask technical questions of Bryan, but don't hold
+your breath.  If you should have a fix or enhancement, though, Bryan will
+incorporate it into the package promptly.
 
-Enjoy!
 
-
-William Setzer
-William_Setzer at ncsu.edu
 
 Known Problems
 --------------
@@ -156,14 +74,41 @@ NCurses
 
 NETBSD
 
-   I continue to get conflicting reports about the correct number of
-   arguments for longname() and touchline(), controlled via the file
-   `hints/c-netbsd.h'.  Before compiling, you may want to look them up
-   yourself, confirm them, and then editing `hints/c-netbsd.h'.
-
-   Any NETBSD guru that can resolve this problem for all versions of
-   their OS will get my undying gratitude.
+   William reported as of 2001: I continue to get conflicting reports
+   about the correct number of arguments for longname() and
+   touchline(), controlled via the file `hints/c-netbsd.h'.  Before
+   compiling, you may want to look them up yourself, confirm them, and
+   then editing `hints/c-netbsd.h'.
 
 Solaris 2.6
 
    The menu stuff doesn't appear to work.  I have no idea why.
+
+
+
+COPYRIGHT AND LICENSE INFORMATION
+---------------------------------
+
+	 Copyright (c) 1994-2000  William Setzer
+                   All rights reserved.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the same terms as perl, specifically:
+
+        a) the GNU General Public License as published by the Free
+        Software Foundation; either version 1, or (at your option) any
+        later version, or
+
+        b) the "Artistic License" which comes with this Kit.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    Artistic License for more details. 
+
+    You should have received a copy of the Artistic License with this
+    Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
+
+    You should also have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.

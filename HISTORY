@@ -1,0 +1,85 @@
+The Curses Perl module was created by William Setzer (William_Setzer
+at ncsu.edu) in 1994.  William maintained it up until July 2001, when he
+stopped having time to do so.
+
+In September 2004, Bryan Henderson (bryanh@giraffe-data.com) took over
+maintainership of it, after confirming with William that he did not
+plan to continue.
+
+The module has always been distributed via CPAN.
+
+Curses itself is much older than the Perl implementation.  Curses was
+originally only a C programming library.
+
+
+New in 1.07 (September 2004)
+
+  - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't
+    work on some systems (causes a build failure).
+
+
+New in 1.06 (July 2001)
+
+ o Now requires perl5.005 or better to run.  (You can probably run it
+   in perl5.002-perl5.004 by grabbing newCONSTSUB out of the IO
+   distribution on CPAN and editing all uses of "foreach my $var" in
+   my perl scripts.)
+
+ o Did lots of fiddling with the file generation in an effort to make
+   it more comprehensible.  In doing so, I moved around the way some
+   things were done and probably broke it on some systems with weird
+   compilers.  Please let me know.
+
+ o changed the "Curses->new()" function to be a bit less clever.
+
+ o Support for libmenu!  Many thanks to Yury Pshenichny <yura at zp.ua>
+   who did most of the actual work.
+
+   Update: Well, sort of support.  For some reason beyond my ken, it
+   doesn't work with Solaris (2.6) libmenu. (The items won't attach to
+   the menu.)  ncurses menu, both 1.9.9 and 5.2, seem to work fine.
+
+ o libform support added, too.  Ho hum.  ;)  This one does appear to
+   work with Solaris libform.
+
+ o Added the following ncurses extension functions:
+
+   use_default_colors()
+   assume_default_colors()
+   define_key()
+   keybound()
+   keyok()
+   resizeterm()
+
+   (Thanks to neild at misago.org, hans at kolej.mff.cuni.cz)
+
+ o Re-enabled the functions:
+
+   attr_get()
+   attr_off()
+   attr_on()
+   attr_set()
+
+ o Between the functions supported and the functions listed in the
+   pod as not supported, those are all the ones I know about.
+   Got any more?  Let me know.
+
+ o Fixed 64 bit issue with getch() and possibly others, truncating
+   returns of `chtype' to 32 bits.  Note that this could possibly
+   break some OSes.  Please let me know.
+   (Thanks to Randall.G.Steiner at bankofamerica.com)
+
+ o Fixed bug where @ARGV was always being cleared, and so no arguments
+   ever got to MakeMaker.
+   (Thanks to bdlow at nortelnetworks.com)
+
+ o Added hints for Darwin/Mac OS X system.
+   (Thanks to sdietrich at emlab.com)
+
+ o Added note to NETBSD users at the bottom of this README.
+
+ o Added a security notice to the README and pod.
+   (Thanks to connor at ing.umu.se)
+
+ o Has anyone successfully used the mouse event stuff?
+
