@@ -2,7 +2,15 @@ These are notes for the maintainer.
 
 Steps to release:
 
-  - make realclean  .
+  - Test the build:
+
+    make realclean
+    Set up environment variables, c-config.h if required.
+    perl Makefile.PL
+    make
+    perl -Mblib -MCurses -e1
+
+  - make realclean
 
   - Update HISTORY file with description of new stuff and release date.
 

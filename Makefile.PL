@@ -8,7 +8,10 @@
 ##  or the GNU General Public License, as specified in the README file.
 
 require 5.005;
+use strict;
+use warnings;
 use ExtUtils::MakeMaker;
+use English;
 
 #  Here are the arguments defined for this file:
 #
@@ -19,14 +22,18 @@ use ExtUtils::MakeMaker;
 #
 #  Ex:  "perl Makefile.PL PANELS MENUS GEN"
 
-#  Curses needs the following two variables defined here in order to
-#  compile the library.  They are:
+#  Environment variables tell us how one accesses the Curses library
+#  on this system.
 #
-#    $inc    contains any includes or defines (-I or -D) that are
-#               needed to compile libcurses applications
-#    $libs   contains any libraries or library paths (-l or -L) that are
-#               needed to compile libcurses applications.  This must be
-#               -l and -L options only -- we parse it.
+#    ...CFLAGS   contains any includes or defines (-I or -D) that are
+#                needed to compile libcurses applications
+#    ...LDFLAGS  contains any libraries or library paths (-l or -L) that are
+#                needed to compile libcurses applications.  This must be
+#                -l and -L options only -- we parse it.  Note that if you
+#                specify something that doesn't result in MakeMaker finding
+#                a library, your value just gets silently ignored -- it
+#                won't show up in the make file.
+
 
 #  If these environment variables aren't set, we try in a fairly
 #  stupid fashion to pick them for you, along with a "c-config.h" file.
@@ -34,14 +41,16 @@ use ExtUtils::MakeMaker;
 my $inc = $ENV{'CURSES_CFLAGS'};
 my $libs = $ENV{'CURSES_LDFLAGS'};
 
-my $panel_inc = $ENV{'CURSES_PANEL_CFLAGS'};
-my $panel_libs = $ENV{'CURSES_PANEL_LDFLAGS'};
+my $panel_inc = $ENV{'CURSES_PANEL_CFLAGS'} || '';
+my $panel_libs = $ENV{'CURSES_PANEL_LDFLAGS'} || '';
 
-my $menu_inc = $ENV{'CURSES_MENU_CFLAGS'};
-my $menu_libs = $ENV{'CURSES_MENU_LDFLAGS'};
+my $menu_inc = $ENV{'CURSES_MENU_CFLAGS'} || '';
+my $menu_libs = $ENV{'CURSES_MENU_LDFLAGS'} || '';
 
-my $form_inc = $ENV{'CURSES_FORM_CFLAGS'};
-my $form_libs = $ENV{'CURSES_FORM_LDFLAGS'};
+my $form_inc = $ENV{'CURSES_FORM_CFLAGS'} || '';
+my $form_libs = $ENV{'CURSES_FORM_LDFLAGS'} || '';
+
+my $libtype = $ENV{'CURSES_LIBTYPE'};
 
 #  If you want to see examples of what needs to go in the $inc and
 #  $libs variables, check out the `guess_cfg' tables of values below.
@@ -146,7 +155,7 @@ sub guessAtCursesLocation($$$) {
 
     print qq{Making a guess for \$inc and/or \$libs...\n};
 
-    my $guess  = $guess_cfg->{$^O};
+    my $guess  = $guess_cfg->{$OSNAME};
 
     if (ref $guess eq 'HASH') {
         $$libtypR = $guess->{'default'};
@@ -184,63 +193,52 @@ sub guessAtCursesLocation($$$) {
 
 
 
-my $gen;
-my $panels;
-my $menus;
-my $forms;
+sub makeConfigH($) {
 
-my @argv;
-while (@ARGV) {
-    my $arg = shift;
+    my ($libTypeArg) = @_;
 
-    if    ($arg eq 'GEN')    { $gen    = $arg   }
-    elsif ($arg eq 'PANELS') { $panels = $arg   }
-    elsif ($arg eq 'MENUS')  { $menus  = $arg   }
-    elsif ($arg eq 'FORMS')  { $forms  = $arg   }
-    else                     { push @argv, $arg }
-}
-@ARGV = @argv;   # pass non-Curses arguments to MakeMaker
-
-my $source = "hints/c-$^O";
-
-print "GEN    function:  ", ($gen    ? "enabled" : "not applicable"), "\n";
-print "PANELS functions: ", ($panels ? "enabled" : "not enabled"), "\n";
-print "MENUS  functions: ", ($menus  ? "enabled" : "not enabled"), "\n";
-print "FORMS  functions: ", ($forms  ? "enabled" : "not enabled"), "\n";
-print "\n";
-
-if (not defined $inc or not defined $libs) {
-    guessAtCursesLocation(\$inc, \$libs, \my $libtyp);
-    if (defined($libtyp)) {
-        $source .= '.' . $libtyp;
-    }
-}
-if (not -e "c-config.h") {
     print qq{Making a guess for "c-config.h"...\n};
 
-    if (not -f "$source.h") {
+    my $libType;
+
+    if (defined($libTypeArg)) {
+        $libType = $libTypeArg;
+    } else {
+        if ($OSNAME eq 'linux') {
+            $libType = 'ncurses';
+        }
+    }
+
+    my $hintsfile;
+    if (defined($libType)) {
+        $hintsfile = "hints/c-$OSNAME.$libType.h";
+    } else {
+        $hintsfile = "hints/c-$OSNAME.h";
+    }
+
+    if (not -f $hintsfile) {
 	print STDERR <<"EOW";
 
 I'm sorry, but I couldn't find a hints file that was configured for
-your OS.  You will need to create and configure a "c-config.h" file
-for yourself.  Please see the "INSTALL" directions for pointers on how
-to do this.
+your OS (named $hintsfile).  You will need to create and configure a 
+"c-config.h" file for yourself.  Please see the "INSTALL" directions 
+for pointers on how to do this.
 EOW
         exit 1;
     }
 
     eval "require(File::Copy);";
     if (! $@) {
-	&File::Copy::copy("$source.h", "c-config.h");
+	&File::Copy::copy($hintsfile, "c-config.h");
     }
     else {
 	my $cp;
 
-	if    ($^O eq 'MSWin32') { $cp = "perl -MExtUtils::Command -e cp" }
-	elsif ($^O eq 'VMS')     { $cp = "copy/log"                       }
-	else                     { $cp = "/bin/cp"                        }
+	if    ($OSNAME eq 'MSWin32') { $cp = "perl -MExtUtils::Command -e cp" }
+	elsif ($OSNAME eq 'VMS')     { $cp = "copy/log"                       }
+	else                         { $cp = "cp"                             }
 
-	my $sys = "$cp $source.h c-config.h";
+	my $sys = "$cp $hintsfile c-config.h";
 	if ($sys =~ m!([^\\:\w/. -])!) {
 	    print STDERR <<EOW;
 
@@ -260,6 +258,46 @@ EOW
 	    system $sys;
 	}
     }
+}
+
+
+
+
+my $gen;
+my $panels;
+my $menus;
+my $forms;
+
+my @argv;
+while (@ARGV) {
+    my $arg = shift;
+
+    if    ($arg eq 'GEN')    { $gen    = $arg   }
+    elsif ($arg eq 'PANELS') { $panels = $arg   }
+    elsif ($arg eq 'MENUS')  { $menus  = $arg   }
+    elsif ($arg eq 'FORMS')  { $forms  = $arg   }
+    else                     { push @argv, $arg }
+}
+@ARGV = @argv;   # pass non-Curses arguments to MakeMaker
+
+print "GEN    function:  ", ($gen    ? "enabled" : "not applicable"), "\n";
+print "PANELS functions: ", ($panels ? "enabled" : "not enabled"), "\n";
+print "MENUS  functions: ", ($menus  ? "enabled" : "not enabled"), "\n";
+print "FORMS  functions: ", ($forms  ? "enabled" : "not enabled"), "\n";
+print "\n";
+
+my $libtyp;
+
+if (defined($inc) && defined($libs)) {
+    # We have the info we need
+} elsif (defined($inc) || defined($libs)) {
+    die("You must specify both CURSES_LDFLAGS and CURSES_CFLAGS " .
+        "environment variables or neither.");
+} else {
+    guessAtCursesLocation(\$inc, \$libs, \my $libtyp);
+}
+if (not -e "c-config.h") {
+    makeConfigH($libtyp);
 }
 
 #  Major cheese alert.  Any -L for the curses library is probably
@@ -329,12 +367,12 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },
 	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.10',
+	      VERSION   =>   '1.11',
 );
 
 sub MY::postamble
 {
-    my $echo = $^O eq 'VMS' ? 'write sys$output' : 'echo';
+    my $echo = $OSNAME eq 'VMS' ? 'write sys$output' : 'echo';
     my $mf   = <<EOM;
 CursesDef.h: c-config.h Makefile.PL list.syms
 	\$(PERL) test.syms $panels $menus $forms
@@ -345,7 +383,7 @@ c-config.h:
 cdemo: cdemo.o c-config.h
 EOM
 
-    if ($^O eq 'VMS') {
+    if ($OSNAME eq 'VMS') {
 	$mf .= <<EOM;
 	\$(CC) \$(INC) cdemo.c
 	\$(LD) cdemo\$(OBJ_EXT), \$(EXTRALIBS), CURSES2.OPT/opt
