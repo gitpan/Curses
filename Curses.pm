@@ -10,7 +10,7 @@ bootstrap Curses;
 ###
 ## Version consistency check
 #
-$VERSION    = 1.01;
+$VERSION    = 1.02;
 $XS_VERSION = eval { XS_VERSION() };
 $XS_VERSION = "pre 1.01" if $@;
 
@@ -84,11 +84,11 @@ prefresh qiflush raw refresh resetty savetty scrl scroll scrollok
 setscrreg setterm slk_clear slk_init slk_label slk_noutrefresh
 slk_refresh slk_restore slk_set slk_touch standend standout
 start_color subpad subwin syncok timeout touchline touchln
-touchoverlap touchwin typeahead unctrl ungetch vline
+touchoverlap touchwin typeahead unctrl ungetch vline newterm set_term
 );
 
 @_CONSTANTS = qw(
-OK ERR
+ERR OK
 
 ACS_BLOCK ACS_BOARD ACS_BTEE ACS_BULLET ACS_CKBOARD ACS_DARROW
 ACS_DEGREE ACS_DIAMOND ACS_HLINE ACS_LANTERN ACS_LARROW ACS_LLCORNER

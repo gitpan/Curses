@@ -1,14 +1,13 @@
-/*  Hint file for the Solaris platform.
+/*  Hint file for the MSWin32 platform, Visual C compiler.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.
  */
 
-/* These hints thanks to Douglas Acker <acker@se01.wg2.waii.com> */
+/* These hints thanks to Gurusamy Sarathy <gsar@engin.umich.edu> */
 
-#include <curses.h>
-
-#undef instr
+#undef SP	/* in case this gets pulled in after perl.h */
+#include <pdcurses.h>
 
 #define C_LONGNAME
 #define C_LONG0ARGS

@@ -8,7 +8,11 @@ README
 cdemo.c
 demo
 gdc
+hints/c-MSWin32.borland.h
+hints/c-MSWin32.visualc.h
 hints/c-aix.h
+hints/c-bsd386.h
+hints/c-bsdos.h
 hints/c-dec_osf.h
 hints/c-dgux.h
 hints/c-dynixptx.h
@@ -22,6 +26,7 @@ hints/c-linux.ncurses.h
 hints/c-netbsd.h
 hints/c-next.h
 hints/c-none.h
+hints/c-os2.ncurses.h
 hints/c-sco.h
 hints/c-solaris.h
 hints/c-sunos.bsd.h
@@ -29,4 +34,3 @@ hints/c-sunos.ncurses.h
 hints/c-sunos.sysv.h
 hints/c-vms.h
 test.syms
-todo

@@ -11,13 +11,13 @@ When I say "perl5" below, I mean whatever you've called the perl
 version 5 executable on your system.  One common mistake is
 accidentally using perl version 4.
 
-1) Make sure perl5 has been built.  Unpack "Curses-1.01.tar.gz".
+1) Make sure perl5 has been built.  Unpack "Curses-1.02.tar.gz".
 
-   gunzip -c Curses-1.01.tar.gz | tar xvf -
+   gunzip -c Curses-1.02.tar.gz | tar xvf -
 
 2) Chdir to the "Curses" directory.
 
-   cd Curses-1.01
+   cd Curses-1.02
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
    pretty dumb about it, but give it a try and skip to (5).
@@ -66,15 +66,15 @@ accidentally using perl version 4.
 6) make
 
    `make' will first run a perl script called `test.syms' that
-   generates the file "Curses.h".  It should do a pretty good job,
+   generates the file "pCurses.h".  It should do a pretty good job,
    but if you find that it isn't picking up the correct values, you
-   can edit "Curses.h" by hand and follow the directions.  If you
+   can edit "pCurses.h" by hand and follow the directions.  If you
    have to "roll your own", be sure and save a copy.  A "make clean"
-   will delete "Curses.h".
+   will delete "pCurses.h".
 
    `make' will then try to compile "Curses.c".  If you get any
    undefined curses symbols, it means that your curses really doesn't
-   have those functions, and you should edit "Curses.h" and/or
+   have those functions, and you should edit "pCurses.h" and/or
    "c-config.h" and change the #define to #undef for that function.
 
    If you get other compile errors, it is probably because the curses

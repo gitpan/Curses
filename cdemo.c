@@ -1,5 +1,5 @@
 #include "c-config.h"
-#include "Curses.h"
+#include "pCurses.h"
 
 main() {
   WINDOW *b;

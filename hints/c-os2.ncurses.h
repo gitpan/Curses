@@ -1,14 +1,12 @@
-/*  Hint file for the Solaris platform.
+/*  Hint file for the OS/2 platform, ncurses version of libcurses.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.
  */
 
-/* These hints thanks to Douglas Acker <acker@se01.wg2.waii.com> */
+/* These hints thanks to "Andrew V. Stesin" <stesin@elvisti.kiev.ua> */
 
 #include <curses.h>
-
-#undef instr
 
 #define C_LONGNAME
 #define C_LONG0ARGS

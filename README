@@ -1,4 +1,4 @@
-    The Curses extension to perl5, version 1.01
+    The Curses extension to perl5, version 1.02
 
 	 Copyright (c) 1994-1996  William Setzer
                 All rights reserved.
@@ -12,44 +12,34 @@
     Artistic License for more details. 
 
 This is a dynamic loadable curses module for perl5.  You can get this
-package at any CPAN archive.  (You can also still get it at the
-original site I provided, but I'm trying to phase that out.)
+package at any CPAN archive.
 
 Please see the INSTALL document for how to install it on your system,
 the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-New in 1.01:
+New in 1.02:
 
-   o Makefile.PL expanded!  If you do a simple "perl Makefile.PL" now,
-     it will try to set up defaults for you.  Hopefully, this'll work
-     for most people.
+ o The constants OK and ERR were switched!  They should give the
+   right values now.  (Doesn't anyone check their return codes? :-)
 
-   o Version consistency checks added.
+ o Rename of Curses.h to pCurses.h for case-impaired systems.
 
-   o OSF1 (v3.2) hints file.
+ o New functions supported:  newterm, set_term
 
-   o DGUX hints file.
+ o New hints for BSDOS, BSD386, OS2, and MSWin32.
 
-   o Bug fix in test.syms to make it behave better if dropped in ext/.
+ My thanks to the following people:
 
-   o Bug fix in Curses.c, savetty().
+ sjpaavol@cc.helsinki.fi   [newterm, set_term]
+ jmorzins@MIT.EDU          [ERR <-> OK switched]
+ karres@southwind.net      [BSDOS hints]
+ gsar@engin.umich.edu      [MSWin32 hints and patches]
+ cider@f5.com              [BSDOS hints]
+ ilya@math.ohio-state.edu  [OS2 hints, pCurses fix]
+ ashted@southern.edu       [BSDOS, BSD386 hints]
 
-   o Hints file for SunOS/ncurses.
-
-   o More INSTALL info (ExtUtils::testlib, ncurses keyname() compile warning)
-
-   o VMS support!  Courtesy of Peter Prymmer.
-
-   o New LINES/COLS functions to complement the stdscr/curscr ones.
-     According to Steven Kunz, these variables are all that aren't
-     available when Curses to be compiled with the C backend of
-     Malcolm Beattie's (excellent) compiler (alpha 3).
-
-   o Renames to conform to hints osname:
-       c-osf1.h   => c-dec_osf.h
-       c-sco42.h  => c-sco.h
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in

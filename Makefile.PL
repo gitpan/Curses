@@ -58,6 +58,8 @@ my $libs;
 #
 my $guess_cfg =
 { 'aix'       => [ ''                       => '-lcurses -ltermcap' ],
+  'bsd386'    => [ ''                       => '-lcurses -ltermcap' ],
+  'bsdos'     => [ ''                       => '-lcurses -ltermcap' ],
   'dec_osf'   => [ ''                       => '-lcurses -ltermcap' ],
   'dgux'      => [ ''                       => '-lcurses -ltermcap' ],
   'dynixptx'  => [ ''                       => '-lcurses -lc' ],
@@ -76,6 +78,11 @@ my $guess_cfg =
   },
   'netbsd'    => [ ''                       => '-lcurses -ltermcap' ],
   'next'      => [ ''                       => '-lcurses -ltermcap' ],
+  'os2'       =>
+  { 'bsd'     => [ ''                       => '-lcurses -ltermcap' ],
+    'ncurses' => [ ''                       => '-lncurses' ],            ##
+    'default' => 'ncurses'
+  },
   'sco'       => [ ''                       => '-lcurses -ltermcap' ],   ##
   'solaris'   => [ ''                       => '-L/usr/ccs/lib -lcurses' ],
   'sunos'     =>
@@ -85,6 +92,11 @@ my $guess_cfg =
     'default' => 'sysv'
   },
   'vms'       => [ ''                       => 'sys$library:vaxcurse.olb' ],
+  'MSWin32'   =>
+  { 'borland' => [ '-w- -Id:\bc5\include'   => '-Ld:\bc5\lib pdcurses.lib' ],
+    'visualc' => [ ''                       => 'pdcurses' ],
+    'default' => 'visualc'
+  },
   ''          => undef
 };
 
@@ -132,9 +144,11 @@ EOW
 	    exit 1;
 	}
 
-	my $lns = $Config{'lns'} || "/bin/cp";
+	my $lns = $Config{'lns'}
+		  || ($osname eq 'MSWin32' && "perl -MExtUtils::Command -e cp")
+		  || "/bin/cp";
 	my $sys = "$lns $source.h c-config.h";
-	if (not $sys =~ m!([^\w/. -])!) {
+	if (not $sys =~ m!([^\\:\w/. -])!) {
 	    system $sys;
 	}
 	else {
@@ -163,17 +177,17 @@ EOW
 &WriteMakefile(NAME      => 'Curses',
 	       INC       => $inc,
 	       LIBS      => [ $libs ],
-	       H         => [ 'Curses.h' ],
-	       VERSION   => '1.01',
+	       H         => [ 'pCurses.h' ],
+	       VERSION   => '1.02',
 	       SKIP      => [ 'xs_c', 'xs_o' ],
-	       clean     => { FILES => 'Curses.h c-config.h cdemo' },
+	       clean     => { FILES => 'pCurses.h c-config.h cdemo' },
 	       dist      => { COMPRESS => 'gzip' }
 );
 
 sub MY::postamble
 {
 '
-Curses.h: c-config.h Makefile.PL
+pCurses.h: c-config.h Makefile.PL
 	$(PERL) test.syms
 c-config.h:
 	@echo "You need to make a c-config.h.  See the INSTALL document.";

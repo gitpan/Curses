@@ -7,15 +7,20 @@
  */
 
 #include "c-config.h"
-#include "Curses.h"
+#include "pCurses.h"
 
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
-#define C_XS_VERSION  1.01
+#ifdef __PDCURSES__
+#undef SP
+#endif
+
+#define C_XS_VERSION  1.02
 
 typedef WINDOW *Curses;
+typedef SCREEN *Screen;
 
 /*
  * Begin support variables and functions
@@ -79,6 +84,19 @@ int argnum;
 	      argnum, c_function);
     else
 	croak("argument is not a Curses window");
+}
+
+static Screen
+c_sv2Screen(sv, argnum)
+SV *sv;
+int argnum;
+{
+    if (sv_isa(sv, "Curses::Screen")) { return (Screen)SvIV((SV*)SvRV(sv)); }
+    if (argnum >= 0)
+	croak("argument %d to Curses function '%s' is not a Curses screen",
+	      argnum, c_function);
+    else
+	croak("argument is not a Curses screen");
 }
 
 /* Fix cast to do the "right thing" for characters bigger than 128.
@@ -2682,6 +2700,56 @@ XS(XS_Curses_vline)
     XSRETURN(1);
 }
 
+/* Screen stuff */
+/* Contributed by Santeri Paavolainen <sjpaavol@cc.helsinki.fi> */
+
+XS(XS_Curses_newterm)
+{
+    dXSARGS;
+#ifdef C_NEWTERM
+    c_exactargs("newterm", items, 3);
+    {
+	char *	term;
+	FILE *	out	= IoIFP(sv_2io(ST(1)));
+	FILE *	in	= IoIFP(sv_2io(ST(2)));
+	Screen	ret;
+
+	/* The 'term' parameter must be null terminated */
+	if (ST(0) != &sv_undef)
+	  term = (char *)SvPV(ST(0),na);
+	else
+	  term = NULL;
+
+	ret   = newterm(term, out, in);
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Curses::Screen", (void *)ret);
+    }
+#else
+    c_not_there("newterm");
+#endif
+    XSRETURN(1);
+}
+
+XS(XS_Curses_set_term)
+{
+    dXSARGS;
+#ifdef	C_SET_TERM
+    c_countargs("set_term", items, 1);
+    {
+	Screen	scr = c_sv2Screen(ST(0), 0);
+	Screen	ret = set_term(scr);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Curses::Screen", (void *) ret);
+    }
+#else
+    c_not_there("set_term");
+#endif
+    XSRETURN(1);
+}
+
+/* Tied stuff */
+
 XS(XS_Curses_Vars_TIESCALAR)
 {
     dXSARGS;
@@ -3394,6 +3462,9 @@ XS(boot_Curses)
     newXS("Curses::ungetch",		XS_Curses_ungetch,		file);
     newXS("Curses::vline",		XS_Curses_vline,		file);
 
+    newXS("Curses::newterm",		XS_Curses_newterm,		file);
+    newXS("Curses::set_term",		XS_Curses_set_term,		file);
+    
     newXS("Curses::constant",		XS_Curses_constant,		file);
     newXS("Curses::curscr",		XS_Curses_curscr,		file);
     newXS("Curses::stdscr",		XS_Curses_stdscr,		file);
