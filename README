@@ -13,36 +13,13 @@ the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-*** SECURITY NOTICE ***
-
-It has always been the case with the curses functions, but please note
-that the following functions:
-
-    getstr()   (and optional wgetstr(), mvgetstr(), and mvwgetstr())
-    inchstr()  (and optional winchstr(), mvinchstr(), and mvwinchstr())
-    instr()    (and optional winstr(), mvinstr(), and mvwinstr())
-
-are subject to buffer overflow attack.  This is because you pass in
-the buffer to be filled in, which has to be of finite length, but
-there is no way to stop a bad guy from typing.
-
-In order to avoid this problem, use the alternate functions:
-
-   getnstr()
-   inchnstr()
-   innstr()
-
-which take an extra "size of buffer" argument.
-
-The changes for Release 1.09 are as follows.  The complete change
+The changes for Release 1.10 are as follows.  The complete change
 history is in the file HISTORY.
 
-  - Makefile.PL searches for curses header files instead of assuming
-    based on $OSNAME.
+  Bug fixed: Makefile has undefined variable $libtyp.
 
-  - Makefile.PL warns user to reconfigure environment when form.h is
-    in /usr/include rather than just add -I/usr/include to the compile
-    (this concerns the problem with the conflicting Perl form.h file).
+  Bug fixed: Makefile computes wrong guess hint file name.
+
 
   =====================
  
@@ -68,6 +45,28 @@ Email Bryan at bryanh@giraffe-data.com.  Do not use the CPAN bug
 database to report a bug.  It's more work for both parties and Bryan
 doesn't know a bug has been opened except when he occasionally goes to
 look.
+
+
+*** SECURITY NOTICE ***
+
+It has always been the case with the curses functions, but please note
+that the following functions:
+
+    getstr()   (and optional wgetstr(), mvgetstr(), and mvwgetstr())
+    inchstr()  (and optional winchstr(), mvinchstr(), and mvwinchstr())
+    instr()    (and optional winstr(), mvinstr(), and mvwinstr())
+
+are subject to buffer overflow attack.  This is because you pass in
+the buffer to be filled in, which has to be of finite length, but
+there is no way to stop a bad guy from typing.
+
+In order to avoid this problem, use the alternate functions:
+
+   getnstr()
+   inchnstr()
+   innstr()
+
+which take an extra "size of buffer" argument.
 
 
 Known Problems

@@ -12,7 +12,13 @@ Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
 
-New in 1.09 (March 2005)
+New in 1.10 (March 11, 2005)
+
+  Bug fixed: Makefile has undefined variable $libtyp.
+
+  Bug fixed: Makefile computes wrong guess hint file name.
+
+New in 1.09 (March 6, 2005)
 
   - Makefile.PL searches for curses header files instead of assuming
     based on $OSNAME.

@@ -2,6 +2,8 @@ These are notes for the maintainer.
 
 Steps to release:
 
+  - make realclean  .
+
   - Update HISTORY file with description of new stuff and release date.
 
   - Copy the changes for the current release in README.
@@ -10,9 +12,16 @@ Steps to release:
 
   - Update version number in Curses.pm (search for VERSION).
 
-  - Make a tarball named like Curses-1.07.tgz .
+  - Make a tarball with something like this:
+
+    tar --file=/tmp/Curses-1.07.tgz --gzip --create Curses-1.07
 
   - Upload via pause.perl.org.
+
+    It goes into CPAN in the directory belonging to the user who
+    uploaded it.  PAUSE gives you various options for uploading, tells
+    you how to follow the progress of the uploading and indexing, and
+    sends you emails about it.
 
   - PAUSE will automatically extract the README file from the tarball
     and install it as e.g. Curses-1.07.readme

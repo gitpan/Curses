@@ -150,7 +150,7 @@ sub guessAtCursesLocation($$$) {
 
     if (ref $guess eq 'HASH') {
         $$libtypR = $guess->{'default'};
-        $guess    = $guess->{$libtyp};
+        $guess    = $guess->{$$libtypR};
     }
     if (ref $guess ne 'ARRAY') {
         die "FATAL: internal error: guess_cfg is bad\n";
@@ -212,7 +212,7 @@ print "\n";
 if (not defined $inc or not defined $libs) {
     guessAtCursesLocation(\$inc, \$libs, \my $libtyp);
     if (defined($libtyp)) {
-        $source .= $libtyp;
+        $source .= '.' . $libtyp;
     }
 }
 if (not -e "c-config.h") {
@@ -329,7 +329,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },
 	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.09',
+	      VERSION   =>   '1.10',
 );
 
 sub MY::postamble
