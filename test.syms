@@ -14,9 +14,9 @@
 #
 #  Thanks to Raphael Manfredi and the other contributors of dist-3.0.
 #
-#  Version 1.3.  William Setzer.  1/1/95.
+#  VMS patches thanks to Peter Prymmer <pvhp@lns62.lns.cornell.edu>
 
-BEGIN { push(@INC, "../../lib"); }
+BEGIN { unshift(@INC, "../../lib"); }
 use Config;
 use Getopt::Std;
 require 'flush.pl';
@@ -62,7 +62,12 @@ sub do_speedups
     # testing.  (I could do testing via a make and things would be
     # simpler, but they'd also be much slower.)
     #
-    open(MF, "Makefile") || die "Can't open Makefile: $!\n";
+    my $file;
+
+    if ($Config{'osname'} =~ /VMS/) { $file = "Descrip.MMS" }
+    else                            { $file = "Makefile"    }
+
+    open(MF, "$file") || die "Can't open $file: $!\n";
     while (<MF>)
     {
 	if (/^CC\s*=\s*(.*)/)        { $cc  = $1 }
@@ -175,29 +180,75 @@ EOHDR
 sub do_cleanup
 {
     unlink "testsym",  "testsym.c",  "testsym.o";
-    unlink "testinvd", "testinvd.c", "testinvd.c";
+    unlink "testinvd", "testinvd.c", "testinvd.o";
+
+    1 while unlink "testsym.obj";  # Possibly pointless VMSism
+    1 while unlink "testinvd.obj"; # Possibly pointless VMSism
+
     close OUTH;
     close LOG if $opt_v;
 }
 
 sub test_symbol
 {
-    my($cmd)  = "$cc -DSYM=\"$_[0]\" $inc -o testsym testsym.c $ex";
+    my $cmd;
 
-    $cmd .= " >/dev/null 2>&1" unless $opt_v;
+    if ($Config{'osname'} =~ /VMS/) {
+	$cmd = "$cc /DEFINE=SYM=\"$_[0]\" $inc testsym.c $ex";
+#	$cmd .= " /nowarnings" unless $opt_v;
+    } else {
+	$cmd = "$cc -DSYM=\"$_[0]\" $inc -o testsym testsym.c $ex";
+	$cmd .= " >/dev/null 2>&1" unless $opt_v;
+    }
+
     print LOG $cmd, "\n" if $opt_v;
     flush(LOG);
-    ! system $cmd;
+    if ($Config{'osname'} =~ /VMS/) {
+#	return (system ($cmd));
+	my @result;
+	@result = `$cmd`;
+	if ($#result >= 0) {
+	    print LOG @result if $opt_v; 
+	    return 0;
+	} else { 
+	    print LOG "post: ", $cmd, "\n" if $opt_v; 
+	    print LOG @result if $opt_v; 
+	    return 1; 
+	}
+    } else {
+	return ! system $cmd;
+    }
 }
 
 sub test_intvoid
 {
-    my($cmd)  = "$cc -DSYM=\"$_[0]\" $inc -o testinvd testinvd.c $ex";
+    my $cmd;
+    if ($Config{'osname'} =~ /VMS/) {
+	$cmd = "$cc /DEFINE=SYM=\"$_[0]\" $inc testinvd.c $ex";
+#	$cmd .= " /nowarnings" unless $opt_v;
+    } else {
+	$cmd = "$cc -DSYM=\"$_[0]\" $inc -o testinvd testinvd.c $ex";
+	$cmd .= " >/dev/null 2>&1" unless $opt_v;
+    }
 
-    $cmd .= " >/dev/null 2>&1" unless $opt_v;
     print LOG $cmd, "\n" if $opt_v;
     flush(LOG);
-    ! system $cmd;
+
+    if ($Config{'osname'} =~ /VMS/) {
+#	return (system ($cmd));
+	my @result;
+	@result = `$cmd`;
+	if ($#result >= 0) {
+	    print LOG @result if $opt_v; 
+	    return 0;
+	} else { 
+	    print LOG "post: ", $cmd, "\n" if $opt_v; 
+	    print LOG @result if $opt_v; 
+	    return 1; 
+	}
+    } else {
+	return ! system $cmd;
+    }
 }
 
 sub write_symbol

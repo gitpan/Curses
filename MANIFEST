@@ -9,6 +9,9 @@ cdemo.c
 demo
 gdc
 hints/c-aix.h
+hints/c-dec_osf.h
+hints/c-dgux.h
+hints/c-dynixptx.h
 hints/c-freebsd.bsd.h
 hints/c-freebsd.ncurses.h
 hints/c-hpux.h
@@ -19,8 +22,11 @@ hints/c-linux.ncurses.h
 hints/c-netbsd.h
 hints/c-next.h
 hints/c-none.h
-hints/c-sco42.h
+hints/c-sco.h
 hints/c-solaris.h
 hints/c-sunos.bsd.h
+hints/c-sunos.ncurses.h
 hints/c-sunos.sysv.h
+hints/c-vms.h
 test.syms
+todo

@@ -1,4 +1,4 @@
-/*  Hint file for the SCO Unix 3.2 and 4.2 platform.
+/*  Hint file for the SCO Unix (3.2 and 4.2) platform.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.

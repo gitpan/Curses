@@ -13,6 +13,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#define C_XS_VERSION  1.01
+
 typedef WINDOW *Curses;
 
 /*
@@ -2136,7 +2138,7 @@ XS(XS_Curses_savetty)
 {
     dXSARGS;
 #ifdef C_SAVETTY
-    c_exactargs("savetty");
+    c_exactargs("savetty", items, 0);
     {
 	savetty();
     }
@@ -2784,6 +2786,36 @@ XS(XS_Curses_curscr)
     XSRETURN(1);
 }
 
+XS(XS_Curses_LINES)
+{
+    dXSARGS;
+    c_exactargs("LINES", items, 0);
+    {
+        ST(0) = sv_newmortal();
+        sv_setiv(ST(0), (IV)LINES);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Curses_COLS)
+{
+    dXSARGS;
+    c_exactargs("COLS", items, 0);
+    {
+        ST(0) = sv_newmortal();
+        sv_setiv(ST(0), (IV)COLS);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Curses_XS_VERSION)
+{
+  dXSARGS;
+  ST(0) = sv_newmortal();
+  sv_setnv(ST(0), (double)C_XS_VERSION);
+  XSRETURN(1);
+}
+
 XS(XS_Curses_constant)
 {
     dXSARGS;
@@ -3365,6 +3397,10 @@ XS(boot_Curses)
     newXS("Curses::constant",		XS_Curses_constant,		file);
     newXS("Curses::curscr",		XS_Curses_curscr,		file);
     newXS("Curses::stdscr",		XS_Curses_stdscr,		file);
+    newXS("Curses::LINES",		XS_Curses_LINES,		file);
+    newXS("Curses::COLS",		XS_Curses_COLS,			file);
+    newXS("Curses::XS_VERSION",		XS_Curses_XS_VERSION,		file);
+
     newXS("Curses::Vars::DESTROY",	XS_Curses_Vars_DESTROY,		file);
     newXS("Curses::Vars::FETCH",	XS_Curses_Vars_FETCH,		file);
     newXS("Curses::Vars::STORE",	XS_Curses_Vars_STORE,		file);

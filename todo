@@ -1,0 +1,75 @@
+From carson@Mcs.Net Thu Nov 21 12:56:03 1996
+X-From-Line: carson@Venus.mcs.net  Wed Nov 20 11:11:17 1996
+Received: from cc09ss.unity.ncsu.edu by eos03a.eos.ncsu.edu (8.7.3/ES20May96)
+        id LAA21906; Wed, 20 Nov 1996 11:11:17 -0500 (EST)
+Received: from Kitten.mcs.com by cc09ss.unity.ncsu.edu (8.7.3/NS20May96)
+        id LAA25321; Wed, 20 Nov 1996 11:11:17 -0500 (EST)
+Received: from Mailbox.mcs.com (Mailbox.mcs.com [192.160.127.87]) by Kitten.mcs.com (8.8.2/8.8.2) with ESMTP id KAA24096 for <William_Setzer@ncsu.edu>; Wed, 20 Nov 1996 10:11:16 -0600 (CST)
+Received: from Venus.mcs.net (carson@Venus.mcs.com [192.160.127.92]) by Mailbox.mcs.com (8.8.2/8.8.2) with ESMTP id KAA22247 for <William_Setzer@ncsu.edu>; Wed, 20 Nov 1996 10:11:11 -0600 (CST)
+Received: (from carson@localhost) by Venus.mcs.net (8.8.2/8.8.2) id KAA18323 for William_Setzer@ncsu.edu; Wed, 20 Nov 1996 10:11:09 -0600 (CST)
+From: Carson Wilson <carson@Mcs.Net>
+Message-Id: <199611201611.KAA18323@Venus.mcs.net>
+Subject: I've ported Curses-1.0 to DYNIX/ptx (Sequent)
+To: William_Setzer@ncsu.edu
+Date: Wed, 20 Nov 1996 10:11:09 -0600 (CST)
+X-Mailer: ELM [version 2.4 PL24]
+Content-Type: text
+Lines: 53
+Xref: babylon5.unity.ncsu.edu mail.misc:3181
+X-Gnus-Article-Number: 3181   Wed Nov 20 11:15:09 1996
+
+Dear William Setzer,
+
+Thanks a lot for your work on curseperl.
+
+I've ported it to Perl5 and DYNIX/ptx for the Sequent platform.
+
+Following are the changes to Makefile.PL and the proper c-config.h setup:
+
+1. Makefile.PL:
+The -lc below is necessary to avoid the following problem, as getwidth
+resides in /lib/libc.a:
+
+-----
+$ perl -Iblib/arch -Iblib/lib demo
+Can't load 'blib/arch/auto/Curses/Curses.so' for module Curses: dynamic linker: 
+perl: relocation error: symbol not found: _getwidth at /usr/local/lib/perl5/Dyna
+Loader.pm line 140.
+
+ at blib/lib/Curses.pm line 8
+BEGIN failed--compilation aborted at demo line 3.
+-----
+
+I've removed "-ltermcap" because libtercap.a is just a link to libcurses.a
+on DYNIX.
+
+# DYNIX/ptx (Sequent platform) 4.1.3 (and probably other versions of Dynix):
+# Wed Nov 20 09:40:27 CST 1996, Carson Wilson, Walgreens
+$inc  = "";
+$libs = "-lcurses -lc";
+
+2. c-config.h
+
+/* Change each #undef below to #define if the answer to the question
+ * beside it is "yes".
+ */
+#define C_LONGNAME      /* Does longname() exist?               */
+#define C_LONG0ARGS     /* Does longname() take 0 arguments?    */
+#undef  C_LONG2ARGS     /* Does longname() take 2 arguments?    */
+
+#define C_TOUCHLINE     /* Does touchline() exist?              */
+#define C_TOUCH3ARGS    /* Does touchline() take 3 arguments?   */
+#undef  C_TOUCH4ARGS    /* Does touchline() take 4 arguments?   */
+
+I hope you can include these in the next release; please let me know
+if there is anything else you need.
+
+-- 
+Carson Wilson
+carson@mcs.com
+http://www.mcs.com/~carson
+home phone: 847-432-3077
+work phone: 847-818-4391
+
+
+

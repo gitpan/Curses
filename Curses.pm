@@ -7,6 +7,17 @@ require DynaLoader;
 
 bootstrap Curses;
 
+###
+## Version consistency check
+#
+$VERSION    = 1.01;
+$XS_VERSION = eval { XS_VERSION() };
+$XS_VERSION = "pre 1.01" if $@;
+
+if ($VERSION ne $XS_VERSION) {
+    croak "Curses.pm version [$VERSION] does not match C code [$XS_VERSION]";
+}
+
 tie $LINES,  Curses::Vars, 1;
 tie $COLS,   Curses::Vars, 2;
 tie $stdscr, Curses::Vars, 3;
@@ -55,7 +66,7 @@ sub printw { addstr(sprintf(shift(@_),@_)); }
 @EXPORT = qw(
 &tstp &printw &scanw &_putchar &fullname
 
-stdscr curscr $LINES $COLS KEY_F
+stdscr curscr LINES COLS $LINES $COLS KEY_F
 
 addch addchnstr addchstr addnstr addstr attroff attron attrset
 baudrate beep bkgd bkgdset border box can_change_color cbreak clear

@@ -3,19 +3,26 @@ recommended, especially for the MakeMaker improvements.  Some of
 the MakeMaker stuff mentioned below (PERL_SRC=<...>, etc) may not
 work with perl5.001.
 
+[ Addendum: perl5.003 + the security patch is even better, having the
+  ExtUtils::testlib module.  You should probably upgrade at least to
+  there. ]
+
 When I say "perl5" below, I mean whatever you've called the perl
 version 5 executable on your system.  One common mistake is
 accidentally using perl version 4.
 
-1) Make sure perl5 has been built.  Unpack "Curses-1.0.tar.gz".
+1) Make sure perl5 has been built.  Unpack "Curses-1.01.tar.gz".
 
-   gunzip -c Curses-1.0.tar.gz | tar xvf -
+   gunzip -c Curses-1.01.tar.gz | tar xvf -
 
 2) Chdir to the "Curses" directory.
 
-   cd Curses-1.0
+   cd Curses-1.01
 
-3) Look in the "hints" directory to see if any of the hint files are
+3) Want to see if maybe the package can autoconfigure itself?  It's
+   pretty dumb about it, but give it a try and skip to (5).
+
+4) Look in the "hints" directory to see if any of the hint files are
    appropriate to your machine's OS.  If so, symlink or copy it to the
    file "c-config.h" in the current ("Curses") directory.  If not,
    copy "hints/c-none.h" to "c-config.h" in the current directory.
@@ -25,7 +32,7 @@ accidentally using perl version 4.
    copy so I can include it in future distributions (see
    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
 
-4) Edit "Makefile.PL" and pick or add the appropriate options.
+   Edit "Makefile.PL" and pick or add the appropriate options.
 
 5) perl5 Makefile.PL
 
@@ -52,6 +59,10 @@ accidentally using perl version 4.
    I highly recommend reading the "ExtUtils::MakeMaker" man page, as
    there are lots of neat options you can specify.
 
+   If the "Makefile.PL" tells you that it can't do something (it
+   prints out "I'm sorry" and some more stuff), then you'll need to go
+   back to step (4) and try configuring by hand.
+
 6) make
 
    `make' will first run a perl script called `test.syms' that
@@ -76,18 +87,38 @@ accidentally using perl version 4.
    undefined type "chtype", put "#define chtype int" in "c-config.h"
    after the include file (see "hints/c-sunos.bsd.h" for an example).
 
+   Another problem: Depending on the version of ncurses and the
+   compiler you use, you might get an error that looks approximately
+   like:
+
+      Curses.c: In function `XS_Curses_keyname':
+      Curses.c:1531: warning: initialization discards `const' from pointer
+      target type
+
+   Ignore it; it's only a warning.  Newer ncurses prototype keyname()
+   to returning a const char*, and I didn't feel like going through a
+   bunch of pain to both support older compilers and to make the
+   warning go away.
+
 7) Optionally test the distribution.  This bit can get a little
-   complicated, because things changed between perl5.001 and perl5.002.
+   complicated, because things changed between perl5.001, perl5.002,
+   and perl5.003.
+
    If you didn't set the "INST_*" options in step (5), and if you're
    running perl5.001, try:
 
    perl5 -Iblib demo
    perl5 -Iblib gdc
 
-   If you're running perl5.002 (or later, I hope):
+   If you're running perl5.002, try:
 
    perl5 -Iblib/arch -Iblib/lib demo
    perl5 -Iblib/arch -Iblib/lib gdc
+
+   If you're running perl5.003 (or later, probably), try:
+
+   perl5 -MExtUtils::testlib demo
+   perl5 -MExtUtils::testlib gdc
 
    If you did set the "INST_*" options, hopefully you've put that
    directory in your "PERL5LIB" environment variable.  If not, do. :-)
@@ -105,6 +136,14 @@ accidentally using perl version 4.
    system's "libcurses.a" works to be able to use Curses most
    effectively.
 
+   For "demo", you can try:
+
+   make cdemo
+
+   This will try to compile a pure-C version of the "demo".  If you
+   see the same errors in it that you see in "demo", it means there's
+   a bug in your libcurses.
+   
 8) Doing a :
 
    make install
@@ -120,11 +159,3 @@ accidentally using perl version 4.
    "Curses.pm") for incompatibilities with other Perl programs.  Also
    check the end of the "README" for problems that may exist for your
    particular libcurses.a or operating system.
-
-   For "demo", you can try:
-
-   make cdemo
-
-   This will try to compile a pure-C version of the "demo".  If you
-   see the same errors in it that you see in "demo", it means there's
-   a bug in your libcurses.
