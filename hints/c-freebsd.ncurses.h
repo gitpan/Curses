@@ -1,13 +1,12 @@
-/*  Hint file for the Linux platform, ncurses version of libcurses.
+/*  Hint file for the FreeBSD platform, ncurses version of libcurses.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.
  */
 
-#undef  bool
-#include <curses.h>
-#undef  instr
-#define instr _sigh_sigh_sigh_
+/* These hints thanks to "Andrew V. Stesin" <stesin@elvisti.kiev.ua> */
+
+#include <ncurses.h>
 
 #define C_LONGNAME
 #define C_LONG0ARGS

@@ -163,6 +163,7 @@ EOHDR
 
     while (<DATA>)
     {
+	chop;
 	my($there) = test_symbol($_);
 
 	s/\(.*\s*//;

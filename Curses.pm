@@ -7,10 +7,10 @@ require DynaLoader;
 
 bootstrap Curses;
 
-tie $LINES,   Curses::Vars, 1;
-tie $COLS,    Curses::Vars, 2;
-#tie $stdscr, Curses::Vars, 3; # can't get these to work.
-#tie $curscr, Curses::Vars, 4; # can't get these to work.
+tie $LINES,  Curses::Vars, 1;
+tie $COLS,   Curses::Vars, 2;
+tie $stdscr, Curses::Vars, 3;
+tie $curscr, Curses::Vars, 4;
 
 # mostly taken from mbeattie's NCurses stuff
 sub new
@@ -41,10 +41,16 @@ sub _unimpl
 }
 
 sub tstp     { _unimpl('tstp');      }
-sub printw   { _unimpl('printw');    }
 sub scanw    { _unimpl('scanw');     }
 sub _putchar { _unimpl('_putchar');  }
 sub fullname { _unimpl('fullname');  }
+
+# printw and friends are apparently popular enough that people want
+# them around.  I'm including versions written by:
+# emf@addams.att.com (Ed Freedenburg)
+
+sub printw { addstr(sprintf(shift(@_),@_)); }
+# sub printw   { _unimpl('printw');    }
 
 @EXPORT = qw(
 &tstp &printw &scanw &_putchar &fullname
@@ -134,10 +140,15 @@ if ($OldCurses)
 	eval "sub $_ { $1(\@_); }";
     }
 
+# see commentary under `printw()'
+#    sub wprintw  { _unimpl('wprintw');   }
+#    sub mvprintw { _unimpl('mvprintw');  }
+#    sub mvwprintw{ _unimpl('mvwprintw'); }
+
     eval <<EOS;
-    sub wprintw  { _unimpl('wprintw');   }
-    sub mvprintw { _unimpl('mvprintw');  }
-    sub mvwprintw{ _unimpl('mvwprintw'); }
+sub wprintw   { addstr(shift(@_),sprintf(shift(@_),@_)); }
+sub mvprintw  { addstr(shift(@_),shift(@_),sprintf(shift(@_),@_)); }
+sub mvwprintw { addstr(shift(@_),shift(@_),shift(@_),sprintf(shift(@_),@_)); }
     sub wscanw   { _unimpl('wscanw');    }
     sub mvscanw  { _unimpl('mvscanw');   }
     sub mvwscanw { _unimpl('mvwscanw');  }
@@ -251,10 +262,9 @@ Some functions and variables are not supported by C<Curses>, even with
 the C<BEGIN> line.  They are listed under
 L<"curses(3) items not supported by Curses">.
 
-One incompatibility of note is that the variables C<$stdscr> and
-C<$curscr> do not work.  You should use the functions C<stdscr> and
-C<curscr> instead.  I would like to make the variables work, but
-haven't yet figure out how.
+The variables C<$stdscr> and C<$curscr> are also available as
+functions C<stdscr> and C<curscr>.  This is because of a Perl bug.
+See the L<BUGS> section for details.
 
 =head2 Incompatibilities with previous versions of C<Curses>
 
@@ -265,25 +275,10 @@ instead of C<$str = getstr()> and C<($y, $x) = getyx()>.
 
 =head2 Incompatibilities with other Perl programs
 
-    menu.pl, v3.0
-	There is a bug somewhere that keeps you from redefining
-	functions that are dynamically loaded.  If you need to
-	uncomment the getcap() function in menu.pl, version 3.0, apply
-	the patch in F<menu-3.0.patch> first.  This is a workaround
-	until the bug gets found.
-
-	There is also a bug in some versions of libcurses.a.  If your
-	curses is based on BSD curses and you use more than four
-	getcap()'s (as menu.pl does), it can corrupt the libcurses.a
-	data structures.  This is noticable as an "A", "B", "C" or "D"
-	being printed every time the screen is cleared.  A workaround
-	is to apply the F<menu-3.0.patch> and uncomment the getcap()
-	function.
-
-    menu.pl, v3.1
-	Termcap.pm has been rewritten, so the getcap() solution no
-	longer works, as written.  You may need to apply the
-	F<menu-3.1.patch> to get things running correctly.
+    menu.pl, v3.0 and v3.1
+	There were various interaction problems between these two
+	releases and Curses.  Please upgrade to the latest version
+	(v3.3 as of 3/16/96).
 
 =head1 DIAGNOSTICS
 
@@ -313,17 +308,17 @@ library doesn't define.
 You have a C<Curses> constant in your code that your system's curses(3)
 library doesn't define.
 
-=item * Curses does not support the curses function '$_[0]', used at ...
+=item * Curses does not support the curses function '%s', used at ...
 
 You have a curses(3) function in your code that the C<Curses> module
 doesn't support.
 
-=item * Curses does not support the curses variable '$_[0]', used at ...
+=item * Curses does not support the curses variable '%s', used at ...
 
 You have a curses(3) variable in your code that the C<Curses> module
 doesn't support.
 
-=item * Curses does not support the curses constant '$_[0]', used at ...
+=item * Curses does not support the curses constant '%s', used at ...
 
 You have a bareword in your code that is trying to be interpreted as
 a C<Curses> constant, but C<Curses> doesn't know anything about it.
@@ -342,8 +337,12 @@ Check out the F<perldiag> man page to see if the error is in there.
 
 =head1 BUGS
 
-The functions C<stdscr> and C<curscr> should be $stdscr and $curscr.
-I can't figure out if this is C<Curses>' fault or Perl's.
+If you use the variables C<$stdscr> and C<$curscr> instead of their
+functional counterparts (C<stdscr> and C<curscr>), you might run into
+a bug in Perl where the "magic" isn't called early enough.  This is
+manifested by the C<Curses> package telling you C<$stdscr> isn't a
+window.  One workaround is to put a line like C<$stdscr = $stdscr>
+near the front of your program.
 
 Probably many more.
 
@@ -497,7 +496,7 @@ example of this.
 
 =head2 Supported Variables
 	
-	LINES		COLS
+	LINES		COLS		stdscr[*]	curscr[*]
 	
 =head2 Supported Constants
 	
@@ -552,8 +551,8 @@ example of this.
 	
 	Variables
 	---------
-	ttytype Def_term My_term stdscr[*] curscr[*]
+	ttytype Def_term My_term
  
-[*] stdscr and curscr are available via the Perl functions C<stdscr>
+[*] stdscr and curscr are also available via the Perl functions C<stdscr>
 and C<curscr>.  See L<"Perl 4.X cursperl Compatibility"> for more
 information.

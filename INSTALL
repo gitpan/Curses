@@ -1,53 +1,130 @@
-First, this version *requires* perl5.001.  The enhancements to
-the MakeMaker system are too substantial to ignore.  You'll find
-that you can now install Curses into an already installed system.
+This package requires at least perl5.001, but perl5.002 is highly
+recommended, especially for the MakeMaker improvements.  Some of
+the MakeMaker stuff mentioned below (PERL_SRC=<...>, etc) may not
+work with perl5.001.
 
-1)  Make sure perl5.001 has been built.  Unpack "Curses-a8.tar.gz".  If
-    you haven't installed perl5.001, move the "Curses" directory to
-    "perl5.001/ext/Curses".  Go into the "Curses" directory.
+When I say "perl5" below, I mean whatever you've called the perl
+version 5 executable on your system.  One common mistake is
+accidentally using perl version 4.
 
-2)  Look in the `hints' directory to see if any of the hint files are
-    appropriate to your machine's OS.  If so, symlink or copy it to
-    the file "c-config.h" in the current (Curses) directory.  If not,
-    copy "hints/c-none.h" to "c-config.h" in the current directory.
-    Then edit "c-config.h" and follow the directions.  If you have
-    to "roll your own", be sure and save a copy.  A "make clean"
-    will delete "c-config.h".  If you "rolled your own", please send
-    me a copy so I can include it in future distributions (see
-    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
+1) Make sure perl5 has been built.  Unpack "Curses-a9.tar.gz".
 
-3)  Edit "Makefile.PL" and pick or add the appropriate options.
+   gunzip -c Curses-a9.tar.gz | tar xvf -
 
-4)  perl Makefile.PL
+2) Chdir to the "Curses" directory.
 
-5)  make
+   cd Curses-a9
 
-    `make' will first run a perl script called `test.syms' that
-    generates the file "Curses.h".  It should do a pretty good job,
-    but if you find that it isn't picking up the correct values, you
-    can edit "Curses.h" by hand and follow the directions.  If you
-    have to "roll your own", be sure and save a copy.  A "make clean"
-    will delete "Curses.h".
+3) Look in the "hints" directory to see if any of the hint files are
+   appropriate to your machine's OS.  If so, symlink or copy it to the
+   file "c-config.h" in the current ("Curses") directory.  If not,
+   copy "hints/c-none.h" to "c-config.h" in the current directory.
+   Then edit "c-config.h" and follow the directions.  If you have to
+   "roll your own", be sure and save a copy.  A "make clean" will
+   delete "c-config.h".  If you "rolled your own", please send me a
+   copy so I can include it in future distributions (see
+   "hints/c-isc.h" for an example of a user-contributed "c-config.h").
 
-    `make' will then try to compile "Curses.c".  If you get any
-    undefined curses symbols, it means that your curses really doesn't
-    have those functions, and you should edit "Curses.h" and/or
-    "c-config.h" and change the #define to #undef for that function.
+4) Edit "Makefile.PL" and pick or add the appropriate options.
 
-    If you get other compile errors, it is probably because the curses
-    include file and the perl include files are conflicting.  You'll
-    have to figure out what's wrong and add proper C code to
-    "c-config.h".  See "hints/c-sunos.sysv.h" for an example of how to
-    do this.
+5) perl5 Makefile.PL
 
-    One common problem: If the compile of Curses.c fails because of an
-    undefined type "chtype", put "#define chtype int" in "c-config.h"
-    after the include file (see "hints/c-sunos.bsd.h" for an example).
+   This package needs the perl5 header files.  If you've already
+   installed perl5, the "Makefile.PL" will magically know where
+   they are.  If you haven't installed perl5, you may need to
+   tell the "Makefile.PL" where the header files are.  You can
+   do this with the "PERL_SRC=<source directory>" option.
 
-6)  Enjoy!
+   perl5 Makefile.PL PERL_SRC=/local/src/perl5
 
-    If your enjoyment is ruined (:-) because the module doesn't work
-    right, peruse the Curses pod document (located at the end of
-    "Curses.pm") for incompatibilities with other Perl programs.  Also
-    check the end of the "README" for problems that may exist for your
-    particular libcurses.a or operating system.
+   If you want to install this package somewhere besides the
+   perl5 installation directories, it can get a little complicated.
+   The easiest way is to set the "INST_LIB=", "INST_ARCHLIB="
+   and "INST_MAN3DIR=" variables to the directories where you want
+   things.  You're allowed to use the "~" (tilde) to mean your home
+   directory.
+
+   perl5 Makefile.PL INST_LIB=~/lib/perl INST_ARCHLIB=~/lib/perl \
+      INST_MAN3DIR=~/man/man3
+
+   The "Makefile.PL", along with just about every other perl module,
+   uses the "ExtUtils::MakeMaker" package to generate the "Makefile".
+   I highly recommend reading the "ExtUtils::MakeMaker" man page, as
+   there are lots of neat options you can specify.
+
+6) make
+
+   `make' will first run a perl script called `test.syms' that
+   generates the file "Curses.h".  It should do a pretty good job,
+   but if you find that it isn't picking up the correct values, you
+   can edit "Curses.h" by hand and follow the directions.  If you
+   have to "roll your own", be sure and save a copy.  A "make clean"
+   will delete "Curses.h".
+
+   `make' will then try to compile "Curses.c".  If you get any
+   undefined curses symbols, it means that your curses really doesn't
+   have those functions, and you should edit "Curses.h" and/or
+   "c-config.h" and change the #define to #undef for that function.
+
+   If you get other compile errors, it is probably because the curses
+   include file and the perl include files are conflicting.  You'll
+   have to figure out what's wrong and add proper C code to
+   "c-config.h".  See "hints/c-sunos.sysv.h" for an example of how to
+   do this.
+
+   One common problem: If the compile of Curses.c fails because of an
+   undefined type "chtype", put "#define chtype int" in "c-config.h"
+   after the include file (see "hints/c-sunos.bsd.h" for an example).
+
+7) Optionally test the distribution.  This bit can get a little
+   complicated, because things changed between perl5.001 and perl5.002.
+   If you didn't set the "INST_*" options in step (5), and if you're
+   running perl5.001, try:
+
+   perl5 -Iblib demo
+   perl5 -Iblib gdc
+
+   If you're running perl5.002 (or later, I hope):
+
+   perl5 -Iblib/arch -Iblib/lib demo
+   perl5 -Iblib/arch -Iblib/lib gdc
+
+   If you did set the "INST_*" options, hopefully you've put that
+   directory in your "PERL5LIB" environment variable.  If not, do. :-)
+
+   perl5 demo
+   perl5 gdc
+
+   "gdc" is a digital clock ported from the "ncurses" distribution.
+
+   As mentioned in the "README", the demo is not intended to be an
+   exhaustive test of all the possible Curses functions.  If it
+   doesn't do all the functions correctly, it may be a Curses bug or
+   it may be a problem with your system's "libcurses.a".  There's no
+   getting around the fact that you need to be conversant in how your
+   system's "libcurses.a" works to be able to use Curses most
+   effectively.
+
+8) Doing a :
+
+   make install
+
+   will install everything in the "standard" perl5 places, just like
+   stuff from the base perl5 distribution.  If you set the "INST_*"
+   options to where you want Curses to reside, you can skip this step.
+
+9) Enjoy!
+
+   If your enjoyment is ruined (:-) because the module doesn't work
+   right, peruse the Curses pod document (located at the end of
+   "Curses.pm") for incompatibilities with other Perl programs.  Also
+   check the end of the "README" for problems that may exist for your
+   particular libcurses.a or operating system.
+
+   For "demo", you can try:
+
+   make cdemo
+
+   This will try to compile a pure-C version of the "demo".  If you
+   see the same errors in it that you see in "demo", it means there's
+   a bug in your libcurses.

@@ -1,13 +1,12 @@
-/*  Hint file for the Linux platform, ncurses version of libcurses.
+/*  Hint file for the SCO Unix 3.2 and 4.2 platform.
  *
  *  If this configuration doesn't work, look at the file "c-none.h"
  *  for how to set the configuration options.
  */
 
-#undef  bool
+/* These hints thanks to Han Holl <100327.1632@compuserve.com> */
+
 #include <curses.h>
-#undef  instr
-#define instr _sigh_sigh_sigh_
 
 #define C_LONGNAME
 #define C_LONG0ARGS

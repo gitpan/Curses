@@ -1,6 +1,6 @@
 /*  Curses.c, the good stuff
  *
- *  Copyright (c) 1994,1995  William Setzer
+ *  Copyright (c) 1994-1996  William Setzer
  *
  *  You may distribute under the terms of the Artistic License, as
  *  specified in the README file.
@@ -79,11 +79,18 @@ int argnum;
 	croak("argument is not a Curses window");
 }
 
+/* Fix cast to do the "right thing" for characters bigger than 128.
+ * Shame on me for being ASCII-centric.  Thanks to
+ * win@incom.rhein-main.de (Winfried Koenig).
+ */
 static chtype
 c_sv2chtype(sv)
 SV *sv;
 {
-    if (SvPOK(sv)) { char *tmp = SvPV(sv,na);  return (chtype)tmp[0]; }
+    if (SvPOK(sv)) {
+      char *tmp = SvPV(sv,na);
+      return (chtype)(unsigned char)tmp[0];
+    }
     return (chtype)SvIV(sv);
 }
 
@@ -92,8 +99,7 @@ c_chtype2sv(sv, ch)
 SV *sv;
 chtype ch;
 {
-    if (ch == ERR)     { sv_setsv(sv, &sv_undef); }
-    else if (ch > 255) { sv_setiv(sv, (IV)ch);    }
+    if (ch == ERR || ch > 255) { sv_setiv(sv, (IV)ch);    }
     else {
 	char tmp[2];
 	tmp[0] = (char)ch;
@@ -915,9 +921,9 @@ XS(XS_Curses_getnstr)
     c_countargs("getnstr", items, 2);
     {
 	Curses	win = c_win ? c_sv2Curses(ST(0), 0) : stdscr;
-	char *	str =  sv_grow(ST(c_arg),SvIV(ST(c_arg+1))+1);
 	int	n   = (int)SvIV(ST(c_arg+1));
-	int	ret = CI_OPT_MV_AND( wgetnstr(win, buf, n) );
+	char *	str = (char *)sv_grow(ST(c_arg),n+1);
+	int	ret = CI_OPT_MV_AND( wgetnstr(win, str, n) );
 
 	if (ret != ERR)
 	{
@@ -1188,10 +1194,18 @@ XS(XS_Curses_inchnstr)
     c_countargs("inchnstr", items, 2);
     {
 	Curses	win = c_win ? c_sv2Curses(ST(0), 0) : stdscr;
-	chtype *str = (chtype *)SvPV(ST(c_arg),na);
 	int	n   = (int)SvIV(ST(c_arg+1));
+	chtype *str = (chtype *)sv_grow(ST(c_arg), (n+1)*sizeof(chtype));
 	int	ret = CI_OPT_MV_AND( winchnstr(win, str, n) );
 
+	/* We should probably try to terminate `str' here, but there's
+	 * no real way to tell when we're at the end.  So we just hope.
+	 */
+	if (ret != ERR)
+	{
+            SvCUR(ST(c_arg)) = (n+1) * sizeof(chtype);
+            SvPOK_only(ST(c_arg));
+	}
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)ret);
     }
@@ -1201,6 +1215,7 @@ XS(XS_Curses_inchnstr)
     XSRETURN(1);
 }
 
+/* 250 bytes is a WAG: they could still overflow the buffer */
 XS(XS_Curses_inchstr)
 {
     dXSARGS;
@@ -1208,9 +1223,17 @@ XS(XS_Curses_inchstr)
     c_countargs("inchstr", items, 1);
     {
 	Curses	win = c_win ? c_sv2Curses(ST(0), 0) : stdscr;
-	chtype *str = (chtype *)SvPV(ST(c_arg),na);
+	chtype *str = (chtype *)sv_grow(ST(c_arg),250 * sizeof(chtype));
 	int	ret = CI_OPT_MV_AND( winchstr(win, str) );
 
+	/* We should probably try to terminate `str' here, but there's
+	 * no real way to tell when we're at the end.  So we just hope.
+	 */
+	if (ret != ERR)
+	{
+            SvCUR(ST(c_arg)) = 250 * sizeof(chtype);
+            SvPOK_only(ST(c_arg));
+	}
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)ret);
     }
@@ -1361,10 +1384,16 @@ XS(XS_Curses_insnstr)
     c_countargs("insnstr", items, 2);
     {
 	Curses	win = c_win ? c_sv2Curses(ST(0), 0) : stdscr;
-	char *	str = (char *)SvPV(ST(c_arg),na);
 	int	n   = (int)SvIV(ST(c_arg+1));
+	char *	str = sv_grow(ST(c_arg),n+1);
 	int	ret = CI_OPT_MV_AND( winsnstr(win, str, n) );
 
+	if (ret != ERR)
+	{
+            SvCUR(ST(c_arg)) = strlen(str);
+            SvPOK_only(ST(c_arg));
+            *SvEND(ST(c_arg)) = '\0';
+	}
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)ret);
     }
@@ -1393,6 +1422,7 @@ XS(XS_Curses_insstr)
     XSRETURN(1);
 }
 
+/* 250 bytes is a WAG: they could still overflow the buffer */
 XS(XS_Curses_instr)
 {
     dXSARGS;
@@ -1400,9 +1430,15 @@ XS(XS_Curses_instr)
     c_countargs("instr", items, 1);
     {
 	Curses	win = c_win ? c_sv2Curses(ST(0), 0) : stdscr;
-	char *	str = (char *)SvPV(ST(c_arg),na);
+	char *	str = (char *)sv_grow(ST(c_arg), 250);
 	int	ret = CI_OPT_MV_AND( winstr(win, str) );
 
+	if (ret != ERR)
+	{
+            SvCUR(ST(c_arg)) = strlen(str);
+            SvPOK_only(ST(c_arg));
+            *SvEND(ST(c_arg)) = '\0';
+	}
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (IV)ret);
     }

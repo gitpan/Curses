@@ -1,6 +1,5 @@
-#!../../perl
+#!/usr/local/bin/perl
 
-BEGIN { push(@INC, "../../lib"); }
 use Curses;
 
 initscr();
