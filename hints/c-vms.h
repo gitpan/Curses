@@ -4,7 +4,7 @@
  *  for how to set the configuration options.
  */
 
-/* These hints thanks to Peter Prymmer <pvhp@lns62.lns.cornell.edu> */
+/* These hints thanks to Peter Prymmer <pvhp@forte.com> */
 
 #include <curses.h>
 
@@ -19,3 +19,7 @@
 #define chtype int
 #define cbreak()   crmode()
 #define nocbreak() nocrmode()
+
+#ifndef SCREEN
+#define SCREEN WINDOW
+#endif

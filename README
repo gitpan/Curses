@@ -1,17 +1,32 @@
-    The Curses extension to perl5, version 1.02
+             The Curses extension to perl v5
+                       Version 1.04
 
-	 Copyright (c) 1994-1996  William Setzer
-                All rights reserved.
+
+	 Copyright (c) 1994-2000  William Setzer
+                   All rights reserved.
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the Artistic License.
+    it under the same terms as perl, specifically:
+
+        a) the GNU General Public License as published by the Free
+        Software Foundation; either version 1, or (at your option) any
+        later version, or
+
+        b) the "Artistic License" which comes with this Kit.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     Artistic License for more details. 
 
-This is a dynamic loadable curses module for perl5.  You can get this
+    You should have received a copy of the Artistic License with this
+    Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
+
+    You should also have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+This is a dynamic loadable curses module for perl.  You can get this
 package at any CPAN archive.
 
 Please see the INSTALL document for how to install it on your system,
@@ -19,27 +34,93 @@ the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-New in 1.02:
+New in 1.04:
 
- o The constants OK and ERR were switched!  They should give the
-   right values now.  (Doesn't anyone check their return codes? :-)
+ o (1.03 was a test version.)
 
- o Rename of Curses.h to pCurses.h for case-impaired systems.
+ o Completely retooled most of the important parts!  Reread the INSTALL
+   document "just in case", but the changes should be mostly internal.
 
- o New functions supported:  newterm, set_term
+ o New release is now also covered under the GPL, to appease the
+   license-challenged.
 
- o New hints for BSDOS, BSD386, OS2, and MSWin32.
+ o Dropped support/instructions for perl with version less than 5.003.
 
- My thanks to the following people:
+ o Fixed is_linetouched arg count.
 
- sjpaavol@cc.helsinki.fi   [newterm, set_term]
- jmorzins@MIT.EDU          [ERR <-> OK switched]
- karres@southwind.net      [BSDOS hints]
- gsar@engin.umich.edu      [MSWin32 hints and patches]
- cider@f5.com              [BSDOS hints]
- ilya@math.ohio-state.edu  [OS2 hints, pCurses fix]
- ashted@southern.edu       [BSDOS, BSD386 hints]
+ o Added a Curses::Screen::new to allow for object oriented calls.
 
+ o Added suport for getmaxx() and getmaxy() for those Ultrix/Alpha
+   libs that dont have the -yx version.
+
+ o Added optional panel support!  [*]
+   Thanks to Chris Leach <leachcj at bp.com>.
+
+ o Renamed the variable "rs" in the border function so it would no
+   longer conflict with one defined in threads.
+
+ o Additional VMS fixes.
+
+ o Additional support for IRIX.
+
+ o OpenBSD hints.
+
+ o Added support for the [ncurses] resize() function.
+
+ o Added NCR MPRAS 3.02 hints.
+
+ o Unpolluted na, sv_yes, sv_no, sv_undef.
+
+ o Added DESTROY method to quell "invisible" complaints.
+
+ o Added support for the COLORS and COLOR_PAIRS variables (and
+   function equivalents).
+
+ o Added cygwin hints.
+
+ o Deleted support for the following functions.  (I couldn't remember
+   where I got them in the first place, and in some cases they
+   actually cause problems.)
+
+     getattrs gettmode mvcur setterm
+
+ o Also added support for the following functions.  (I think [hope]
+   this is all of them :)
+
+     attr_get attr_off attr_on attr_set chgat curs_set cursyncup
+     def_prog_mode def_shell_mode delay_output delwin dupwin filter
+     getsyx getwin has_key mvderwin napms putwin redrawln redrawwin
+     reset_prog_mode reset_shell_mode scr_dump scr_init scr_restore
+     scr_set setsyx slk_attr slk_attroff slk_attron slk_attrset
+     slk_color syncdown syncup termattrs termname untouchwin use_env
+
+ o Removed support for the following variables.  (They never worked,
+   but now Curses won't even tell you they don't work.)
+
+     ttytype My_term Def_term
+
+My thanks to the following people:
+
+  walker at sky.nlm.nih.gov           [Curses::Screen::new, IRIX fixes]
+  jrs at sys.uea.ac.uk                [getmaxx, getmaxy]
+  drs1 at lucent.com                  [rs/thread conflict]
+  pvhp at forte.com                   [VMS fixes]
+  sgrozev at orbitel.bg               [OpenBSD hints]
+  mike at unix1.allvirtual.com        [OpenBSD hints]
+  James.Bailey at AtlantaGA.NCR.COM   [NCR hints]
+  Todd.Miller at courtesan.com        [OpenBSD hints]
+  mcafee at umich.edu                 [DESTROY method]
+  michael at shoebox.net              [COLORS/COLOR_PAIRS support]
+  gombasg at inf.elte.hu              [DESTROY method]
+  aweinberger at insweb.com           [OpenBSD hints]
+  spinazzi at databankgroup.it        [Cygwin hints]
+
+[*] His full patch is yet to be integrated.  The parts clearing the
+    way for forms and menu library support are not there yet.
+    Maybe next time... :)
+
+    I also reserve the right to fiddle around with package placement
+    for panels.  Curses::Panels is a probable spot.
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in
@@ -48,15 +129,17 @@ You can type "make cdemo" to make a C language version of the demo.
 If you get the same results via "demo" and "cdemo", but they don't
 look right, then it's a bug in your libcurses, not in Curses.
 
-Many thanks Malcolm Beattie and Larry Wall, without whose code I could
-steal I wouldn't have written this.  Enjoy!
+Enjoy!
 
 
 William Setzer
-William_Setzer@ncsu.edu
+William_Setzer at ncsu.edu
 
 Known Problems
 --------------
 NCurses
    getch() and getstr() don't work right under very old versions of
    ncurses (around v1.8.5).  Please upgrade to a newer version.
+
+   panel_hidden() test is reversed in v1.9.9.g.  Please upgrade to
+   a newer version.

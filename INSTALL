@@ -1,26 +1,17 @@
-This package requires at least perl5.001, but perl5.002 is highly
-recommended, especially for the MakeMaker improvements.  Some of
-the MakeMaker stuff mentioned below (PERL_SRC=<...>, etc) may not
-work with perl5.001.
+This package requires at least perl5.003.  You're on your own before
+then.
 
-[ Addendum: perl5.003 + the security patch is even better, having the
-  ExtUtils::testlib module.  You should probably upgrade at least to
-  there. ]
+1) Make sure perl has been built.  Unpack "Curses-1.04.tar.gz".
 
-When I say "perl5" below, I mean whatever you've called the perl
-version 5 executable on your system.  One common mistake is
-accidentally using perl version 4.
-
-1) Make sure perl5 has been built.  Unpack "Curses-1.02.tar.gz".
-
-   gunzip -c Curses-1.02.tar.gz | tar xvf -
+     gunzip -c Curses-1.04.tar.gz | tar xvf -
 
 2) Chdir to the "Curses" directory.
 
-   cd Curses-1.02
+     cd Curses-1.04
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
-   pretty dumb about it, but give it a try and skip to (5).
+   pretty dumb about it, but give it a try and skip to (5).  (But
+   be sure and read the last paragraph in (4) first.)
 
 4) Look in the "hints" directory to see if any of the hint files are
    appropriate to your machine's OS.  If so, symlink or copy it to the
@@ -34,25 +25,21 @@ accidentally using perl version 4.
 
    Edit "Makefile.PL" and pick or add the appropriate options.
 
-5) perl5 Makefile.PL
+   If you want panel support (from libpanel), you can either add the
+   appropriate flags now, or give auto-configure a whirl, by appending
+   "PANELS":
 
-   This package needs the perl5 header files.  If you've already
-   installed perl5, the "Makefile.PL" will magically know where
-   they are.  If you haven't installed perl5, you may need to
-   tell the "Makefile.PL" where the header files are.  You can
-   do this with the "PERL_SRC=<source directory>" option.
+     perl Makefile.PL PANELS
 
-   perl5 Makefile.PL PERL_SRC=/local/src/perl5
+5) perl Makefile.PL [PANELS]  [options]
 
-   If you want to install this package somewhere besides the
-   perl5 installation directories, it can get a little complicated.
-   The easiest way is to set the "INST_LIB=", "INST_ARCHLIB="
-   and "INST_MAN3DIR=" variables to the directories where you want
-   things.  You're allowed to use the "~" (tilde) to mean your home
-   directory.
+   This package needs the perl header files.  If you've already
+   installed perl, the "Makefile.PL" will magically know where they
+   are.  If you haven't installed perl, you may need to tell the
+   "Makefile.PL" where the header files are.  You can do this with the
+   "PERL_SRC=<source directory>" option.
 
-   perl5 Makefile.PL INST_LIB=~/lib/perl INST_ARCHLIB=~/lib/perl \
-      INST_MAN3DIR=~/man/man3
+     perl Makefile.PL PERL_SRC=/local/src/perl
 
    The "Makefile.PL", along with just about every other perl module,
    uses the "ExtUtils::MakeMaker" package to generate the "Makefile".
@@ -100,31 +87,12 @@ accidentally using perl version 4.
    bunch of pain to both support older compilers and to make the
    warning go away.
 
-7) Optionally test the distribution.  This bit can get a little
-   complicated, because things changed between perl5.001, perl5.002,
-   and perl5.003.
+7) Optionally test the distribution:
 
-   If you didn't set the "INST_*" options in step (5), and if you're
-   running perl5.001, try:
-
-   perl5 -Iblib demo
-   perl5 -Iblib gdc
-
-   If you're running perl5.002, try:
-
-   perl5 -Iblib/arch -Iblib/lib demo
-   perl5 -Iblib/arch -Iblib/lib gdc
-
-   If you're running perl5.003 (or later, probably), try:
-
-   perl5 -MExtUtils::testlib demo
-   perl5 -MExtUtils::testlib gdc
-
-   If you did set the "INST_*" options, hopefully you've put that
-   directory in your "PERL5LIB" environment variable.  If not, do. :-)
-
-   perl5 demo
-   perl5 gdc
+   perl demo
+   perl gdc
+   perl panel.demo  [if you enabled panel support]
+   perl demo2       [stuff that has a 50/50 chance of showing up right]
 
    "gdc" is a digital clock ported from the "ncurses" distribution.
 
@@ -148,9 +116,8 @@ accidentally using perl version 4.
 
    make install
 
-   will install everything in the "standard" perl5 places, just like
-   stuff from the base perl5 distribution.  If you set the "INST_*"
-   options to where you want Curses to reside, you can skip this step.
+   will install everything in the "standard" perl places, just like
+   stuff from the base perl distribution.
 
 9) Enjoy!
 

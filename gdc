@@ -17,6 +17,7 @@
 #  */
 
 use Curses;
+use ExtUtils::testlib;
 
 $YBASE   = 10;
 $XBASE   = 10;

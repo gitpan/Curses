@@ -1,0 +1,82 @@
+#!/usr/local/bin/perl
+##
+##  This code contributed by Chris Leach <leachcj@bp.com>
+
+use ExtUtils::testlib;
+use Curses;
+
+$loaded = 1;
+$doendw = 1;
+
+######################### End of black magic.
+
+# Insert your test code below (better if it prints "ok 13"
+# (correspondingly "not ok 13") depending on the success of chunk 13
+# of the test code):
+
+sub drawline {
+    my $p = shift;
+    my $s = shift || panel_userptr($p);
+    my $w = panel_window($p);
+    
+    foreach $r (1 .. 8) {
+       addstr($w, $r, 3*$r-2, $s);
+    }
+    $p;
+}
+
+sub mkpanel {
+    my $s = shift || "XXX";
+    my $w = Curses->new(10, 26, 12, 25);
+    box($w, 0, 0);
+    my $p = new_panel($w);
+    if ($p) {
+        set_panel_userptr($p, $s);
+        drawline($p, $s);
+    }
+}
+
+sub showus {
+addstr(stdscr, 0, 0, "@_\n");
+update_panels();
+doupdate();
+sleep(2);
+}
+
+my $p1 = mkpanel("000");
+showus("New Panel with 000's");
+
+my $p2 = mkpanel("+++");
+move_panel($p1, 8, 20);
+showus("New Panel with +++'s");
+
+hide_panel($p1);
+showus("Hiding 000's");
+
+showus("000's hidden?  ", panel_hidden($p1) ? "YES" : "NO");
+
+show_panel($p1);  # if panel_hidden($p1);
+showus("Showing 000's");
+
+my $p3 = mkpanel();
+my $w3 = panel_window($p3);
+move_panel($p3, 7, 34);
+showus("New Panel with XXX's");
+
+top_panel(panel_above(panel_above()));
+showus("Moving the panel above the bottom panel to the top");
+
+bottom_panel(panel_below(panel_below()));
+showus("Moving the panel below the top panel to the bottom");
+
+del_panel($p3);
+showus("Deleting panel with XXX's saving window");
+
+replace_panel($p1, $w3);
+showus("Replacing 000's window");
+
+del_panel($p1);
+del_panel($p2);
+endwin(); 
+$doendw = 0;
+print "ok 1\n";
