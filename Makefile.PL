@@ -303,7 +303,7 @@ if (not -e "c-config.h") {
 #  Major cheese alert.  Any -L for the curses library is probably
 #  also needed for the panels library.
 #
-if ($panels and not defined $panel_libs) {
+if ($panels and not $panel_libs) {
     while ($libs =~ m!(-L\S+)!g) {
 	$panel_libs .= $1;
     }
@@ -313,7 +313,7 @@ if ($panels and not defined $panel_libs) {
 #  More major cheese alert.  Any -L for the curses library is probably
 #  also needed for the menus library.
 #
-if ($menus and not defined $menu_libs) {
+if ($menus and not $menu_libs) {
     while ($libs =~ m!(-L\S+)!g) {
 	$menu_libs .= $1;
     }
@@ -323,7 +323,7 @@ if ($menus and not defined $menu_libs) {
 #  More major cheese alert.  Any -L for the curses library is probably
 #  also needed for the forms library.
 #
-if ($forms and not defined $form_libs) {
+if ($forms and not $form_libs) {
     while ($libs =~ m!(-L\S+)!g) {
 	$form_libs .= $1;
     }
@@ -367,7 +367,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },
 	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.11',
+	      VERSION   =>   '1.12',
 );
 
 sub MY::postamble

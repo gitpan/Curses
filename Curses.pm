@@ -1,6 +1,3 @@
-##  This file can be automatically generated; changes may be lost.
-##
-##
 ##  CursesFun.c -- the functions
 ##
 ##  Copyright (c) 1994-2000  William Setzer
@@ -54,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = 1.11; # Also see Makefile.PL
+$VERSION = '1.12'; # Also see Makefile.PL
 
 use Carp;
 require Exporter;

@@ -16,9 +16,9 @@ document for known compile or install problems.
 The changes for Release 1.11 are as follows.  The complete change
 history is in the file HISTORY.
 
-  Bug fixed: Curses.pm treats version as number, so 1.10 == 1.1 .
+  Build bug fixed: panel, forms, menu libs not found in build.
 
-  Various cleanup and improved diagnostics in the build.
+  Build bug fixed: Curses.pm treats version as number, so 1.10 == 1.1 .
 
   =====================
  

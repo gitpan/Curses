@@ -12,17 +12,21 @@ Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
 
-New in 1.11
+New in 1.12 (March 17, 2005)
 
-  Bug fixed: Curses.pm treats version as number, so 1.10 == 1.1 .
+  Build bug fixed: panel, forms, menu libs not found in build.
+
+  Build bug fixed: Curses.pm treats version as number, so 1.10 == 1.1 .
+
+New in 1.11 (March 12, 2005)
 
   Various cleanup and improved diagnostics in the build.
 
 New in 1.10 (March 11, 2005)
 
-  Bug fixed: Makefile has undefined variable $libtyp.
+  Build bug fixed: Makefile has undefined variable $libtyp.
 
-  Bug fixed: Makefile computes wrong guess hint file name.
+  Build bug fixed: Makefile computes wrong guess hint file name.
 
 New in 1.09 (March 6, 2005)
 
