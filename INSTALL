@@ -9,7 +9,11 @@ then.
 3) Want to see if maybe the package can autoconfigure itself?  It's
    pretty dumb about it, but give it a try and skip to (4.5).
 
-4) Look in the "hints" directory to see if any of the hint files are
+4) Configure the build for your system.
+
+4.1)
+
+   Look in the "hints" directory to see if any of the hint files are
    appropriate to your machine's OS.  If so, symlink or copy it to the
    file "c-config.h" in the current ("Curses") directory.  If not,
    copy "hints/c-none.h" to "c-config.h" in the current directory.
@@ -19,60 +23,49 @@ then.
    copy so I can include it in future distributions (see
    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
 
-   Edit "Makefile.PL" and pick or add the appropriate options.
+4.2)
 
-4.5)
+   Set environment variables telling the compiler and linker where your
+   Curses C libraries are:
 
-   If you want panel support (from libpanel), you can either skip back
-   to (4) and add the appropriate flags, or give auto-configure a
-   whirl, by appending "PANELS":
+      CURSES_CFLAGS: -I and -D options needed at compile time for access to
+        the basic Curses library (libcurses).
+      CURSES_LDFLAGS: -L and -l options needed at link time for access to 
+        the basic Curses library (libcurses).  (this really
+        must be only -L and -l options; Makefile.PL parses it).
 
-     perl Makefile.PL PANELS
+      CURSES_PANEL_CFLAGS
+      CURSES_PANEL_LDFLAGS
+      CURSES_MENU_CFLAGS
+      CURSES_MENU_LDFLAGS
+      CURSES_FORM_CFLAGS
+      CURSES_FORM_LDFLAGS
 
-   NOTE: You must have a panel library for this to work.  This doesn't
-   create the functions; it only enables them.  Enabling PANELS
-   support without a panel library is the surest way to keep this
-   package from compiling.
+      These are analogous, but for the panel, menu, and form specialty
+      Curses libraries, respectively.
 
-   Currently, panel support is not available for the BSD versions of
-   the hints file (c-*.bsd.h), because I'm not aware of any panel
-   libraries for BSD curses.
+   You can set these in your shell and export them, e.g.
 
-4.6)
+      export CURSES_CFLAGS="-I /usr/include/curses"
+      export CURSES_LDFLAGS="-L /usr/lib/ncurses -lcurses"
 
-   If you want menu support (from libmenu), you can either skip back
-   to (4) and add the appropriate flags, or give auto-configure a
-   whirl, by appending "MENUS":
-
-     perl Makefile.PL MENUS
-
-   NOTE: You must have a menu library for this to work.  This doesn't
-   create the functions; it only enables them.  Enabling MENUS support
-   without a menu library is the surest way to keep this package from
-   compiling.
-
-   Currently, menu support is not available for the BSD versions of
-   the hints file (c-*.bsd.h), because I'm not aware of any menu
-   libraries for BSD curses.
-
-4.7)
-
-   If you want form support (from libform), you can either skip back
-   to (4) and add the appropriate flags, or give auto-configure a
-   whirl, by appending "FORMS":
-
-     perl Makefile.PL FORMS
-
-   NOTE: You must have a form library for this to work.  This doesn't
-   create the functions; it only enables them.  Enabling FORMS support
-   without a form library is the surest way to keep this package from
-   compiling.
-
-   Currently, form support is not available for the BSD versions of
-   the hints file (c-*.bsd.h), because I'm not aware of any form
-   libraries for BSD curses.
+   Or you can set them right on the 'perl Makefile.PL' command.
 
 5) perl Makefile.PL [PANELS] [MENUS] [FORMS]  [options]
+
+   PANELS means to include Curses panel function.
+
+   MENUS means to include Curses menu functions.
+
+   FORMS means to include Curses form function.
+
+   For PANELS, MENUS, and FORMS, you must have the associated C library on
+   your system (libpanel, libmenu, libform).  Choosing one of these options
+   without having the library will prevent this package from compiling.
+
+   Currently, PANELS, MENUS, and FORMS don't work for the BSD 
+   hints files (c-*.bsd.h), because I'm not aware of any panel, menu,
+   or form libraries for BSD curses.
 
    This package needs the perl header files.  If you've already
    installed perl, the "Makefile.PL" will magically know where they
@@ -93,12 +86,24 @@ then.
 
 6) make
 
-   `make' will first run a perl script called `test.syms' that
-   generates the file "CursesDef.h".  It should do a pretty good job,
-   but if you find that it isn't picking up the correct values, you
-   can edit "CursesDef.h" by hand and follow the directions.  If you
-   have to "roll your own", be sure and save a copy.  A "make clean"
-   will delete "CursesDef.h".
+   `make' will first run a perl script called `test.syms' that investigates
+   what the Curses libraries are like on your system and records the
+   results in the file "CursesDef.h".
+
+   test.syms is very brittle -- it works via test compiles, and if any
+   number of things goes wrong with the test compile, it makes bad
+   assumptions, usually that you don't have a certain function in your
+   Curses library.  If test.syms tells you it can't find functions that
+   you think you have, run test.syms manually with the -v (verbose) option.
+   That will show you the error messages from the test compiles and you
+   can figure out what's going wrong and fix it.  Typically, you'll find
+   that you need to do better on your CURSES_* environment variables
+   (see above).
+
+   Alternatively, if you see that test.syms is picking the wrong
+   values, you can edit "CursesDef.h" by hand and follow the
+   directions.  If you have to "roll your own", be sure and save a
+   copy.  A "make clean" will delete "CursesDef.h".
 
    `make' will then try to compile "Curses.c".  If you get any
    undefined curses symbols, it means that your curses really doesn't

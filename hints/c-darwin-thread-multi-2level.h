@@ -1,10 +1,8 @@
-/*  Hint file for the Linux platform, ncurses version of libcurses.
- *
- *  If this configuration doesn't work, look at the file "c-none.h"
- *  for how to set the configuration options.
- */
+/*  Hint file for Darwin Kernel Version 7.5.0, ncurses version of 
+    libcurses.  Based in FreeBSD, ncurses hints file
 
-#undef  bool
+    This file came from gene03@smalltime.com, September 2004.
+*/
 
 #include <ncurses.h>
 
@@ -12,15 +10,15 @@
 #include <panel.h>
 #endif
 
+
 #ifdef C_MENUSUPPORT
 #include <menu.h>
 #endif
 
+
 #ifdef C_FORMSUPPORT
 #include <form.h>
 #endif
-
-#undef  instr
 
 #define C_LONGNAME
 #define C_LONG0ARGS
@@ -29,3 +27,6 @@
 #define C_TOUCHLINE
 #define C_TOUCH3ARGS
 #undef  C_TOUCH4ARGS
+
+#undef instr
+#undef bool

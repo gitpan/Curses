@@ -12,10 +12,10 @@ use ExtUtils::MakeMaker;
 
 #  Here are the arguments defined for this file:
 #
-#    PANELS   -- enable panel support
-#    MENUS    -- enable menus support
-#    FORMS    -- enable forms support
-#    GEN      -- add generation support to Makefile (developers only!)
+#    PANELS   -- enable panel functions
+#    MENUS    -- enable menus functions
+#    FORMS    -- enable forms functions
+#    GEN      -- add generation function to Makefile (developers only!)
 #
 #  Ex:  "perl Makefile.PL PANELS MENUS GEN"
 
@@ -25,41 +25,24 @@ use ExtUtils::MakeMaker;
 #    $inc    contains any includes or defines (-I or -D) that are
 #               needed to compile libcurses applications
 #    $libs   contains any libraries or library paths (-l or -L) that are
-#               needed to compile libcurses applications
+#               needed to compile libcurses applications.  This must be
+#               -l and -L options only -- we parse it.
 
-my $inc;
-my $libs;
-
-#  If you do not set these explicitly, Makefile.PL will try in a fairly
+#  If these environment variables aren't set, we try in a fairly
 #  stupid fashion to pick them for you, along with a "c-config.h" file.
-#
-#  If you want to include the panels functions, set the following two
-#  variables appropriately, just as above.  You must also give PANELS
-#  as an argument to this file in order to enable panel support (see
-#  above).
 
-my $p_inc;
-my $p_libs;
+my $inc = $ENV{'CURSES_CFLAGS'};
+my $libs = $ENV{'CURSES_LDFLAGS'};
 
-#  If you want to include the menus functions, set the following two
-#  variables appropriately, just as above.  You must also give MENUS
-#  as an argument to this file in order to enable menus support (see
-#  above).
+my $panel_inc = $ENV{'CURSES_PANEL_CFLAGS'};
+my $panel_libs = $ENV{'CURSES_PANEL_LDFLAGS'};
 
-my $m_inc;
-my $m_libs;
+my $menu_inc = $ENV{'CURSES_MENU_CFLAGS'};
+my $menu_libs = $ENV{'CURSES_MENU_LDFLAGS'};
 
-#  If you want to include the forms functions, set the following two
-#  variables appropriately, just as above.  You must also give FORMS
-#  as an argument to this file in order to enable forms support (see
-#  above).
+my $form_inc = $ENV{'CURSES_FORM_CFLAGS'};
+my $form_libs = $ENV{'CURSES_FORM_LDFLAGS'};
 
-my $f_inc;
-my $f_libs;
-
-#  If you do not set these explicitly, Makefile.PL will try in an
-#  even more stupid fashion to pick them for you.
-#
 #  If you want to see examples of what needs to go in the $inc and
 #  $libs variables, check out the `guess_cfg' tables of values below.
 #  In fact, one way to set the variables would be to add or modify an
@@ -185,10 +168,10 @@ if (ref $guess ne 'ARRAY') {
     die "FATAL: internal error: guess_cfg is bad\n";
 }
 
-print "GEN    support: ", ($gen    ? "enabled" : "not applicable"), "\n";
-print "PANELS support: ", ($panels ? "enabled" : "not enabled"), "\n";
-print "MENUS  support: ", ($menus  ? "enabled" : "not enabled"), "\n";
-print "FORMS  support: ", ($forms  ? "enabled" : "not enabled"), "\n";
+print "GEN    function:  ", ($gen    ? "enabled" : "not applicable"), "\n";
+print "PANELS functions: ", ($panels ? "enabled" : "not enabled"), "\n";
+print "MENUS  functions: ", ($menus  ? "enabled" : "not enabled"), "\n";
+print "FORMS  functions: ", ($forms  ? "enabled" : "not enabled"), "\n";
 print "\n";
 
 if (not defined $inc or not defined $libs) {
@@ -259,37 +242,37 @@ EOW
 #  Major cheese alert.  Any -L for the curses library is probably
 #  also needed for the panels library.
 #
-if ($panels and not defined $p_libs) {
+if ($panels and not defined $panel_libs) {
     while ($libs =~ m!(-L\S+)!g) {
-	$p_libs .= $1;
+	$panel_libs .= $1;
     }
-    $p_libs .= " -lpanel ";
+    $panel_libs .= " -lpanel ";
 }
 
 #  More major cheese alert.  Any -L for the curses library is probably
 #  also needed for the menus library.
 #
-if ($menus and not defined $m_libs) {
+if ($menus and not defined $menu_libs) {
     while ($libs =~ m!(-L\S+)!g) {
-	$m_libs .= $1;
+	$menu_libs .= $1;
     }
-    $m_libs .= " -lmenu ";
+    $menu_libs .= " -lmenu ";
 }
 
 #  More major cheese alert.  Any -L for the curses library is probably
 #  also needed for the forms library.
 #
-if ($forms and not defined $f_libs) {
+if ($forms and not defined $form_libs) {
     while ($libs =~ m!(-L\S+)!g) {
-	$f_libs .= $1;
+	$form_libs .= $1;
     }
-    $f_libs .= " -lform ";
+    $form_libs .= " -lform ";
 }
 
 #  Aiee!  Perl also has a <form.h>.  This bites.
 #
-if ($forms and "$inc $p_inc $m_inc $f_inc" !~ /-I/) {
-    $f_inc .= " -I/usr/include ";
+if ($forms and "$inc $panel_inc $menu_inc $form_inc" !~ /-I/) {
+    $form_inc .= " -I/usr/include ";
 }
 
 my $clean = 'CursesDef.h c-config.h cdemo testsym testint testtyp';
@@ -299,8 +282,8 @@ my $realc = $gen
     : "";
 
 WriteMakefile(NAME      =>   'Curses',
-	      INC       =>   "$p_inc $m_inc $f_inc $inc",
-	      LIBS      => [ "$p_libs $m_libs $f_libs $libs" ],
+	      INC       =>   "$panel_inc $menu_inc $form_inc $inc",
+	      LIBS      => [ "$panel_libs $menu_libs $form_libs $libs" ],
 	      H         => [ 'CursesDef.h'                   ],
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },

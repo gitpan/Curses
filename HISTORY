@@ -12,6 +12,17 @@ Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
 
+New in 1.08 (November 2004)
+
+  - perl.syms more verbose so you can diagnose failures.
+
+  - You can use environment variables instead of modifying Makefile.PL
+    to set your -I, -L, etc. options for the Curses libraries.
+
+  - c-linux.ncurses.h hints file includes ncurses.h, not curses.h.
+
+  - New c-darwin-thread-multi-2level.h hints file.
+
 New in 1.07 (September 2004)
 
   - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't

@@ -103,11 +103,11 @@ else {
 }
 $compile =~ s!{NULL}!!;
 
-# print STDOUT "compile: $compile\n";
-
 if ($compile =~ /{/) {
     die "OOPS: internal error getting compile command: $compile\n";
 }
+
+print STDOUT "Doing test compiles with the compile command '$compile'\n";
 
 
 ###
