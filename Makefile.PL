@@ -25,14 +25,24 @@
 # $libs = "-lncurses";
 
 # Solaris
-# $inc  = "-I/usr/include";
+# $inc  = "";
 # $libs = "-L/usr/ccs/lib -lcurses";
 
-# Note for Solaris 2.3:
-#   To get the module to compile properly with gcc, you must add
-#   `-DSYSV=1' to $inc.  This will disable the redefinition of memcpy
-#   to bcopy that is present in /usr/include/curses.h.
+# Notes for Solaris:
+#   Under 2.3, it was reported that to get the module to compile properly
+#   with gcc, you must add `-DSYSV=1' to $inc.  This will disable the
+#   redefinition of memcpy to bcopy that is present in /usr/include/curses.h.
 #   [Courtesy of Dave Blaszyk <dvb@ycc.Kodak.COM>]
+#
+#   $inc also contained "-I/usr/include", but this seems to cause a great
+#   deal of trouble for gcc under perl5.002, so I removed it by default.
+#   I have tested Curses-a9 with perl5.002 and gcc263 and Sun's unbundled
+#   cc on Solaris 2.4 with an empty $inc and had no problems, but your
+#   mileage may vary.
+#
+#   If you are having trouble compiling under Solaris, try various
+#   combinations of "-I/usr/include" and "-DSYSV=1" to see if it fixes
+#   things.
 
 # SunOS SysV
 # $inc  = "-I/usr/5include";
@@ -52,7 +62,7 @@ unless (defined $inc and defined $libs) {
 	       INC       => $inc,
 	       LIBS      => [ $libs ],
 	       H         => [ 'Curses.h' ],
-	       VERSION   => 'a9',
+	       VERSION   => '1.0',
 	       SKIP      => [ 'xs_c', 'xs_o' ],
 	       clean     => { FILES => 'Curses.h c-config.h cdemo' },
 	       dist      => { COMPRESS => 'gzip' }

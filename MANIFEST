@@ -12,6 +12,7 @@ hints/c-aix.h
 hints/c-freebsd.bsd.h
 hints/c-freebsd.ncurses.h
 hints/c-hpux.h
+hints/c-irix.h
 hints/c-isc.h
 hints/c-linux.bsd.h
 hints/c-linux.ncurses.h

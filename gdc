@@ -4,6 +4,9 @@
 # It's not exact, because I was simplifying things to find a bug in my
 # port.
 #
+# Also note that this is basically a direct port.  If it looks like C
+# written in perl, that's because it is.  :-)
+#
 # /*
 #  * Grand digital clock for curses compatible terminals
 #  * Usage: gdc [-s] [n]   -- run for n seconds (default infinity)

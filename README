@@ -1,4 +1,4 @@
-    The Curses extension to perl5, version alpha9
+    The Curses extension to perl5, version 1.0
 
 	 Copyright (c) 1994-1996  William Setzer
                 All rights reserved.
@@ -14,32 +14,35 @@
 This is a dynamic loadable curses module for perl5.  You can get this
 package at any CPAN archive, or from:
 
-   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses-a9.tar.gz
+   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses-1.0.tar.gz
 
 Mirrors take note:  This is also available as:
 
-   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses/Curses-a9.tar.gz
+   ftp://ftp.ncsu.edu/pub/math/wsetzer/Curses/Curses-1.0.tar.gz
 
 Please see the INSTALL document for how to install it on your system,
 the Curses pod (located at the end of "Curses.pm") for
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-New in alpha 9:
+New in 1.0:
 
-   o Bug fixes, new hint files, a "cdemo" to help debugging.
+   o Hey, a real release!  :-)
+
+   o Note added in Makefile.PL to address the `top_env' problem when
+     compiling for Solaris with gcc.
+
+   o Another test program "gdc" from the ncurses distribution, ported
+     quickly to perl.
+
+   o IRIX hint file.
+
+   o Better INSTALL instructions, I think.  I don't remember when I
+     wrote them, so you might only see what you saw in alpa 9.
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in
-an "eval" and try again.
-
-Please note: If no serious problems crop up in this release, I'll
-rename it Curses-1.00 in a couple of months and that'll probably be
-the end of the supported maintenance on it.  I am presently working on
-an "NCurses" module, based on the "ncurses" SysV-ish XSI4 compliant
-free libcurses maintained by Z.M. Ben-Halid and Eric Raymond.  This is
-a very good curses, and standardizing on one particular implementation
-allows one to (finally) write portable scripts.
+an "eval" and try again.  Same goes double for the "gdc" program.
 
 Many thanks Malcolm Beattie and Larry Wall, without whose code I could
 steal I wouldn't have written this.  Enjoy!
