@@ -12,6 +12,15 @@ Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
 
+New in 1.09 (March 2005)
+
+  - Makefile.PL searches for curses header files instead of assuming
+    based on $OSNAME.
+
+  - Makefile.PL warns user to reconfigure environment when form.h is
+    in /usr/include rather than just add -I/usr/include to the compile
+    (this concerns the problem with the conflicting Perl form.h file).
+
 New in 1.08 (November 2004)
 
   - perl.syms more verbose so you can diagnose failures.

@@ -7,7 +7,7 @@ then.
    .tgz file you downloaded from CPAN)
 
 3) Want to see if maybe the package can autoconfigure itself?  It's
-   pretty dumb about it, but give it a try and skip to (4.5).
+   pretty dumb about it, but give it a try and skip to (5).
 
 4) Configure the build for your system.
 
@@ -24,6 +24,26 @@ then.
    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
 
 4.2)
+
+   Curses has an interface header file named form.h.  If on your system
+   this is in a system header file directory such as /usr/include, you
+   have a problem.  That's because Perl also has a file named form.h
+   in a directory that is searched before the system directories in the
+   compile of the Perl Curses module.
+
+   So you'll have to fix that.  It's better to have your Curses stuff
+   in its own directory.  /usr/include/ncurses is conventional.  Move
+   all your Curses header files (curses.h, ncurses.h, form.h, menu.h,
+   panel.h) into this directory and set the _CFLAGS variables below
+   accordingly.  If you use /usr/include/ncurses, you don't have to
+   bother with the environment variables, because Makefile.PL will
+   find them.
+
+   You can ignore all this if you're not building forms capability
+   into the Perl Curses module (by specifying "FORMS" as an option to
+   Makefile.PL below).
+
+4.3)
 
    Set environment variables telling the compiler and linker where your
    Curses C libraries are:
@@ -51,6 +71,7 @@ then.
 
    Or you can set them right on the 'perl Makefile.PL' command.
 
+
 5) perl Makefile.PL [PANELS] [MENUS] [FORMS]  [options]
 
    PANELS means to include Curses panel function.
@@ -75,14 +96,14 @@ then.
 
      perl Makefile.PL PERL_SRC=/local/src/perl
 
-   The "Makefile.PL", along with just about every other perl module,
-   uses the "ExtUtils::MakeMaker" package to generate the "Makefile".
-   I highly recommend reading the "ExtUtils::MakeMaker" man page, as
-   there are lots of neat options you can specify.
+   The "Makefile.PL", as with just about every other perl module, uses
+   the "ExtUtils::MakeMaker" package to generate a make file (named
+   "Makefile").  I highly recommend reading the "ExtUtils::MakeMaker"
+   man page, as there are lots of neat options you can specify.
 
-   If the "Makefile.PL" tells you that it can't do something (it
-   prints out "I'm sorry" and some more stuff), then you'll need to go
-   back to step (4) and try configuring by hand.
+   If Makefile.PL tells you that it can't do something (it prints out
+   "I'm sorry" and some more stuff), then you'll need to go back to
+   step (4) and try configuring by hand.
 
 6) make
 
@@ -116,7 +137,7 @@ then.
    "c-config.h".  See "hints/c-sunos.sysv.h" for an example of how to
    do this.
 
-7) Optionally test the distribution:
+7) Test the distribution:
 
    perl demo
    perl gdc

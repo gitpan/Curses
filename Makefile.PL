@@ -138,6 +138,52 @@ my $guess_cfg = {
 ###
 ## You shouldn't need to change anything below
 #
+
+
+
+sub guessAtCursesLocation($$$) {
+    my ($incR, $libsR, $libtypR) = @_;
+
+    print qq{Making a guess for \$inc and/or \$libs...\n};
+
+    my $guess  = $guess_cfg->{$^O};
+
+    if (ref $guess eq 'HASH') {
+        $$libtypR = $guess->{'default'};
+        $guess    = $guess->{$libtyp};
+    }
+    if (ref $guess ne 'ARRAY') {
+        die "FATAL: internal error: guess_cfg is bad\n";
+    }
+    if (not defined $guess) {
+        print STDERR
+        "I'm sorry, but I could not make a good guess for the includes and\n" .
+        "libraries that are needed.  You will need to set the CURSES_\n" .
+        "environment variables as described in the INSTALL file.\n";
+        exit 1;
+    }
+
+    if (-f('/usr/include/ncurses/ncurses.h')) {
+        $inc = '-I/usr/include/ncurses';
+    } elsif (-f('/usr/include/curses/curses.h')) {
+        $inc = '-I/usr/include/curses';
+    } elsif (-f('/usr/include/ncurses.h')) {
+        $inc = '';
+    } elsif (-f('/usr/include/curses.h')) {
+        $inc = '';
+    } else {
+        $inc  = $guess->[0];
+    }
+
+    $libs = $guess->[1];
+
+    $$incR = $inc;
+    $$libsR = $libs;
+}
+
+
+
+
 my $gen;
 my $panels;
 my $menus;
@@ -155,18 +201,7 @@ while (@ARGV) {
 }
 @ARGV = @argv;   # pass non-Curses arguments to MakeMaker
 
-my $guess  = $guess_cfg->{$^O};
 my $source = "hints/c-$^O";
-
-
-if (ref $guess eq 'HASH') {
-    my $libtyp = $guess->{'default'};
-    $guess     = $guess->{$libtyp};
-    $source   .= ".$libtyp";
-}
-if (ref $guess ne 'ARRAY') {
-    die "FATAL: internal error: guess_cfg is bad\n";
-}
 
 print "GEN    function:  ", ($gen    ? "enabled" : "not applicable"), "\n";
 print "PANELS functions: ", ($panels ? "enabled" : "not enabled"), "\n";
@@ -175,23 +210,11 @@ print "FORMS  functions: ", ($forms  ? "enabled" : "not enabled"), "\n";
 print "\n";
 
 if (not defined $inc or not defined $libs) {
-    print qq{Making a guess for \$inc and/or \$libs...\n};
-
-    if (not defined $guess) {
-	print STDERR <<'EOW';
-
-I'm sorry, but I could not make a good guess for the includes and
-libraries that are needed.  You will need to edit Makefile.PL and
-follow the instructions for defining the $inc and $libs variables.
-EOW
-	exit 1;
+    guessAtCursesLocation(\$inc, \$libs, \my $libtyp);
+    if (defined($libtyp)) {
+        $source .= $libtyp;
     }
-
-    $inc  = $guess->[0];
-    $libs = $guess->[1];
 }
-
-
 if (not -e "c-config.h") {
     print qq{Making a guess for "c-config.h"...\n};
 
@@ -269,10 +292,28 @@ if ($forms and not defined $form_libs) {
     $form_libs .= " -lform ";
 }
 
-#  Aiee!  Perl also has a <form.h>.  This bites.
-#
-if ($forms and "$inc $panel_inc $menu_inc $form_inc" !~ /-I/) {
-    $form_inc .= " -I/usr/include ";
+# Both Perl and Ncurses have a form.h.  We have to include the Perl
+# header files in our search path, but don't need form.h itself.
+# Because the Curses form library header directory comes before the
+# perl header directory in our search path, that isn't normally a
+# problem.  EXCEPT: when there is no specific Curses form library
+# directory, and the Curses form.h is instead in the general system
+# search path, e.g.  /usr/include/form.h.  The system directories come
+# after the Perl directory in the search.  There used to be a
+# workaround here where we would simply add /usr/include to the front
+# of the search path, but that is not only gross, but ineffective with
+# some compilers, which ignore a -I option that adds a directory that
+# is a system directory (e.g. gcc 3).
+
+# To deal with this, we make a rough check for the problem, and if it
+# appears to exist, we tell the user to fix it.
+
+if ($forms and $form_inc !~ m{-I} and -f('/usr/include/form.h')) {
+    print("WARNING: Your Curses form.h file appears to be in the default\n");
+    print("system search path, which will not work for us because of\n");
+    print("the conflicting Perl form.h file.  This means your 'make' will\n");
+    print("probably fail unless you fix this, as described in the INSTALL\n");
+    print("file.\n");
 }
 
 my $clean = 'CursesDef.h c-config.h cdemo testsym testint testtyp';
@@ -288,7 +329,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      clean     => { FILES    => $clean              },
 	      realclean => { FILES    => $realc              },
 	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.08',  # also see $VERSION in Curses.pm
+	      VERSION   =>   '1.09',
 );
 
 sub MY::postamble

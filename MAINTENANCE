@@ -1,0 +1,26 @@
+These are notes for the maintainer.
+
+Steps to release:
+
+  - Update HISTORY file with description of new stuff and release date.
+
+  - Copy the changes for the current release in README.
+
+  - Update version number in Makefile.PL (search for VERSION).
+
+  - Update version number in Curses.pm (search for VERSION).
+
+  - Make a tarball named like Curses-1.07.tgz .
+
+  - Upload via pause.perl.org.
+
+  - PAUSE will automatically extract the README file from the tarball
+    and install it as e.g. Curses-1.07.readme
+
+  - PAUSE will open the tarball automatically and index the packages it finds
+    in there by name (Curses::Window, Curses::Screen, etc.).
+
+    It will find and index the package "Gen" and extract its README too.  I'm
+    pretty sure this is wrong -- this looks like it's just supposed to be a
+    private thing used in the build.  Someday, we should find a way to stop
+    this.

@@ -34,11 +34,17 @@ In order to avoid this problem, use the alternate functions:
 
 which take an extra "size of buffer" argument.
 
-The changes for Release 1.07 are as follows.  The complete change
+The changes for Release 1.09 are as follows.  The complete change
 history is in the file HISTORY.
 
-  - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't
-    work on some systems (causes a build failure).
+  - Makefile.PL searches for curses header files instead of assuming
+    based on $OSNAME.
+
+  - Makefile.PL warns user to reconfigure environment when form.h is
+    in /usr/include rather than just add -I/usr/include to the compile
+    (this concerns the problem with the conflicting Perl form.h file).
+
+  =====================
  
 
 The "demo" program is for demonstration purposes only.  If it
@@ -58,6 +64,10 @@ and report bugs to and ask technical questions of Bryan, but don't hold
 your breath.  If you should have a fix or enhancement, though, Bryan will
 incorporate it into the package promptly.
 
+Email Bryan at bryanh@giraffe-data.com.  Do not use the CPAN bug
+database to report a bug.  It's more work for both parties and Bryan
+doesn't know a bug has been opened except when he occasionally goes to
+look.
 
 
 Known Problems
