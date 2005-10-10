@@ -4,9 +4,11 @@
  *  for how to set the configuration options.
  */
 
-/* These hints thanks to Federico Spinazzi <spinazzi@databankgroup.it> */
+/* These hints thanks to Federico Spinazzi <spinazzi@databankgroup.it>
+   (2001) and yselkowitz@users.sourceforge.net (October 2005)
+*/
 
-#include <curses.h>
+#include <ncurses.h>
 
 #ifdef C_PANELSUPPORT
 #include <panel.h>
@@ -19,6 +21,9 @@
 #ifdef C_FORMSUPPORT
 #include <form.h>
 #endif
+
+#undef bool
+#undef instr
 
 #undef  C_LONGNAME
 #undef  C_LONG0ARGS

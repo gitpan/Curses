@@ -13,15 +13,29 @@ the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-The changes for Release 1.11 are as follows.  The complete change
+The changes for Release 1.13 are as follows.  The complete change
 history is in the file HISTORY.
 
-  Build bug fixed: panel, forms, menu libs not found in build.
+  Fix so it builds on current Cygwin.
 
-  Build bug fixed: Curses.pm treats version as number, so 1.10 == 1.1 .
+  Some kind of build fix to get panels, forms, and menu functions to build.
 
   =====================
  
+
+BINARY DISTRIBUTIONS
+--------------------
+
+There is a binary package for Cygwin at
+
+  ftp://sunsite.dk/projects/cygwinports/release/perl/perl-Curses
+
+The maintainer of this CPAN source package doesn't know of any others,
+but if you do, let him know and he will add them here.
+
+
+DEMO PROGRAMS
+-------------
 
 The "demo" program is for demonstration purposes only.  If it
 references a function your version of curses doesn't have, wrap it in

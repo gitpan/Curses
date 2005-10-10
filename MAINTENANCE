@@ -6,7 +6,7 @@ Steps to release:
 
     make realclean
     Set up environment variables, c-config.h if required.
-    perl Makefile.PL
+    perl Makefile.PL PANELS MENUS FORMS
     make
     perl -Mblib -MCurses -e1
 

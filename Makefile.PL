@@ -95,7 +95,7 @@ my $guess_cfg = {
   'aix'       => [ ''                       => '-lcurses -ltermcap'        ],
   'bsd386'    => [ ''                       => '-lcurses -ltermcap'        ],
   'bsdos'     => [ ''                       => '-lcurses -ltermcap'        ],
-  'cygwin'    => [ '-I/usr/local/include'   => '-lncurses'                 ],
+  'cygwin'    => [ '-I/usr/include/ncurses' => '-lncurses'                 ],
   'darwin'    => [ ''                       => '-lcurses'                  ],
   'dec_osf'   => [ ''                       => '-lcurses -ltermcap'        ],
   'dgux'      => [ ''                       => '-lcurses -ltermcap'        ],
@@ -360,22 +360,30 @@ my $realc = $gen
       'CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c'
     : "";
 
+my $components =
+    ($panels ? " PANELS " : "") .
+    ($menus  ? " MENUS "  : "") .
+    ($forms  ? " FORMS "  : "");
+
 WriteMakefile(NAME      =>   'Curses',
 	      INC       =>   "$panel_inc $menu_inc $form_inc $inc",
 	      LIBS      => [ "$panel_libs $menu_libs $form_libs $libs" ],
 	      H         => [ 'CursesDef.h'                   ],
-	      clean     => { FILES    => $clean              },
-	      realclean => { FILES    => $realc              },
-	      dist      => { COMPRESS => 'gzip -9f'          },
-	      VERSION   =>   '1.12',
+	      clean     => { FILES      => $clean              },
+	      realclean => { FILES      => $realc              },
+	      dist      => { COMPRESS   => 'gzip -9f'          },
+              postamble => { COMPONENTS => $components         },
+	      VERSION   =>   '1.13',
 );
 
-sub MY::postamble
-{
+sub MY::postamble {
+
+    my ($this, %args) = @_;
+
     my $echo = $OSNAME eq 'VMS' ? 'write sys$output' : 'echo';
     my $mf   = <<EOM;
 CursesDef.h: c-config.h Makefile.PL list.syms
-	\$(PERL) test.syms $panels $menus $forms
+	\$(PERL) test.syms $args{COMPONENTS}
 
 c-config.h:
 	@ $echo "You need to make a c-config.h.  See the INSTALL document.";

@@ -52,7 +52,8 @@ then.
         the basic Curses library (libcurses).
       CURSES_LDFLAGS: -L and -l options needed at link time for access to 
         the basic Curses library (libcurses).  (this really
-        must be only -L and -l options; Makefile.PL parses it).
+        must be only -L and -l options; Makefile.PL parses it.  Furthermore,
+        there can't be any space between the -L or -l and its value).
 
       CURSES_PANEL_CFLAGS
       CURSES_PANEL_LDFLAGS
@@ -66,8 +67,8 @@ then.
 
    You can set these in your shell and export them, e.g.
 
-      export CURSES_CFLAGS="-I /usr/include/curses"
-      export CURSES_LDFLAGS="-L /usr/lib/ncurses -lcurses"
+      export CURSES_CFLAGS="-I/usr/include/ncurses"
+      export CURSES_LDFLAGS="-L/usr/lib/ncurses -lncurses"
 
    Or you can set them right on the 'perl Makefile.PL' command.
 

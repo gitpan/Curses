@@ -11,6 +11,11 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.13 (October 10, 2005)
+
+  Fix so it builds on current Cygwin.
+
+  Some kind of build fix to get panels, forms, and menu functions to build.
 
 New in 1.12 (March 17, 2005)
 

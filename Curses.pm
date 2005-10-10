@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.12'; # Also see Makefile.PL
+$VERSION = '1.13'; # Also see Makefile.PL
 
 use Carp;
 require Exporter;

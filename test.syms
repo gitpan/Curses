@@ -153,8 +153,8 @@ while (@ARGV) {
 
 	next;
     };	
-    $arg =~ /^-/ and Usage("Unknown option: $_");
-    Usage("Unknown argument: $_");
+    $arg =~ /^-/ and Usage("Unknown option: $arg");
+    Usage("Unknown argument: $arg");
 }
 if (@ARGV) { Usage() }
 
