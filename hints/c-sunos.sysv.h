@@ -7,11 +7,10 @@
 /* The combined set of lines below between * vvvv * and * ^^^^ *
  * below is one example of how to fix compiler errors between the
  * curses include file and the perl include files.  It turns out that
- * for the SunOS platform, SysV curses, there were three problems:
+ * for the SunOS platform, SysV curses, there were these problems:
  *
  * 1) sprintf() was declared as returning different types in <curses.h>
  *    and "perl.h"
- * 2) "instr" was defined in both <curses.h> and "perl.h"
  * 3) Lots of redefined warnings, because <sys/ioctl.h> was included by
  *    both <curses.h> and "perl.h"
  *
@@ -41,7 +40,6 @@
 
 /* vvvv */
 #undef sprintf
-#undef instr
 #define _sys_ioctl_h
 /* ^^^^ */
 

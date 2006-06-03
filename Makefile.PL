@@ -1,4 +1,4 @@
-#!../../perl
+#! /usr/bin/perl -w
 ##
 ##  Makefile.PL
 ##
@@ -9,7 +9,7 @@
 
 require 5.005;
 use strict;
-use warnings;
+#use warnings;   Can't use; new since Perl 5.005; use perl -w instead
 use ExtUtils::MakeMaker;
 use English;
 
@@ -157,9 +157,13 @@ sub guessAtCursesLocation($$$) {
 
     my $guess  = $guess_cfg->{$OSNAME};
 
+    my $libtyp;  # 'bsd' or 'ncurses'
+
     if (ref $guess eq 'HASH') {
-        $$libtypR = $guess->{'default'};
-        $guess    = $guess->{$$libtypR};
+        # For this platform, we have a choice of Curses library.  We'll
+        # choose the default.
+        $libtyp = $guess->{'default'};
+        $guess  = $guess->{$libtyp};
     }
     if (ref $guess ne 'ARRAY') {
         die "FATAL: internal error: guess_cfg is bad\n";
@@ -186,17 +190,28 @@ sub guessAtCursesLocation($$$) {
 
     $libs = $guess->[1];
 
-    $$incR = $inc;
-    $$libsR = $libs;
+    print("Guesses:  includes '$inc', libs '$libs' ");
+    if (defined($libtyp)) {
+        print("Curses type $libtyp");
+    } else {
+        print("Curses type irrelevant");
+    }
+    print("\n");
+
+    $$incR    = $inc;
+    $$libsR   = $libs;
+    $$libtypR = $libtyp;
 }
 
 
 
 
 sub makeConfigH($) {
-
     my ($libTypeArg) = @_;
-
+#-----------------------------------------------------------------------------
+#  $libTypeArg is the kind of Curses library we should choose -- 'bsd' or
+#  'ncurses'.  It is undefined if there is no choice on this system.
+#-----------------------------------------------------------------------------
     print qq{Making a guess for "c-config.h"...\n};
 
     my $libType;
@@ -242,7 +257,7 @@ EOW
 	if ($sys =~ m!([^\\:\w/. -])!) {
 	    print STDERR <<EOW;
 
-I'm sorry.  I was going to try and pick a "c-config.h" for you, but it
+I'm sorry.  I was going to try to pick a "c-config.h" for you, but it
 looks like there are some non-standard characters in the exec string.
 I'm feeling rather paranoid, so I'll let you look at the line and do
 it by hand if it looks OK.  I wanted to execute a copy and thought I
@@ -373,7 +388,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      realclean => { FILES      => $realc              },
 	      dist      => { COMPRESS   => 'gzip -9f'          },
               postamble => { COMPONENTS => $components         },
-	      VERSION   =>   '1.13',
+	      VERSION   =>   '1.14',
 );
 
 sub MY::postamble {

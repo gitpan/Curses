@@ -20,8 +20,6 @@
 #include <form.h>
 #endif
 
-#undef instr
-
 #define C_LONGNAME
 #define C_LONG0ARGS
 #undef  C_LONG2ARGS

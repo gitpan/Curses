@@ -14,8 +14,6 @@ Steps to release:
 
   - Update HISTORY file with description of new stuff and release date.
 
-  - Copy the changes for the current release in README.
-
   - Update version number in Makefile.PL (search for VERSION).
 
   - Update version number in Curses.pm (search for VERSION).
@@ -24,7 +22,7 @@ Steps to release:
 
     tar --file=/tmp/Curses-1.07.tgz --gzip --create Curses-1.07
 
-  - Upload via pause.perl.org.
+  - Upload via pause.perl.org.  Use "upload a file to CPAN" link.
 
     It goes into CPAN in the directory belonging to the user who
     uploaded it.  PAUSE gives you various options for uploading, tells
@@ -41,3 +39,9 @@ Steps to release:
     pretty sure this is wrong -- this looks like it's just supposed to be a
     private thing used in the build.  Someday, we should find a way to stop
     this.
+
+
+For Bryan's test system:
+
+  export CURSES_LDFLAGS="-L /usr/link/ncurses -lgpm"
+  export CURSES_CFLAGS="-I /usr/include/ncurses"

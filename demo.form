@@ -56,7 +56,7 @@ foreach my $F (@$flist) {
 }
 push @pack, 0;
 
-my $form = new_form(pack "I*", @pack);
+my $form = new_form(pack "J*", @pack);
 if ($form eq '') { fatal("new_form failed") }
 
 my $rows;

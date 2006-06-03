@@ -28,5 +28,4 @@
 #define C_TOUCH3ARGS
 #undef  C_TOUCH4ARGS
 
-#undef instr
 #undef bool

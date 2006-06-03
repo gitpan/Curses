@@ -23,7 +23,6 @@
 #endif
 
 #undef bool
-#undef instr
 
 #undef  C_LONGNAME
 #undef  C_LONG0ARGS

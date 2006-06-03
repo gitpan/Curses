@@ -11,6 +11,18 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.14 (June 3, 2006)
+
+  Make demo.form work on 64 bit machine.
+
+  Add some narration to Makefile.PL to help with diagnosis.
+
+  Move undef of 'instr' from individual hint files to Curses.c and add
+  explanation.
+
+  Use perl -w instead of 'use warnings' in Makefile.PL so it works with
+  older Perl.
+
 New in 1.13 (October 10, 2005)
 
   Fix so it builds on current Cygwin.

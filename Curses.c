@@ -10,6 +10,14 @@
 #include "CursesTyp.h"
 #include "c-config.h"
 
+/* c-config.h above includes Ncurses header files that define macro
+   'instr'.  Unfortunately, perl.h (below) also defines 'instr'.
+   Fortunately, we don't need the Curses version -- we use
+   winstr(stdscr, ...) instead.  So we undef instr here to avoid a compiler
+   warning about the redeclaration.
+*/
+#undef instr
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
