@@ -1,7 +1,14 @@
 This package requires at least perl5.005.  You're on your own before
 then.
 
-1) Make sure perl has been built.  
+1) Make sure you've got the prerequisites
+
+1.1) Make sure perl has been built.  
+
+1.2) Make sure you have a Curses C library installed.  Either original 
+     BSD Curses or newer Ncurses will do.  Pdcurses (public domain Curses
+     code that works in DOS, Windows, and X11) almost works.  See
+     PDCURSES section below.
 
 2) Chdir into the Curses source directory (which you unpacked from the
    .tgz file you downloaded from CPAN)
@@ -34,10 +41,9 @@ then.
    So you'll have to fix that.  It's better to have your Curses stuff
    in its own directory.  /usr/include/ncurses is conventional.  Move
    all your Curses header files (curses.h, ncurses.h, form.h, menu.h,
-   panel.h) into this directory and set the _CFLAGS variables below
-   accordingly.  If you use /usr/include/ncurses, you don't have to
-   bother with the environment variables, because Makefile.PL will
-   find them.
+   panel.h) into this directory If you use /usr/include/ncurses,
+   Makefile.PL will find them there.  Otherwise, set the _CFLAGS
+   environment variables below accordingly.
 
    You can ignore all this if you're not building forms capability
    into the Perl Curses module (by specifying "FORMS" as an option to
@@ -179,3 +185,24 @@ then.
    "Curses.pm") for incompatibilities with other Perl programs.  Also
    check the end of the "README" for problems that may exist for your
    particular libcurses.a or operating system.
+
+
+PDCURSES
+--------
+
+Pdcurses is a public domain Curses implementation that works on DOS,
+OS/2, Win32, and X11.  http://pdcurses.sourceforge.net .
+
+Alexandr Ciornii on September 22, 2006, reported that he had some success
+using Perl Curses with Pdcurses, with these notes:
+
+    I've encountered several problems with it:
+    
+    1. 'pdcurses.h' does not exist; only 'curses.h'.  Renamed it.
+    2. 'curses.h' also defines chtype and attr_t.  Commented out there.
+    3. 'curses.h' also defines SCREEN.  Commented out in 'CursesTyp.h'.
+    4. `perl demo` fails
+    
+        Curses function 'TIESCALAR' called with too few arguments at
+        C:\cpan\Curses-1.14\blib\lib/Curses.pm line 82.
+        Compilation failed in require at demo line 11.

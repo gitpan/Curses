@@ -149,6 +149,32 @@ my $guess_cfg = {
 #
 
 
+sub chooseBsdOrNcurses($$) {
+    my ($libtypDefault, $libtypR) = @_;
+#-----------------------------------------------------------------------------
+#  Assuming this is a platform on which there may be BSD Curses, ncurses,
+#  or both, choose one.
+#
+#  Return the choice as $$libtypR:  'bsd' or 'ncurses'.
+#
+#  We prefer Ncurses, so choose that if it appears to be installed.
+#  If it doesn't, but BSD appears to be installed, we choose that.  If
+#  we don't see either, we choose $libtypDefault.
+#-----------------------------------------------------------------------------
+    if (-f('/usr/include/ncurses/ncurses.h')) {
+        $$libtypR  = 'ncurses';
+    } elsif (-f('/usr/include/ncurses.h')) {
+        $$libtypR = 'ncurses';
+    } elsif (-f('/usr/include/curses/curses.h')) {
+        $$libtypR = 'bsd';
+    } elsif (-f('/usr/include/curses.h')) {
+        $$libtypR = 'bsd';
+    } else {
+        $$libtypR = $libtypDefault;
+    }
+}
+
+
 
 sub guessAtCursesLocation($$$) {
     my ($incR, $libsR, $libtypR) = @_;
@@ -160,13 +186,13 @@ sub guessAtCursesLocation($$$) {
     my $libtyp;  # 'bsd' or 'ncurses'
 
     if (ref $guess eq 'HASH') {
-        # For this platform, we have a choice of Curses library.  We'll
-        # choose the default.
-        $libtyp = $guess->{'default'};
+        # For this platform, we have a choice of Curses library.
+
+        chooseBsdOrNcurses($guess->{'default'}, \$libtyp);
         $guess  = $guess->{$libtyp};
     }
     if (ref $guess ne 'ARRAY') {
-        die "FATAL: internal error: guess_cfg is bad\n";
+        die "FATAL: internal error: guess_cfg is bad";
     }
     if (not defined $guess) {
         print STDERR
@@ -309,7 +335,7 @@ if (defined($inc) && defined($libs)) {
     die("You must specify both CURSES_LDFLAGS and CURSES_CFLAGS " .
         "environment variables or neither.");
 } else {
-    guessAtCursesLocation(\$inc, \$libs, \my $libtyp);
+    guessAtCursesLocation(\$inc, \$libs, \$libtyp);
 }
 if (not -e "c-config.h") {
     makeConfigH($libtyp);
@@ -319,7 +345,7 @@ if (not -e "c-config.h") {
 #  also needed for the panels library.
 #
 if ($panels and not $panel_libs) {
-    while ($libs =~ m!(-L\S+)!g) {
+    while ($libs =~ m{(-L\S+)}g) {
 	$panel_libs .= $1;
     }
     $panel_libs .= " -lpanel ";
@@ -388,7 +414,7 @@ WriteMakefile(NAME      =>   'Curses',
 	      realclean => { FILES      => $realc              },
 	      dist      => { COMPRESS   => 'gzip -9f'          },
               postamble => { COMPONENTS => $components         },
-	      VERSION   =>   '1.14',
+	      VERSION   =>   '1.15',
 );
 
 sub MY::postamble {
@@ -396,6 +422,7 @@ sub MY::postamble {
     my ($this, %args) = @_;
 
     my $echo = $OSNAME eq 'VMS' ? 'write sys$output' : 'echo';
+    my $objext = $OSNAME eq 'MSWin32' ? 'obj' : 'o';
     my $mf   = <<EOM;
 CursesDef.h: c-config.h Makefile.PL list.syms
 	\$(PERL) test.syms $args{COMPONENTS}
@@ -403,7 +430,7 @@ CursesDef.h: c-config.h Makefile.PL list.syms
 c-config.h:
 	@ $echo "You need to make a c-config.h.  See the INSTALL document.";
 	@ exit 1
-cdemo: cdemo.o c-config.h
+cdemo: cdemo.$objext c-config.h
 EOM
 
     if ($OSNAME eq 'VMS') {

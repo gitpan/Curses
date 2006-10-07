@@ -11,6 +11,24 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.15 (October 8, 2006)
+
+  Add a simple load test 00-load.t.
+
+  Makefile.PL: use cdemo.obj instead of cdemo.o on Windows.
+
+  Makefile.PL: Guess ncurses/bsd based on what .h files exist.
+
+  Fix bug in Makefile.PL: doesn't use curses type in guess at c-config.h
+  (e.g. tries to use c-freebsd.h when it should use c-freebsd.bsd.h).
+
+  Change all sv_isa() to sv_derived_from() so you can use subclasses.
+  Thanks Leigh <leighbrown@hsbc.com>.
+
+  Rename default Darwin (Mac OS X) hints file (ca 2001) to c-darwin.old, and
+  the newer one ca 2004) to c-darwin.old so as to be the default.  We're
+  guessing that the newer one applies to more systems today.
+
 New in 1.14 (June 3, 2006)
 
   Make demo.form work on 64 bit machine.

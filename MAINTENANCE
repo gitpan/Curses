@@ -23,6 +23,7 @@ Steps to release:
     tar --file=/tmp/Curses-1.07.tgz --gzip --create Curses-1.07
 
   - Upload via pause.perl.org.  Use "upload a file to CPAN" link.
+    You have to login to make that link appear.
 
     It goes into CPAN in the directory belonging to the user who
     uploaded it.  PAUSE gives you various options for uploading, tells
@@ -43,5 +44,5 @@ Steps to release:
 
 For Bryan's test system:
 
-  export CURSES_LDFLAGS="-L /usr/link/ncurses -lgpm"
-  export CURSES_CFLAGS="-I /usr/include/ncurses"
+  export CURSES_LDFLAGS="-L/usr/link/ncurses -lncurses -lgpm"
+  export CURSES_CFLAGS="-I/usr/include/ncurses"

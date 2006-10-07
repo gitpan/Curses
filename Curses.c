@@ -153,7 +153,8 @@ c_sv2field(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Field")) { return (FIELD *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Field"))
+	return (FIELD *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses field",
 	      argnum, c_function);
@@ -174,7 +175,8 @@ c_sv2form(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Form")) { return (FORM *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Form"))
+	return (FORM *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses form",
 	      argnum, c_function);
@@ -195,7 +197,8 @@ c_sv2item(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Item")) { return (ITEM *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Item"))
+	return (ITEM *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses item",
 	      argnum, c_function);
@@ -217,7 +220,8 @@ c_sv2menu(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Menu")) { return (MENU *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Menu"))
+	return (MENU *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses menu",
 	      argnum, c_function);
@@ -238,7 +242,8 @@ c_sv2panel(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Panel")) { return (PANEL *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Panel"))
+	return (PANEL *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses panel",
 	      argnum, c_function);
@@ -259,7 +264,8 @@ c_sv2screen(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Screen")) { return (SCREEN *)SvIV((SV*)SvRV(sv)); }
+    if (sv_derived_from(sv, "Curses::Screen"))
+	return (SCREEN *)SvIV((SV*)SvRV(sv));
     if (argnum >= 0)
 	croak("argument %d to Curses function '%s' is not a Curses screen",
 	      argnum, c_function);
@@ -280,7 +286,7 @@ c_sv2window(sv, argnum)
 SV *sv;
 int argnum;
 {
-    if (sv_isa(sv, "Curses::Window")) {
+    if (sv_derived_from(sv, "Curses::Window")) {
       WINDOW *ret = (WINDOW *)SvIV((SV*)SvRV(sv));
       return ret;
     }
