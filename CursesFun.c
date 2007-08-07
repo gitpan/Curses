@@ -64,7 +64,7 @@ XS(XS_Curses_addchstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	chtype *str	= (chtype *)SvPV(ST(c_arg),PL_na);
+	chtype *str	= (chtype *)SvPV_nolen(ST(c_arg));
 	int	ret	= c_mret == ERR ? ERR : waddchstr(win, str);
 	
 	ST(0) = sv_newmortal();
@@ -85,7 +85,7 @@ XS(XS_Curses_addchnstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	chtype *str	= (chtype *)SvPV(ST(c_arg),PL_na);
+	chtype *str	= (chtype *)SvPV_nolen(ST(c_arg));
 	int	n	= (int)SvIV(ST(c_arg+1));
 	int	ret	= c_mret == ERR ? ERR : waddchnstr(win, str, n);
 	
@@ -110,7 +110,7 @@ XS(XS_Curses_addstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	char *	str	= (char *)SvPV(ST(c_arg),PL_na);
+	char *	str	= (char *)SvPV_nolen(ST(c_arg));
 	int	ret	= c_mret == ERR ? ERR : waddstr(win, str);
 	
 	ST(0) = sv_newmortal();
@@ -131,7 +131,7 @@ XS(XS_Curses_addnstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	char *	str	= (char *)SvPV(ST(c_arg),PL_na);
+	char *	str	= (char *)SvPV_nolen(ST(c_arg));
 	int	n	= (int)SvIV(ST(c_arg+1));
 	int	ret	= c_mret == ERR ? ERR : waddnstr(win, str, n);
 	
@@ -347,7 +347,7 @@ XS(XS_Curses_chgat)
 {
     dXSARGS;
 #ifdef C_CHGAT
-    c_countargs("chgat", items, 4);
+    c_countargs("chgat", items, 3);
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
@@ -1269,13 +1269,28 @@ XS(XS_Curses_isendwin)
 #endif
 }
 
+/* newterm() has some complexities because of PerlIo.
+
+   IoIFP() returns a FILE * with some Perl cores, and PerlIo with
+   others.  We need FILE *.  One would think that on the PerlIo system,
+   there would be some way to call something that uses FILE *,
+   such as newterm(), but I haven't found one.
+
+   With some Perl cores, "FILE" is a macro that expands to "PerlIo".
+   That seems ridiculous, because something such as newterm() needs a
+   real FILE *, not just something called that.
+*/
+
+
 XS(XS_Curses_newterm)
 {
     dXSARGS;
 #ifdef C_NEWTERM
+#ifdef PERLIO_IS_STDIO
     c_exactargs("newterm", items, 3);
     {
-	char *	type	= ST(0) != &PL_sv_undef ? (char *)SvPV(ST(0),PL_na) : NULL;
+	char *	type	= ST(0) != &PL_sv_undef ? (char *)SvPV_nolen(ST(0)) : NULL;
+
 	FILE *	outfd	= IoIFP(sv_2io(ST(1)));
 	FILE *	infd	= IoIFP(sv_2io(ST(2)));
 	SCREEN *	ret	= newterm(type, outfd, infd);
@@ -1284,6 +1299,12 @@ XS(XS_Curses_newterm)
 	c_screen2sv(ST(0), ret);
     }
     XSRETURN(1);
+#else  /* PERLIO_IS_STDIO */
+    croak("You cannot use newterm() with this Perl interpreter core because "
+          "it uses PerlIo for file I/O, and the Curses library doesn't "
+          "know what to do with that");
+     /* See explanation in comments above */
+#endif
 #else
     c_fun_not_there("newterm");
     XSRETURN(0);
@@ -1772,7 +1793,7 @@ XS(XS_Curses_insstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	char *	str	= (char *)SvPV(ST(c_arg),PL_na);
+	char *	str	= (char *)SvPV_nolen(ST(c_arg));
 	int	ret	= c_mret == ERR ? ERR : winsstr(win, str);
 	
 	ST(0) = sv_newmortal();
@@ -1793,7 +1814,7 @@ XS(XS_Curses_insnstr)
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;
-	char *	str	= (char *)SvPV(ST(c_arg),PL_na);
+	char *	str	= (char *)SvPV_nolen(ST(c_arg));
 	int	n	= (int)SvIV(ST(c_arg+1));
 	int	ret	= c_mret == ERR ? ERR : winsnstr(win, str, n);
 	
@@ -2662,7 +2683,7 @@ XS(XS_Curses_scr_dump)
 #ifdef C_SCR_DUMP
     c_exactargs("scr_dump", items, 1);
     {
-	char *	filename	= (char *)SvPV(ST(0),PL_na);
+	char *	filename	= (char *)SvPV_nolen(ST(0));
 	int	ret	= scr_dump(filename);
 	
 	ST(0) = sv_newmortal();
@@ -2681,7 +2702,7 @@ XS(XS_Curses_scr_restore)
 #ifdef C_SCR_RESTORE
     c_exactargs("scr_restore", items, 1);
     {
-	char *	filename	= (char *)SvPV(ST(0),PL_na);
+	char *	filename	= (char *)SvPV_nolen(ST(0));
 	int	ret	= scr_restore(filename);
 	
 	ST(0) = sv_newmortal();
@@ -2700,7 +2721,7 @@ XS(XS_Curses_scr_init)
 #ifdef C_SCR_INIT
     c_exactargs("scr_init", items, 1);
     {
-	char *	filename	= (char *)SvPV(ST(0),PL_na);
+	char *	filename	= (char *)SvPV_nolen(ST(0));
 	int	ret	= scr_init(filename);
 	
 	ST(0) = sv_newmortal();
@@ -2719,7 +2740,7 @@ XS(XS_Curses_scr_set)
 #ifdef C_SCR_SET
     c_exactargs("scr_set", items, 1);
     {
-	char *	filename	= (char *)SvPV(ST(0),PL_na);
+	char *	filename	= (char *)SvPV_nolen(ST(0));
 	int	ret	= scr_set(filename);
 	
 	ST(0) = sv_newmortal();
@@ -2805,7 +2826,7 @@ XS(XS_Curses_slk_set)
     c_exactargs("slk_set", items, 3);
     {
 	int	labnum	= (int)SvIV(ST(0));
-	char *	label	= (char *)SvPV(ST(1),PL_na);
+	char *	label	= (char *)SvPV_nolen(ST(1));
 	int	fmt	= (int)SvIV(ST(2));
 	int	ret	= slk_set(labnum, label, fmt);
 	
@@ -3141,8 +3162,8 @@ XS(XS_Curses_longname)
 #ifdef C_LONGNAME
     c_exactargs("longname", items, 2);
     {
-	char *	a	= (char *)SvPV(ST(0),PL_na);
-	char *	b	= (char *)SvPV(ST(1),PL_na);
+	char *	a	= (char *)SvPV_nolen(ST(0));
+	char *	b	= (char *)SvPV_nolen(ST(1));
 	char *	ret	= longname(a, b);
 	
 	ST(0) = sv_newmortal();
@@ -3780,7 +3801,7 @@ XS(XS_Curses_ungetmouse)
 #ifdef C_UNGETMOUSE
     c_exactargs("ungetmouse", items, 1);
     {
-	MEVENT *event	= (MEVENT *)SvPV(ST(0),PL_na);
+	MEVENT *event	= (MEVENT *)SvPV_nolen(ST(0));
 	int	ret	= ungetmouse(event);
 	
 	ST(0) = sv_newmortal();
@@ -4045,7 +4066,7 @@ XS(XS_Curses_define_key)
 #ifdef C_DEFINE_KEY
     c_exactargs("define_key", items, 2);
     {
-	char *	definition	= (char *)SvPV(ST(0),PL_na);
+	char *	definition	= (char *)SvPV_nolen(ST(0));
 	int	keycode	= (int)SvIV(ST(1));
 	int	ret	= define_key(definition, keycode);
 	
@@ -4212,7 +4233,7 @@ XS(XS_Curses_getcap)
 #ifdef C_GETCAP
     c_exactargs("getcap", items, 1);
     {
-	char *	term	= (char *)SvPV(ST(0),PL_na);
+	char *	term	= (char *)SvPV_nolen(ST(0));
 	char *	ret	= (char *)getcap(term);
 	
 	ST(0) = sv_newmortal();
@@ -4482,7 +4503,7 @@ XS(XS_Curses_set_panel_userptr)
     c_exactargs("set_panel_userptr", items, 2);
     {
 	PANEL *	pan	= c_sv2panel(ST(0), 0);
-	char *	ptr	= (char *)SvPV(ST(1),PL_na);
+	char *	ptr	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_panel_userptr(pan, ptr);
 	
 	ST(0) = sv_newmortal();
@@ -4794,7 +4815,7 @@ XS(XS_Curses_set_menu_items)
     c_exactargs("set_menu_items", items, 2);
     {
 	MENU *	menu	= c_sv2menu(ST(0), 0);
-	ITEM **	items	= (ITEM **)SvPV(ST(1),PL_na);
+	ITEM **	items	= (ITEM **)SvPV_nolen(ST(1));
 	int	ret	= set_menu_items(menu, items);
 	
 	ST(0) = sv_newmortal();
@@ -4855,7 +4876,7 @@ XS(XS_Curses_set_menu_mark)
     c_exactargs("set_menu_mark", items, 2);
     {
 	MENU *	menu	= c_sv2menu(ST(0), 0);
-	char *	mark	= (char *)SvPV(ST(1),PL_na);
+	char *	mark	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_menu_mark(menu, mark);
 	
 	ST(0) = sv_newmortal();
@@ -4896,7 +4917,7 @@ XS(XS_Curses_new_menu)
 #ifdef C_NEW_MENU
     c_exactargs("new_menu", items, 1);
     {
-	ITEM **	items	= (ITEM **)SvPV(ST(0),PL_na);
+	ITEM **	items	= (ITEM **)SvPV_nolen(ST(0));
 	MENU *	ret	= new_menu(items);
 	
 	ST(0) = sv_newmortal();
@@ -5020,7 +5041,7 @@ XS(XS_Curses_set_menu_pattern)
     c_exactargs("set_menu_pattern", items, 2);
     {
 	MENU *	menu	= c_sv2menu(ST(0), 0);
-	char *	pattern	= (char *)SvPV(ST(1),PL_na);
+	char *	pattern	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_menu_pattern(menu, pattern);
 	
 	ST(0) = sv_newmortal();
@@ -5103,7 +5124,7 @@ XS(XS_Curses_set_menu_userptr)
     c_exactargs("set_menu_userptr", items, 2);
     {
 	MENU *	item	= c_sv2menu(ST(0), 0);
-	char *	userptr	= (char *)SvPV(ST(1),PL_na);
+	char *	userptr	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_menu_userptr(item, userptr);
 	
 	ST(0) = sv_newmortal();
@@ -5389,8 +5410,8 @@ XS(XS_Curses_new_item)
 #ifdef C_NEW_ITEM
     c_exactargs("new_item", items, 2);
     {
-	char *	name	= (char *)SvPV(ST(0),PL_na);
-	char *	descr	= (char *)SvPV(ST(1),PL_na);
+	char *	name	= (char *)SvPV_nolen(ST(0));
+	char *	descr	= (char *)SvPV_nolen(ST(1));
 	ITEM *	ret	= new_item(name, descr);
 	
 	ST(0) = sv_newmortal();
@@ -5533,7 +5554,7 @@ XS(XS_Curses_set_item_userptr)
     c_exactargs("set_item_userptr", items, 2);
     {
 	ITEM *	item	= c_sv2item(ST(0), 0);
-	char *	ptr	= (char *)SvPV(ST(1),PL_na);
+	char *	ptr	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_item_userptr(item, ptr);
 	
 	ST(0) = sv_newmortal();
@@ -5638,7 +5659,7 @@ XS(XS_Curses_menu_request_by_name)
 #ifdef C_MENU_REQUEST_BY_NAME
     c_exactargs("menu_request_by_name", items, 1);
     {
-	char *	name	= (char *)SvPV(ST(0),PL_na);
+	char *	name	= (char *)SvPV_nolen(ST(0));
 	int	ret	= menu_request_by_name(name);
 	
 	ST(0) = sv_newmortal();
@@ -5796,7 +5817,7 @@ XS(XS_Curses_set_form_fields)
     c_exactargs("set_form_fields", items, 2);
     {
 	FORM *	form	= c_sv2form(ST(0), 0);
-	FIELD **fields	= (FIELD **)SvPV(ST(1),PL_na);
+	FIELD **fields	= (FIELD **)SvPV_nolen(ST(1));
 	int	ret	= set_form_fields(form, fields);
 	
 	ST(0) = sv_newmortal();
@@ -5871,17 +5892,16 @@ XS(XS_Curses_move_field)
 
 /* form_new */
 
-XS(XS_Curses_new_form)
-{
+XS(XS_Curses_new_form) {
     dXSARGS;
 #ifdef C_NEW_FORM
     c_exactargs("new_form", items, 1);
     {
-	FIELD **fields	= (FIELD **)SvPV(ST(0),PL_na);
-	FORM *	ret	= new_form(fields);
-	
-	ST(0) = sv_newmortal();
-	c_form2sv(ST(0), ret);
+        FIELD ** fields  = (FIELD **)SvPV_nolen(ST(0));
+        FORM *  ret = new_form(fields);
+        
+        ST(0) = sv_newmortal();
+        c_form2sv(ST(0), ret);
     }
     XSRETURN(1);
 #else
@@ -6184,7 +6204,7 @@ XS(XS_Curses_set_form_userptr)
     c_exactargs("set_form_userptr", items, 2);
     {
 	FORM *	form	= c_sv2form(ST(0), 0);
-	char *	userptr	= (char *)SvPV(ST(1),PL_na);
+	char *	userptr	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_form_userptr(form, userptr);
 	
 	ST(0) = sv_newmortal();
@@ -6451,7 +6471,7 @@ XS(XS_Curses_set_field_buffer)
     {
 	FIELD *	field	= c_sv2field(ST(0), 0);
 	int	buf	= (int)SvIV(ST(1));
-	char *	value	= (char *)SvPV(ST(2),PL_na);
+	char *	value	= (char *)SvPV_nolen(ST(2));
 	int	ret	= set_field_buffer(field, buf, value);
 	
 	ST(0) = sv_newmortal();
@@ -6653,16 +6673,15 @@ XS(XS_Curses_new_field)
 #ifdef C_NEW_FIELD
     c_exactargs("new_field", items, 6);
     {
-	int	height	= (int)SvIV(ST(0));
-	int	width	= (int)SvIV(ST(1));
-	int	toprow	= (int)SvIV(ST(2));
-	int	leftcol	= (int)SvIV(ST(3));
-	int	offscreen	= (int)SvIV(ST(4));
-	int	nbuffers	= (int)SvIV(ST(5));
-	FIELD *	ret	= new_field(height, width, toprow, leftcol, offscreen, nbuffers);
-	
-	ST(0) = sv_newmortal();
-	c_field2sv(ST(0), ret);
+        int const height    = (int)SvIV(ST(0));
+        int const width     = (int)SvIV(ST(1));
+        int const toprow    = (int)SvIV(ST(2));
+        int const leftcol   = (int)SvIV(ST(3));
+        int const offscreen = (int)SvIV(ST(4));
+        int const nbuffers  = (int)SvIV(ST(5));
+        FIELD * ret = new_field(height, width, toprow, leftcol, offscreen, nbuffers);
+        ST(0) = sv_newmortal();
+        c_field2sv(ST(0), ret);
     }
     XSRETURN(1);
 #else
@@ -6824,7 +6843,7 @@ XS(XS_Curses_set_field_userptr)
     c_exactargs("set_field_userptr", items, 2);
     {
 	FIELD *	field	= c_sv2field(ST(0), 0);
-	char *	userptr	= (char *)SvPV(ST(1),PL_na);
+	char *	userptr	= (char *)SvPV_nolen(ST(1));
 	int	ret	= set_field_userptr(field, userptr);
 	
 	ST(0) = sv_newmortal();
@@ -6906,7 +6925,7 @@ XS(XS_Curses_form_request_by_name)
 #ifdef C_FORM_REQUEST_BY_NAME
     c_exactargs("form_request_by_name", items, 1);
     {
-	char *	name	= (char *)SvPV(ST(0),PL_na);
+	char *	name	= (char *)SvPV_nolen(ST(0));
 	int	ret	= form_request_by_name(name);
 	
 	ST(0) = sv_newmortal();

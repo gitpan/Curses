@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#! /usr/bin/perl
 ##
 ##  This code contributed by Yury Pshenichny <yura@zp.ua>
 ##  based on demo.panel by Chris Leach <leachcj@bp.com>
@@ -39,7 +39,7 @@ foreach my $I (@$ilist) {
 }
 push @pack, 0;
 
-my $menu = new_menu(pack "I*", @pack);
+my $menu = new_menu(pack "L!*", @pack);
 if ($menu eq '') { fatal("new_menu failed") }
 
 my $rows;

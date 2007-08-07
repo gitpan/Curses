@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#! /usr/bin/perl
 ##
 ##  demo2  -- play around with some weird stuff, use object model
 ##

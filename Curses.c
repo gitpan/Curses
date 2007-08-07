@@ -15,8 +15,18 @@
    Fortunately, we don't need the Curses version -- we use
    winstr(stdscr, ...) instead.  So we undef instr here to avoid a compiler
    warning about the redeclaration.
+
+   Similarly, c-config.h may define a macro "pad", while the word
+   "pad" is used in perl.h another way, so we undefine it to avoid
+   a nasty syntax error.
+
+   "term.h" pollutes the name space with hundreds of other macros too.
+   We'll probably have to add to this list; maybe someday we should
+   just undef them all, since we don't use them.
 */
+
 #undef instr
+#undef tab
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -44,7 +54,6 @@
 #ifndef PERL_VERSION
 #  define PL_sv_undef  sv_undef
 #  define PL_sv_yes    sv_yes
-#  define PL_na	     na
 #endif
 
 /*
@@ -128,7 +137,7 @@ c_sv2chtype(sv)
 SV *sv;
 {
     if (SvPOK(sv)) {
-        char *tmp = SvPV(sv,PL_na);
+        char *tmp = SvPV_nolen(sv);
         return (chtype)(unsigned char)tmp[0];
     }
     return (chtype)SvIV(sv);
@@ -163,11 +172,14 @@ int argnum;
 }
 
 static void
-c_field2sv(sv, val)
-SV *sv;
-FIELD *val;
-{
-    sv_setref_pv(sv, "Curses::Field", (void*)val);
+c_field2sv(SV *    const svP,
+           FIELD * const fieldP) {
+/*----------------------------------------------------------------------------
+  Make *svP a reference to a scalar whose value is the numerical
+  equivalent of 'fieldP' and which is blessed into the hypothetical
+  package "Curses::Field".
+-----------------------------------------------------------------------------*/
+    sv_setref_pv(svP, "Curses::Field", (void*)fieldP);
 }
 
 static FORM *

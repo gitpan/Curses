@@ -1,8 +1,9 @@
-#!/usr/local/bin/perl
+#! /usr/bin/perl
+
 # This file a port from test/gdc.c in the ncurses-1.9.8a distribution.
-# No copyright exists, but I don't think the writer would mind the port.
-# It's not exact, because I was simplifying things to find a bug in my
-# port.
+# No copyright license is publicly offered, but I don't think the
+# writer would mind the port.  It's not exact, because I was
+# simplifying things to find a bug in my port.
 #
 # Also note that this is basically a direct port.  If it looks like C
 # written in perl, that's because it is.  :-)

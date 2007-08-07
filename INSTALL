@@ -41,7 +41,7 @@ then.
    So you'll have to fix that.  It's better to have your Curses stuff
    in its own directory.  /usr/include/ncurses is conventional.  Move
    all your Curses header files (curses.h, ncurses.h, form.h, menu.h,
-   panel.h) into this directory If you use /usr/include/ncurses,
+   panel.h) into this directory.  If you use /usr/include/ncurses,
    Makefile.PL will find them there.  Otherwise, set the _CFLAGS
    environment variables below accordingly.
 
@@ -185,6 +185,29 @@ then.
    "Curses.pm") for incompatibilities with other Perl programs.  Also
    check the end of the "README" for problems that may exist for your
    particular libcurses.a or operating system.
+
+
+HP-UX
+-----
+
+HP-UX has two Curses libraries.  According to HP:
+
+  Libraries libcur_colr.a and libcur_colr.sl, and commands
+  captoinfo_colr, infocmp_colr, tput_colr, and tic_colr are
+  part of HP-UX Color-Curses package used for color-management.
+
+And there is apparently also a library with the standard names.
+The Curses Perl module builds using the standard library by default.
+If you want to use the "color" versions, set the CURSES_CFLAGS and
+CURSES_LDFLAGS environment variables accordingly.
+
+HP recommends using the HP ANSI C compiler for everything but
+compiling the kernel, but the one for compling the kernel is the
+default.  (Seems ridiculous, but an HP user said so).  I don't know
+what difference it makes for the Perl Curses module, but if you
+want to use the ANSI compiler, add this to Makefile.PL's arguments:
+
+  CC=/opt/ansic/bin/cc
 
 
 PDCURSES

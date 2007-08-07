@@ -25,9 +25,20 @@ use English;
 #  Environment variables tell us how one accesses the Curses library
 #  on this system.
 #
-#    ...CFLAGS   contains any includes or defines (-I or -D) that are
+#    CURSES_LIBTYPE is 'bsd', 'ncurses', or 'ncursesw'.
+#
+#    CURSES_CFLAGS
+#    CURSES_PANEL_CFLAGS
+#    CURSES_MENUS_CFLAGS
+#    CURSES_FORMS_CFLAGS
+#                contains any includes or defines (-I or -D) that are
 #                needed to compile libcurses applications
-#    ...LDFLAGS  contains any libraries or library paths (-l or -L) that are
+#
+#    CURSES_LDFLAGS
+#    CURSES_PANEL_LDFLAGS
+#    CURSES_MENUS_LDFLAGS
+#    CURSES_FORMS_LDFLAGS
+#                contains any libraries or library paths (-l or -L) that are
 #                needed to compile libcurses applications.  This must be
 #                -l and -L options only -- we parse it.  Note that if you
 #                specify something that doesn't result in MakeMaker finding
@@ -37,6 +48,8 @@ use English;
 
 #  If these environment variables aren't set, we try in a fairly
 #  stupid fashion to pick them for you, along with a "c-config.h" file.
+
+my $libType = $ENV{'CURSES_LIBTYPE'};
 
 my $inc = $ENV{'CURSES_CFLAGS'};
 my $libs = $ENV{'CURSES_LDFLAGS'};
@@ -49,8 +62,6 @@ my $menu_libs = $ENV{'CURSES_MENU_LDFLAGS'} || '';
 
 my $form_inc = $ENV{'CURSES_FORM_CFLAGS'} || '';
 my $form_libs = $ENV{'CURSES_FORM_LDFLAGS'} || '';
-
-my $libtype = $ENV{'CURSES_LIBTYPE'};
 
 #  If you want to see examples of what needs to go in the $inc and
 #  $libs variables, check out the `guess_cfg' tables of values below.
@@ -70,8 +81,8 @@ my $libtype = $ENV{'CURSES_LIBTYPE'};
 #
 #  Notes for FreeBSD ncurses:
 #    [Courtesy of "Andrew V. Stesin" <stesin@elvisti.kiev.ua>]
-#    FreeBSD-2.0.5 ncurses + mytinfo	NOTE! Straight curses works much
-#					better for me!
+#    FreeBSD-2.0.5 ncurses + mytinfo    NOTE! Straight curses works much
+#                                       better for me!
 #
 #  Notes for Solaris:
 #    Under 2.3, it was reported that to get the module to compile properly
@@ -92,52 +103,53 @@ my $libtype = $ENV{'CURSES_LIBTYPE'};
 ##   OS            default guess for $inc      default guess for $libs
 #
 my $guess_cfg = {
-  'aix'       => [ ''                       => '-lcurses -ltermcap'        ],
-  'bsd386'    => [ ''                       => '-lcurses -ltermcap'        ],
-  'bsdos'     => [ ''                       => '-lcurses -ltermcap'        ],
-  'cygwin'    => [ '-I/usr/include/ncurses' => '-lncurses'                 ],
-  'darwin'    => [ ''                       => '-lcurses'                  ],
-  'dec_osf'   => [ ''                       => '-lcurses -ltermcap'        ],
-  'dgux'      => [ ''                       => '-lcurses -ltermcap'        ],
-  'dynixptx'  => [ ''                       => '-lcurses -lc'              ],
+  'aix'       => [ ''                       , '-lcurses -ltermcap'        ],
+  'bsd386'    => [ ''                       , '-lcurses -ltermcap'        ],
+  'bsdos'     => [ ''                       , '-lcurses -ltermcap'        ],
+  'cygwin'    => [ '-I/usr/include/ncurses' , '-lncurses'                 ],
+  'darwin'    => [ ''                       , '-lcurses'                  ],
+  'dec_osf'   => [ ''                       , '-lcurses -ltermcap'        ],
+  'dgux'      => [ ''                       , '-lcurses -ltermcap'        ],
+  'dynixptx'  => [ ''                       , '-lcurses -lc'              ],
   'freebsd'   => {
-    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
-    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'bsd'     => [ ''                       , '-lcurses -ltermcap'        ],
+    'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'bsd'
   },
-  'hpux'      => [ ''                       => '-lcurses -ltermcap'        ],
+  'hpux'      => [ ''                       , '-lcurses -ltermcap'        ],
+# See INSTALL file for information about a different Curses library on HPUX.
   'irix'      => {
-    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
-    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'bsd'     => [ ''                       , '-lcurses -ltermcap'        ],
+    'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'bsd'
   },
-  'isc'       => [ ''                       => '-lcurses -ltermcap'        ],
+  'isc'       => [ ''                       , '-lcurses -ltermcap'        ],
   'linux'     => {
-    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
-    'ncurses' => [ '-I/usr/include/ncurses' => '-lncurses'                 ],
+    'bsd'     => [ ''                       ,  '-lcurses -ltermcap'       ],
+    'ncurses' => [ '-I/usr/include/ncurses' ,  '-lncurses'                ],
     'default' =>   'ncurses'
   },
-  'netbsd'    => [ ''                       => '-lcurses -ltermcap'        ],
-  'next'      => [ ''                       => '-lcurses -ltermcap'        ],
-  'openbsd'   => [ ''                       => '-lcurses -ltermcap'        ],  
+  'netbsd'    => [ ''                       , '-lcurses -ltermcap'        ],
+  'next'      => [ ''                       , '-lcurses -ltermcap'        ],
+  'openbsd'   => [ ''                       , '-lcurses -ltermcap'        ],  
   'os2'       => {
-    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
-    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'bsd'     => [ ''                       , '-lcurses -ltermcap'        ],
+    'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'ncurses'
   },
-  'sco'       => [ ''                       => '-lcurses -ltermcap'        ],
-  'solaris'   => [ ''                       => '-L/usr/ccs/lib -lcurses'   ],
+  'sco'       => [ ''                       , '-lcurses -ltermcap'        ],
+  'solaris'   => [ ''                       , '-L/usr/ccs/lib -lcurses'   ],
   'sunos'     => {
-    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
-    'sysv'    => [ '-I/usr/5include'        => '-L/usr/5lib -lcurses'      ],
-    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'bsd'     => [ ''                       , '-lcurses -ltermcap'        ],
+    'sysv'    => [ '-I/usr/5include'        , '-L/usr/5lib -lcurses'      ],
+    'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'sysv'
   },
-  'VMS'       => [ ''                       => 'sys$library:vaxccurse.olb' ],
-  'svr4'      => [ ''                       => '-lcurses'                  ],
+  'VMS'       => [ ''                       , 'sys$library:vaxccurse.olb' ],
+  'svr4'      => [ ''                       , '-lcurses'                  ],
   'MSWin32'   => {
-    'borland' => [ '-w- -Id:\bc5\include'   => '-Ld:\bc5\lib pdcurses.lib' ],
-    'visualc' => [ ''                       => 'pdcurses'                  ],
+    'borland' => [ '-w- -Id:\bc5\include'   , '-Ld:\bc5\lib pdcurses.lib' ],
+    'visualc' => [ ''                       , 'pdcurses'                  ],
     'default' =>   'visualc'
   },
   ''          =>   undef
@@ -152,16 +164,23 @@ my $guess_cfg = {
 sub chooseBsdOrNcurses($$) {
     my ($libtypDefault, $libtypR) = @_;
 #-----------------------------------------------------------------------------
-#  Assuming this is a platform on which there may be BSD Curses, ncurses,
-#  or both, choose one.
+#  Assuming this is a platform on which there may be multiple versions of
+#  Curses, choose one.
 #
-#  Return the choice as $$libtypR:  'bsd' or 'ncurses'.
+#  Return the choice as $$libtypR:  typeically 'bsd' or 'ncurses'.
 #
 #  We prefer Ncurses, so choose that if it appears to be installed.
 #  If it doesn't, but BSD appears to be installed, we choose that.  If
 #  we don't see either, we choose $libtypDefault.
+#
+#  Among the the two versions of Ncurses, we prefer the
+#  non-wide-character version because Curses.pm doesn't work
+#  completely with the wide character version.  But we'll get that
+#  fixed eventually and then make the more capable wide character
+#  version the preferred choice.
 #-----------------------------------------------------------------------------
-    if (-f('/usr/include/ncurses/ncurses.h')) {
+    if (0) {
+    } elsif (-f('/usr/include/ncurses/ncurses.h')) {
         $$libtypR  = 'ncurses';
     } elsif (-f('/usr/include/ncurses.h')) {
         $$libtypR = 'ncurses';
@@ -177,111 +196,170 @@ sub chooseBsdOrNcurses($$) {
 
 
 sub guessAtCursesLocation($$$) {
-    my ($incR, $libsR, $libtypR) = @_;
+    my ($libtypR, $incR, $libsR) = @_;
+#-----------------------------------------------------------------------------
+#  Return as $$libtypR the type of Curses library we should use:
+#  'ncurses', 'ncursesw' or 'bsd'.  May be undefined if we don't think
+#  we have to choose between the two on this system.
+#
+#  Return as $$incR the -I option we think is appropriate to get the
+#  Curses interface header files.
+#
+#  Return as $$libsR the -L and -l options we think are needed to link
+#  the main Curses library (doesn't cover panels/menus/forms).
+#-----------------------------------------------------------------------------
+    print qq{Making a guess for -I and -L/-l options...\n};
 
-    print qq{Making a guess for \$inc and/or \$libs...\n};
+    # We need to move away from the inflexible $guess_cfg thing.  For
+    # starters, we don't use it when the system looks like one with
+    # wide-character Ncurses.
 
-    my $guess  = $guess_cfg->{$OSNAME};
-
-    my $libtyp;  # 'bsd' or 'ncurses'
-
-    if (ref $guess eq 'HASH') {
-        # For this platform, we have a choice of Curses library.
-
-        chooseBsdOrNcurses($guess->{'default'}, \$libtyp);
-        $guess  = $guess->{$libtyp};
-    }
-    if (ref $guess ne 'ARRAY') {
-        die "FATAL: internal error: guess_cfg is bad";
-    }
-    if (not defined $guess) {
-        print STDERR
-        "I'm sorry, but I could not make a good guess for the includes and\n" .
-        "libraries that are needed.  You will need to set the CURSES_\n" .
-        "environment variables as described in the INSTALL file.\n";
-        exit 1;
-    }
-
-    if (-f('/usr/include/ncurses/ncurses.h')) {
-        $inc = '-I/usr/include/ncurses';
-    } elsif (-f('/usr/include/curses/curses.h')) {
-        $inc = '-I/usr/include/curses';
-    } elsif (-f('/usr/include/ncurses.h')) {
-        $inc = '';
-    } elsif (-f('/usr/include/curses.h')) {
-        $inc = '';
+    if (-f('/usr/include/ncursesw/ncurses.h')) {
+        $$incR = '-I/usr/include/ncursesw';
+        $$libsR = '-lncursesw';
+        $$libtypR = 'ncursesw';
     } else {
-        $inc  = $guess->[0];
+        my $guess1  = $guess_cfg->{$OSNAME};
+
+        my $libtyp;
+            # 'bsd' or 'ncurses'.  Undefined if we think
+            # there's no choice of Curses version on this platform.
+
+        my $guess;
+        if (ref $guess1 eq 'HASH') {
+            # For this platform, we have a choice of Curses library.
+
+            chooseBsdOrNcurses($guess->{'default'}, \$libtyp);
+            $guess = $guess1->{$libtyp};
+        } else {
+            $guess = $guess1;
+        }
+        if (not defined $guess) {
+            print STDERR
+                "I'm sorry, but I could not make a good guess " .
+                "for the includes and\n" .
+                "libraries that are needed.  " .
+                "You will need to set the CURSES_\n" .
+                "environment variables as described in the INSTALL file.\n";
+            exit 1;
+        }
+        if (ref $guess ne 'ARRAY') {
+            die "FATAL: internal error: guess_cfg is bad";
+        }
+
+        if (!defined($libtyp)) {
+            if (0) {
+            } elsif (-f('/usr/include/ncurses/ncurses.h')) {
+                $inc = '-I/usr/include/ncurses';
+            } elsif (-f('/usr/include/curses/curses.h')) {
+                $inc = '-I/usr/include/curses';
+            } elsif (-f('/usr/include/ncurses.h')) {
+                $inc = '';
+            } elsif (-f('/usr/include/curses.h')) {
+                $inc = '';
+            } else {
+                $inc  = $guess->[0];
+            }
+        } else {
+            if ($libtyp eq 'ncurses') {
+                if (-f('/usr/include/ncurses/ncurses.h')) {
+                    $inc = '-I/usr/include/ncurses';
+                } elsif (-f('/usr/include/ncurses.h')) {
+                    $inc = '';
+                } else {
+                    $inc  = $guess->[0];
+                }
+            } else {
+                if (-f('/usr/include/curses/curses.h')) {
+                    $inc = '-I/usr/include/curses';
+                } elsif (-f('/usr/include/curses.h')) {
+                    $inc = '';
+                } else {
+                    $inc  = $guess->[0];
+                }
+            }
+        }
+        $libs = $guess->[1];
+
+        $$libtypR   = $libtyp;
+        $$incR      = $inc;
+        $$libsR     = $libs;
     }
-
-    $libs = $guess->[1];
-
-    print("Guesses:  includes '$inc', libs '$libs' ");
-    if (defined($libtyp)) {
-        print("Curses type $libtyp");
+    print("Guesses:\n");
+    print("  includes:    '$$incR'\n");
+    print("  libs:        '$$libsR'\n");
+    if (defined($$libtypR)) {
+        print("  Curses type: $$libtypR");
     } else {
-        print("Curses type irrelevant");
+        print("  Curses type: irrelevant");
     }
     print("\n");
-
-    $$incR    = $inc;
-    $$libsR   = $libs;
-    $$libtypR = $libtyp;
 }
 
 
 
+my %libClass = (
+                'bsd'      => 'bsd',
+                'ncurses'  => 'ncurses',
+                'ncursesw' => 'ncursesw'
+);
+
+
 
 sub makeConfigH($) {
-    my ($libTypeArg) = @_;
+    my ($libType) = @_;
 #-----------------------------------------------------------------------------
-#  $libTypeArg is the kind of Curses library we should choose -- 'bsd' or
-#  'ncurses'.  It is undefined if there is no choice on this system.
+#  $libTypeArg is the kind of Curses library we are using - 'bsd',
+#  'ncurses', or 'ncursesw'.  It may be undefined if there is no
+#  choice on this system.
 #-----------------------------------------------------------------------------
     print qq{Making a guess for "c-config.h"...\n};
 
-    my $libType;
+    my $libClass;
 
-    if (defined($libTypeArg)) {
-        $libType = $libTypeArg;
-    } else {
-        if ($OSNAME eq 'linux') {
-            $libType = 'ncurses';
+    if (defined($libType)) {
+        $libClass = $libClass{$libType};
+
+        if (!defined($libClass)) {
+            print STDERR ("Internal error: invalid library type '$libType' " .
+                          "in makeConfigH()\n");
+            exit 1;
         }
     }
-
     my $hintsfile;
-    if (defined($libType)) {
+    if (defined($libType) && -f("hints/c-$OSNAME.$libType.h")) {
         $hintsfile = "hints/c-$OSNAME.$libType.h";
+    } elsif (defined($libClass) && -f("hints/c-$OSNAME.$libClass.h")) {
+        $hintsfile = "hints/c-$OSNAME.$libClass.h";
     } else {
-        $hintsfile = "hints/c-$OSNAME.h";
-    }
-
-    if (not -f $hintsfile) {
-	print STDERR <<"EOW";
+        my $candidate = "hints/c-$OSNAME.h";
+        if (-f($candidate)) {
+            $hintsfile = $candidate;
+        } else {
+            print STDERR <<"EOW";
 
 I'm sorry, but I couldn't find a hints file that was configured for
-your OS (named $hintsfile).  You will need to create and configure a 
+your OS (named $candidate).  You will need to create and configure a 
 "c-config.h" file for yourself.  Please see the "INSTALL" directions 
 for pointers on how to do this.
 EOW
-        exit 1;
+            exit 1;
+        }
     }
 
     eval "require(File::Copy);";
     if (! $@) {
-	&File::Copy::copy($hintsfile, "c-config.h");
-    }
-    else {
-	my $cp;
+        &File::Copy::copy($hintsfile, "c-config.h");
+    } else {
+        my $cp;
 
-	if    ($OSNAME eq 'MSWin32') { $cp = "perl -MExtUtils::Command -e cp" }
-	elsif ($OSNAME eq 'VMS')     { $cp = "copy/log"                       }
-	else                         { $cp = "cp"                             }
+        if    ($OSNAME eq 'MSWin32') { $cp = "perl -MExtUtils::Command -e cp" }
+        elsif ($OSNAME eq 'VMS')     { $cp = "copy/log"                       }
+        else                         { $cp = "cp"                             }
 
-	my $sys = "$cp $hintsfile c-config.h";
-	if ($sys =~ m!([^\\:\w/. -])!) {
-	    print STDERR <<EOW;
+        my $sys = "$cp $hintsfile c-config.h";
+        if ($sys =~ m!([^\\:\w/. -])!) {
+            print STDERR <<"EOW";
 
 I'm sorry.  I was going to try to pick a "c-config.h" for you, but it
 looks like there are some non-standard characters in the exec string.
@@ -291,16 +369,37 @@ might be able to use:
 
    $sys
 
-but it has the (possibly) naughty character '$1' in it.
+but it has the (possibly) naughty character '$1' in it.      '
 EOW
-	    exit 1;
-	}
-	else {
-	    system $sys;
-	}
+            exit 1;
+        } else {
+            system($sys);
+        }
     }
 }
 
+
+
+
+sub guessPanelMenuFormLibs($$$$$) {
+
+    my ($ncursesLibSearch, $libType, $panelLibsR, $menuLibsR, $formLibsR) = @_;
+
+    my ($panelLibGuess, $menuLibGuess, $formLibGuess);
+
+    if (defined($libType) && $libType eq "ncursesw") {
+        $panelLibGuess = -lpanelw;
+        $menuLibGuess  = -lmenuw;
+        $formLibGuess  = -lformw;
+    } else {
+        $panelLibGuess = -lpanel;
+        $menuLibGuess  = -lmenu;
+        $formLibGuess  = -lform;
+    }
+    $$panelLibsR = "$ncursesLibSearch $panelLibGuess";
+    $$menuLibsR  = "$ncursesLibSearch $menuLibGuess";
+    $$formLibsR  = "$ncursesLibSearch $formLibGuess";
+}
 
 
 
@@ -327,50 +426,44 @@ print "MENUS  functions: ", ($menus  ? "enabled" : "not enabled"), "\n";
 print "FORMS  functions: ", ($forms  ? "enabled" : "not enabled"), "\n";
 print "\n";
 
-my $libtyp;
-
 if (defined($inc) && defined($libs)) {
     # We have the info we need
-} elsif (defined($inc) || defined($libs)) {
+} elsif (defined($inc) || defined($libs) || defined($libType)) {
     die("You must specify both CURSES_LDFLAGS and CURSES_CFLAGS " .
-        "environment variables or neither.");
+        "environment variables or neither.  ");
 } else {
-    guessAtCursesLocation(\$inc, \$libs, \$libtyp);
+    guessAtCursesLocation(\$libType, \$inc, \$libs);
 }
+
 if (not -e "c-config.h") {
-    makeConfigH($libtyp);
+    makeConfigH($libType);
 }
 
 #  Major cheese alert.  Any -L for the curses library is probably
 #  also needed for the panels library.
 #
+
+my $ncursesLibSearch;
+
+while ($libs =~ m{(-L\S+)}g) {
+    $ncursesLibSearch .= $1;
+}
+
+guessPanelMenuFormLibs($ncursesLibSearch, $libType,
+                       \my $panelGuess, \my $menuGuess, \my $formGuess);
+
+
 if ($panels and not $panel_libs) {
-    while ($libs =~ m{(-L\S+)}g) {
-	$panel_libs .= $1;
-    }
-    $panel_libs .= " -lpanel ";
+    $panel_libs = $panelGuess;
 }
 
-#  More major cheese alert.  Any -L for the curses library is probably
-#  also needed for the menus library.
-#
 if ($menus and not $menu_libs) {
-    while ($libs =~ m!(-L\S+)!g) {
-	$menu_libs .= $1;
-    }
-    $menu_libs .= " -lmenu ";
+    $menu_libs = $menuGuess;
 }
 
-#  More major cheese alert.  Any -L for the curses library is probably
-#  also needed for the forms library.
-#
 if ($forms and not $form_libs) {
-    while ($libs =~ m!(-L\S+)!g) {
-	$form_libs .= $1;
-    }
-    $form_libs .= " -lform ";
+    $form_libs = $formGuess;
 }
-
 # Both Perl and Ncurses have a form.h.  We have to include the Perl
 # header files in our search path, but don't need form.h itself.
 # Because the Curses form library header directory comes before the
@@ -406,15 +499,15 @@ my $components =
     ($menus  ? " MENUS "  : "") .
     ($forms  ? " FORMS "  : "");
 
-WriteMakefile(NAME      =>   'Curses',
-	      INC       =>   "$panel_inc $menu_inc $form_inc $inc",
-	      LIBS      => [ "$panel_libs $menu_libs $form_libs $libs" ],
-	      H         => [ 'CursesDef.h'                   ],
-	      clean     => { FILES      => $clean              },
-	      realclean => { FILES      => $realc              },
-	      dist      => { COMPRESS   => 'gzip -9f'          },
-              postamble => { COMPONENTS => $components         },
-	      VERSION   =>   '1.15',
+WriteMakefile(NAME         =>   'Curses',
+              INC          =>   "$panel_inc $menu_inc $form_inc $inc",
+              LIBS         => [ "$panel_libs $menu_libs $form_libs $libs" ],
+              H            => [ 'CursesDef.h'                   ],
+              clean        => { FILES      => $clean              },
+              realclean    => { FILES      => $realc              },
+              dist         => { COMPRESS   => 'gzip -9f'          },
+              postamble    => { COMPONENTS => $components         },
+              VERSION_FROM => 'Curses.pm',
 );
 
 sub MY::postamble {
@@ -434,25 +527,25 @@ cdemo: cdemo.$objext c-config.h
 EOM
 
     if ($OSNAME eq 'VMS') {
-	$mf .= <<EOM;
+        $mf .= <<EOM;
 	\$(CC) \$(INC) cdemo.c
 	\$(LD) cdemo\$(OBJ_EXT), \$(EXTRALIBS), CURSES2.OPT/opt
 EOM
     }
     else {
-	$mf .= <<EOM;
+        $mf .= <<EOM;
 	\$(CC) \$(INC) -o cdemo cdemo.c \$(EXTRALIBS)
 EOM
     }
 
     if ($gen) {
-	$mf .= <<EOM;
+        $mf .= <<EOM;
 
 Curses.c    :: CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c
 	@\$(NOOP)
 
 config      :: list.syms Curses.pm \\
-	       CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c
+               CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c
 
 list.syms    : gen/make.list.syms gen/list.fun gen/list.var gen/list.typ
 	\$(PERL) gen/make.list.syms

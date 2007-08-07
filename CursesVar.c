@@ -111,7 +111,7 @@ XS(XS_Curses_Vars_TIESCALAR)
     dXSARGS;
     c_exactargs("TIESCALAR", items, 2);
     {
-	char *	pack = (char *)SvPV(ST(0),PL_na);
+	char *	pack = (char *)SvPV_nolen(ST(0));
 	int	n    = (int)SvIV(ST(1));
 
 	ST(0) = sv_newmortal();

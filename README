@@ -13,14 +13,10 @@ the Curses pod (located at the end of "Curses.pm") for known
 incompatibilities with other Perl programs, and the end of this
 document for known compile or install problems.
 
-The changes for Release 1.13 are as follows.  The complete change
-history is in the file HISTORY.
+RECENT CHANGES
+--------------
 
-  Fix so it builds on current Cygwin.
-
-  Some kind of build fix to get panels, forms, and menu functions to build.
-
-  =====================
+The change history is in the file HISTORY.
  
 
 BINARY DISTRIBUTIONS
@@ -84,6 +80,18 @@ which take an extra "size of buffer" argument.
 
 Known Problems
 --------------
+Wide characters
+
+   Screen positions get calculated wrong, i.e. based on the number of
+   bytes in a string instead of the number of characters.
+
+   You should debug this, fix it, and submit the fix for inclusion in
+   the next release of Perl Curses.
+
+   Note that unless you have and build for the wide-character-capable
+   Ncurses (named 'ncursesw'), wide characters won't work even this much.
+   
+
 NCurses
    getch() and getstr() don't work right under very old versions of
    ncurses (around v1.8.5).  Please upgrade to a newer version.

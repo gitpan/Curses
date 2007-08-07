@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.15'; # Also see Makefile.PL
+$VERSION = '1.16'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -254,7 +254,7 @@ Curses - terminal screen handling and optimization
 
 
    Curses::supports_function($function);
-   Curses::supports_contsant($constant);
+   Curses::supports_constant($constant);
 
 =head1 DESCRIPTION
 

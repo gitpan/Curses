@@ -11,6 +11,25 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.16 (August 7, 2007)
+
+  Undefine "tab" macro, defined by Curses header file.  It interferes
+  with perl.h.
+
+  Fix demo.form to use L! instead of J in the pack template that generates
+  the new_form() argument.  Apparently, J is something from older Perl
+  and doesn't exist in current Perl.
+
+  Put some documentation of the library in comments in demo.form.
+
+  Use L! instead of I in the pack template in demo.menu.
+
+  Change SvPV(X,PL_na) to SvPV_nolen(X) to get with the times.
+
+  Change #!/usr/local/bin/perl to #! /usr/bin/perl .
+
+  Fix bug: chgat() requires an extra, meaningless, argument.
+
 New in 1.15 (October 8, 2006)
 
   Add a simple load test 00-load.t.
@@ -87,7 +106,6 @@ New in 1.07 (September 2004)
 
   - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't
     work on some systems (causes a build failure).
-
 
 New in 1.06 (July 2001)
 
