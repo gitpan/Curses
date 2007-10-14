@@ -216,6 +216,44 @@ PDCURSES
 Pdcurses is a public domain Curses implementation that works on DOS,
 OS/2, Win32, and X11.  http://pdcurses.sourceforge.net .
 
+Dave C reported success using Perl Curses with Pdcurses on Windows
+in September 2007.  He gave these notes:
+
+  Environment:
+    Perl Version 5.8.1 built for MSWin32-x86-multi-thread
+    MSVS 2003 Visual C++ 7
+    Windows XP
+    Perl module Curses-1.16
+    Pdcurses 3.3
+
+  Instructions:
+
+  - Set environment variables (for Perl Curses Makefile.PL):
+
+      CURSES_CFLAGS=-Ic:\dev\pdc33
+      CURSES_LDFLAGS=-Lc:\dev\pdc33 pdcurses.lib
+    
+  -  Build and Test
+
+       > Makefile.PL
+       > nmake test
+
+       ignore MOUSE_MOVED redefined warning
+       MOUSE_MOVED is never used in Curses 1.16
+
+  - Install:
+
+       > nmake install
+
+
+  - Test:
+
+       demo, demo2, demo.panel scripts successfully run
+
+       > nmake cdemo
+       > cdemo
+
+
 Alexandr Ciornii on September 22, 2006, reported that he had some success
 using Perl Curses with Pdcurses, with these notes:
 

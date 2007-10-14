@@ -28,9 +28,9 @@
 #undef instr
 #undef tab
 
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
+#include <EXTERN.h>
+#include <perl.h>
+#include <XSUB.h>
 
 #ifndef C_PANELSUPPORT
 #  define PANEL int
@@ -46,9 +46,11 @@
 #  define FIELD int
 #endif
 
-#ifdef __PDCURSES__
-#undef SP
-#endif
+/* Before 1.17 (September 2007), we undefined macro 'SP' here, for
+   the Pdcurses case only.  I don't know why, but it caused the build
+   with Pdcurses to fail, so we took it out.  'SP' is
+   defined in Perl's CORE/pp.h via our inclusion of perl.h above.
+*/
 
 /* What a mess. :( */
 #ifndef PERL_VERSION

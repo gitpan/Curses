@@ -11,7 +11,22 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.17 (Released October 14, 2007)
+
+  Fix bug - can't find c-config.h on a system with ncursesw.
+
+  Make cdemo work on Windows.
+
+  Don't undefine SP macro with Pdcurses.  (Otherwise it won't compile;
+  don't know why we used to undefine SP).
+
+  In Windows hints file, #include curses.h instead of pdcurses.h.  It
+  seems to be called curses.h these days.
+
 New in 1.16 (August 7, 2007)
+
+  Use Ncursesw (Ncurses with wide character functions) instead of
+  Ncurses if available.
 
   Undefine "tab" macro, defined by Curses header file.  It interferes
   with perl.h.

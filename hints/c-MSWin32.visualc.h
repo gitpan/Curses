@@ -6,8 +6,16 @@
 
 /* These hints thanks to Gurusamy Sarathy <gsar@engin.umich.edu> */
 
-#undef SP	/* in case this gets pulled in after perl.h */
-#include <pdcurses.h>
+/* We used to include <pdcurses.h>, but users found it is actually
+   installed as <curses.h>.  Maybe it changed at some point.
+   2007.09.29
+*/
+/* We used to undef macro SP, (which is defined by perl.h), but in September
+   2007, we found that a) SP is needed; and 2) SP doesn't hurt
+   the #includes below.
+*/
+
+#include <curses.h>
 
 #ifdef C_PANELSUPPORT
 #include <panel.h>

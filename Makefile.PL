@@ -235,12 +235,13 @@ sub guessAtCursesLocation($$$) {
             $guess = $guess1;
         }
         if (not defined $guess) {
-            print STDERR
-                "I'm sorry, but I could not make a good guess " .
-                "for the includes and\n" .
-                "libraries that are needed.  " .
-                "You will need to set the CURSES_\n" .
-                "environment variables as described in the INSTALL file.\n";
+            print STDERR <<"EOW";
+
+I'm sorry, but I could not make a good guess for the includes and
+libraries that are needed.  You will need to set the CURSES_
+environment variables as described in the INSTALL file.
+OSNAME=$OSNAME
+EOW
             exit 1;
         }
         if (ref $guess ne 'ARRAY') {
@@ -298,10 +299,30 @@ sub guessAtCursesLocation($$$) {
 
 
 
+sub defaultLibTypeForOs($) {
+    my ($osname) = @_;
+#-----------------------------------------------------------------------------
+#  Return the default library type for OS named '$osname'; if we don't think
+#  there is a choice of library type on this OS, return undef.
+#-----------------------------------------------------------------------------
+    my $libType;
+
+    my $guess  = $guess_cfg->{$OSNAME};
+
+    if (ref $guess eq 'HASH') {
+        # For this platform, we have a choice of Curses library.
+        
+        $libType = $guess->{'default'};
+    }
+    return $libType;
+}
+
+
+
 my %libClass = (
                 'bsd'      => 'bsd',
                 'ncurses'  => 'ncurses',
-                'ncursesw' => 'ncursesw'
+                'ncursesw' => 'ncurses'
 );
 
 
@@ -309,13 +330,15 @@ my %libClass = (
 sub makeConfigH($) {
     my ($libType) = @_;
 #-----------------------------------------------------------------------------
-#  $libTypeArg is the kind of Curses library we are using - 'bsd',
+#  $libType is the kind of Curses library we are using - 'bsd',
 #  'ncurses', or 'ncursesw'.  It may be undefined if there is no
 #  choice on this system.
 #-----------------------------------------------------------------------------
     print qq{Making a guess for "c-config.h"...\n};
 
     my $libClass;
+        # $libClass is a more abstract type than $libType.  It is
+        # 'bsd' or 'ncurses'.
 
     if (defined($libType)) {
         $libClass = $libClass{$libType};
@@ -347,6 +370,8 @@ EOW
         }
     }
 
+    print("Choosing hints file '$hintsfile'\n");
+
     eval "require(File::Copy);";
     if (! $@) {
         &File::Copy::copy($hintsfile, "c-config.h");
@@ -361,7 +386,7 @@ EOW
         if ($sys =~ m!([^\\:\w/. -])!) {
             print STDERR <<"EOW";
 
-I'm sorry.  I was going to try to pick a "c-config.h" for you, but it
+I'm sorry.  I was going to try to create a "c-config.h" for you, but it
 looks like there are some non-standard characters in the exec string.
 I'm feeling rather paranoid, so I'll let you look at the line and do
 it by hand if it looks OK.  I wanted to execute a copy and thought I
@@ -428,6 +453,9 @@ print "\n";
 
 if (defined($inc) && defined($libs)) {
     # We have the info we need
+    if (!defined($libType)) {
+        $libType = defaultLibTypeForOs($OSNAME);
+    }
 } elsif (defined($inc) || defined($libs) || defined($libType)) {
     die("You must specify both CURSES_LDFLAGS and CURSES_CFLAGS " .
         "environment variables or neither.  ");
