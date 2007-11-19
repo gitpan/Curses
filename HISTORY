@@ -11,6 +11,10 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.20 (Released November 19, 2007)
+
+  Fix missing comment delimiter.
+
 New in 1.19 (Released November 18, 2007)
 
   Make it work on 5.005 again, using ppport.h (Devel::PPPort).
