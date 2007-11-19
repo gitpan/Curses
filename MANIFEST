@@ -63,6 +63,7 @@ hints/c-sunos.sysv.h
 hints/c-svr4.h
 hints/c-vms.h
 list.syms
+ppport.h
 test.syms
 testint.c
 testsym.c

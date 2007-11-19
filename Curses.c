@@ -31,6 +31,10 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
+/* I don't know why NEED_sv_2pv_flags is necessary, but ppport.h doesn't
+   work right without it.  Maybe a bug in Devel::PPPort?
+#define NEED_sv_2pv_flags
+#include "ppport.h"
 
 #ifndef C_PANELSUPPORT
 #  define PANEL int

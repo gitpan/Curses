@@ -38,7 +38,7 @@ sub makeCompileCommand($) {
 
     my ($cc, $inc, $ccflags, $ldloadlibs, $lddlflags);
 
-    open MAKEFILE, '<', $makefile or 
+    open MAKEFILE, "< $makefile" or 
         die "Can't open make file '$makefile' errno=$ERRNO";
     while (<MAKEFILE>) {
 

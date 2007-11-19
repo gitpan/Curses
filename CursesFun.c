@@ -347,7 +347,16 @@ XS(XS_Curses_chgat)
 {
     dXSARGS;
 #ifdef C_CHGAT
-    c_countargs("chgat", items, 3);
+    /* Our 4th argument is meaningless.  It mirrors the meaningless "opts"
+       argument in the Curses C library.
+
+       In Perl Curses 1.16, we tried reducing this to 3 as a user thought
+       a 3-argument call ought to work, and we thought this number might
+       just be the _minimum_ argument count.  Well, it's not.  So for
+       backward compatibility if nothing else, it has to be 4.  Fixed
+       back to 4 in 1.18.
+    */
+    c_countargs("chgat", items, 4);
     {
 	WINDOW *win	= c_win ? c_sv2window(ST(0), 0) : stdscr;
 	int	c_mret	= c_x ? c_domove(win, ST(c_x-1), ST(c_x)) : OK;

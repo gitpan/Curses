@@ -229,7 +229,7 @@ sub guessAtCursesLocation($$$) {
         if (ref $guess1 eq 'HASH') {
             # For this platform, we have a choice of Curses library.
 
-            chooseBsdOrNcurses($guess->{'default'}, \$libtyp);
+            chooseBsdOrNcurses($guess1->{'default'}, \$libtyp);
             $guess = $guess1->{$libtyp};
         } else {
             $guess = $guess1;
@@ -372,7 +372,7 @@ EOW
 
     print("Choosing hints file '$hintsfile'\n");
 
-    eval "require(File::Copy);";
+    eval "require File::Copy;";
     if (! $@) {
         &File::Copy::copy($hintsfile, "c-config.h");
     } else {

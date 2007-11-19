@@ -11,6 +11,19 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.19 (Released November 18, 2007)
+
+  Make it work on 5.005 again, using ppport.h (Devel::PPPort).
+  From Slaven Rezic - slaven <at> rezic <dot> de .
+
+  Fix uninitialized value in Makefile.PL on a system without BSD Curses or
+  Ncurses in a common place.
+
+  Reverse change to chgat() in 1.16.  Make expected argument count 4.
+
+There was never a 1.18 release; problems with PAUSE prevent using that
+release number.
+
 New in 1.17 (Released October 14, 2007)
 
   Fix bug - can't find c-config.h on a system with ncursesw.
@@ -43,7 +56,8 @@ New in 1.16 (August 7, 2007)
 
   Change #!/usr/local/bin/perl to #! /usr/bin/perl .
 
-  Fix bug: chgat() requires an extra, meaningless, argument.
+  Fix bug: chgat() requires an extra, meaningless, argument.  Fix changes
+  expected argument count from 4 to 3.
 
 New in 1.15 (October 8, 2006)
 
