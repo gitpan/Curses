@@ -22,8 +22,6 @@
 #include <form.h>
 #endif
 
-#undef bool
-
 #undef  C_LONGNAME
 #undef  C_LONG0ARGS
 #undef  C_LONG2ARGS

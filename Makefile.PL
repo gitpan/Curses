@@ -116,6 +116,7 @@ my $guess_cfg = {
     'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'bsd'
   },
+  'gnukfreebsd' => [ '-I/usr/include/ncurses', '-lncurses'                ],
   'hpux'      => [ ''                       , '-lcurses -ltermcap'        ],
 # See INSTALL file for information about a different Curses library on HPUX.
   'irix'      => {
@@ -200,7 +201,7 @@ sub guessAtCursesLocation($$$) {
 #-----------------------------------------------------------------------------
 #  Return as $$libtypR the type of Curses library we should use:
 #  'ncurses', 'ncursesw' or 'bsd'.  May be undefined if we don't think
-#  we have to choose between the two on this system.
+#  we have to choose between the those on this system.
 #
 #  Return as $$incR the -I option we think is appropriate to get the
 #  Curses interface header files.
@@ -219,8 +220,7 @@ sub guessAtCursesLocation($$$) {
         $$libsR = '-lncursesw';
         $$libtypR = 'ncursesw';
     } else {
-        my $guess1  = $guess_cfg->{$OSNAME};
-
+        my $guess1 = $guess_cfg->{$OSNAME};
         my $libtyp;
             # 'bsd' or 'ncurses'.  Undefined if we think
             # there's no choice of Curses version on this platform.
@@ -473,8 +473,10 @@ if (not -e "c-config.h") {
 
 my $ncursesLibSearch;
 
+$ncursesLibSearch = '';  # initial value
+
 while ($libs =~ m{(-L\S+)}g) {
-    $ncursesLibSearch .= $1;
+    $ncursesLibSearch .= $1 . ' ';
 }
 
 guessPanelMenuFormLibs($ncursesLibSearch, $libType,
@@ -557,12 +559,12 @@ EOM
     if ($OSNAME eq 'VMS') {
         $mf .= <<EOM;
 	\$(CC) \$(INC) cdemo.c
-	\$(LD) cdemo\$(OBJ_EXT), \$(EXTRALIBS), CURSES2.OPT/opt
+	\$(LD) cdemo\$(OBJ_EXT), \$(LDLOADLIBS), CURSES2.OPT/opt
 EOM
     }
     else {
         $mf .= <<EOM;
-	\$(CC) \$(INC) -o cdemo cdemo.c \$(EXTRALIBS)
+	\$(CC) \$(INC) -o cdemo cdemo.c \$(LDLOADLIBS)
 EOM
     }
 

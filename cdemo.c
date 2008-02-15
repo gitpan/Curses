@@ -7,7 +7,6 @@
 */
 
 #include "CursesDef.h"
-#include "CursesTyp.h"
 #include "c-config.h"
 #ifdef VMS
 #include <unistd.h>  /* not in perl.h ??? */
@@ -66,7 +65,7 @@ main(unsigned int  const argc,
     attrset(A_NORMAL);
 #  endif
 #endif
-    addstr("  normal  (if your curses supports these modes)");
+    addstr("  normal  (if your curses can do these modes)");
 
     move(6, 1);
     addstr("do12345678901234567890n't worry be happy");

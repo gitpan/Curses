@@ -16,24 +16,37 @@
    winstr(stdscr, ...) instead.  So we undef instr here to avoid a compiler
    warning about the redeclaration.
 
-   Similarly, c-config.h may define a macro "pad", while the word
-   "pad" is used in perl.h another way, so we undefine it to avoid
+   Similarly, c-config.h may define a macro "tab", while the word
+   "tab" is used in perl.h another way, so we undefine it to avoid
    a nasty syntax error.
 
    "term.h" pollutes the name space with hundreds of other macros too.
    We'll probably have to add to this list; maybe someday we should
    just undef them all, since we don't use them.
-*/
+
+   "bool" is another, and is more problematic.  Sometimes, ncurses.h
+   defines that explicitly and that's bad, but sometimes it does it
+   by including <stdbool.h>, and that's fine.  In the former case,
+   we should undefine it now, but in the latter we can't, because then
+   a subsequent #include <stdbool.h> (by something we #include below)
+   won't define bool because stdbool.h has already been included.
+
+   We're going to leave bool alone now and wait for someone to report
+   that it breaks something.  With a real example, we can then plan how
+   to work around this unfortunate ncurses.h behavior.  We once had a
+   #undef bool.h in the Mac OSX hints file, so someone presumably found
+   it necessary.  But we have also had a Mac OSX system on which compile
+   failed _because_ of that undef, for the reason described above.
+ */
 
 #undef instr
 #undef tab
 
-#include <EXTERN.h>
+#include <EXTERN.h>  /* Needed by <perl.h> */
 #include <perl.h>
 #include <XSUB.h>
 /* I don't know why NEED_sv_2pv_flags is necessary, but ppport.h doesn't
-   work right without it.  Maybe a bug in Devel::PPPort?
-*/
+   work right without it.  Maybe a bug in Devel::PPPort?  */
 #define NEED_sv_2pv_flags
 #include "ppport.h"
 

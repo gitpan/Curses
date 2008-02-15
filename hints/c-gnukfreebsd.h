@@ -1,8 +1,8 @@
-/*  Hint file for Darwin Kernel Version 7.5.0, ncurses version of 
-    libcurses.  Based in FreeBSD, ncurses hints file
-
-    This file came from gene03@smalltime.com, September 2004.
-*/
+/*  Hint file for the Debian GNU/kfreebsd platform
+ *
+ *  If this configuration doesn't work, look at the file "c-none.h"
+ *  for how to set the configuration options.
+ */
 
 #include <ncurses.h>
 
@@ -10,11 +10,9 @@
 #include <panel.h>
 #endif
 
-
 #ifdef C_MENUSUPPORT
 #include <menu.h>
 #endif
-
 
 #ifdef C_FORMSUPPORT
 #include <form.h>
