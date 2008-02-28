@@ -11,6 +11,10 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.22 (Released February 29, 2008)
+
+  Nothing.  Just a packaging fix.
+
 New in 1.21 (Released February 15, 2008)
 
   Don't undefine 'bool' macro in c-darwin hints file.
