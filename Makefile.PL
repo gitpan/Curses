@@ -25,7 +25,9 @@ use English;
 #  Environment variables tell us how one accesses the Curses library
 #  on this system.
 #
-#    CURSES_LIBTYPE is 'bsd', 'ncurses', or 'ncursesw'.
+#    CURSES_LIBTYPE
+#                'bsd', 'ncurses', or 'ncursesw' on most systems.
+#                In some environments, there are other possibilities.
 #
 #    CURSES_CFLAGS
 #    CURSES_PANEL_CFLAGS
@@ -116,7 +118,6 @@ my $guess_cfg = {
     'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'bsd'
   },
-  'gnukfreebsd' => [ '-I/usr/include/ncurses', '-lncurses'                ],
   'hpux'      => [ ''                       , '-lcurses -ltermcap'        ],
 # See INSTALL file for information about a different Curses library on HPUX.
   'irix'      => {
@@ -156,41 +157,57 @@ my $guess_cfg = {
   ''          =>   undef
 };
 
-
 ###
 ## You shouldn't need to change anything below
 #
 
+my $TRUE = 1; my $FALSE = 0;
 
-sub chooseBsdOrNcurses($$) {
-    my ($libtypDefault, $libtypR) = @_;
+
+sub nCursesIsInstalled() {
+
+    if (-f('/usr/include/ncurses/ncurses.h')) {
+        return $TRUE;
+    } elsif (-f('/usr/include/ncurses.h')) {
+        return $TRUE;
+    } else {
+        return $FALSE;
+    }
+}
+
+
+sub bsdIsInstalled() {
+
+    if (-f('/usr/include/curses/curses.h')) {
+        return $TRUE;
+    } elsif (-f('/usr/include/curses.h')) {
+        return $TRUE;
+    } else {
+        return $FALSE;
+    }
+}
+
+
+
+sub chooseLibraryType($$) {
+    my ($typeList, $libtypR) = @_;
 #-----------------------------------------------------------------------------
 #  Assuming this is a platform on which there may be multiple versions of
 #  Curses, choose one.
 #
-#  Return the choice as $$libtypR:  typeically 'bsd' or 'ncurses'.
+#  Return the choice as $$libtypR.
 #
 #  We prefer Ncurses, so choose that if it appears to be installed.
 #  If it doesn't, but BSD appears to be installed, we choose that.  If
 #  we don't see either, we choose $libtypDefault.
-#
-#  Among the the two versions of Ncurses, we prefer the
-#  non-wide-character version because Curses.pm doesn't work
-#  completely with the wide character version.  But we'll get that
-#  fixed eventually and then make the more capable wide character
-#  version the preferred choice.
 #-----------------------------------------------------------------------------
     if (0) {
-    } elsif (-f('/usr/include/ncurses/ncurses.h')) {
-        $$libtypR  = 'ncurses';
-    } elsif (-f('/usr/include/ncurses.h')) {
+    } elsif ($typeList->{'ncurses'} && nCursesIsInstalled()) {
         $$libtypR = 'ncurses';
-    } elsif (-f('/usr/include/curses/curses.h')) {
-        $$libtypR = 'bsd';
-    } elsif (-f('/usr/include/curses.h')) {
+    } elsif ($typeList->{'bsd'} && bsdIsInstalled()) {
         $$libtypR = 'bsd';
     } else {
-        $$libtypR = $libtypDefault;
+        $$libtypR = $typeList->{'default'};
     }
 }
 
@@ -199,9 +216,9 @@ sub chooseBsdOrNcurses($$) {
 sub guessAtCursesLocation($$$) {
     my ($libtypR, $incR, $libsR) = @_;
 #-----------------------------------------------------------------------------
-#  Return as $$libtypR the type of Curses library we should use:
+#  Return as $$libtypR the type of Curses library we should use, e.g.
 #  'ncurses', 'ncursesw' or 'bsd'.  May be undefined if we don't think
-#  we have to choose between the those on this system.
+#  we have to choose between those on this system.
 #
 #  Return as $$incR the -I option we think is appropriate to get the
 #  Curses interface header files.
@@ -222,14 +239,14 @@ sub guessAtCursesLocation($$$) {
     } else {
         my $guess1 = $guess_cfg->{$OSNAME};
         my $libtyp;
-            # 'bsd' or 'ncurses'.  Undefined if we think
+            # typically 'bsd' or 'ncurses'.  Undefined if we think
             # there's no choice of Curses version on this platform.
 
         my $guess;
         if (ref $guess1 eq 'HASH') {
             # For this platform, we have a choice of Curses library.
 
-            chooseBsdOrNcurses($guess1->{'default'}, \$libtyp);
+            chooseLibraryType($guess1, \$libtyp);
             $guess = $guess1->{$libtyp};
         } else {
             $guess = $guess1;
@@ -318,11 +335,19 @@ sub defaultLibTypeForOs($) {
 }
 
 
+# A "library class" is a more abstract categorization than a "library type."
+# The difference between two library types is just compiler and linker
+# options to choose the right library, but different library classes
+# have bigger differences and can have different hints files.  The
+# library class is part of the hint file name.
 
 my %libClass = (
                 'bsd'      => 'bsd',
                 'ncurses'  => 'ncurses',
-                'ncursesw' => 'ncurses'
+                'ncursesw' => 'ncurses',
+                'sysv'     => 'sysv',
+                'visualc'  => 'visualc',
+                'borland'  => 'borland',
 );
 
 
@@ -330,15 +355,13 @@ my %libClass = (
 sub makeConfigH($) {
     my ($libType) = @_;
 #-----------------------------------------------------------------------------
-#  $libType is the kind of Curses library we are using - 'bsd',
+#  $libType is the kind of Curses library we are using - e.g. 'bsd',
 #  'ncurses', or 'ncursesw'.  It may be undefined if there is no
 #  choice on this system.
 #-----------------------------------------------------------------------------
     print qq{Making a guess for "c-config.h"...\n};
 
     my $libClass;
-        # $libClass is a more abstract type than $libType.  It is
-        # 'bsd' or 'ncurses'.
 
     if (defined($libType)) {
         $libClass = $libClass{$libType};

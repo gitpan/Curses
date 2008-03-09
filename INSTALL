@@ -45,6 +45,17 @@ then.
    Makefile.PL will find them there.  Otherwise, set the _CFLAGS
    environment variables below accordingly.
 
+   Alternatively, you can just edit c-config.h, after running
+   Makefile.PL.  Replace the line
+
+     #include <form.h>
+
+   with something like
+
+     #include "/usr/include/form.h"
+
+   explicitly specifying the Ncurses version of form.h.
+
    You can ignore all this if you're not building forms capability
    into the Perl Curses module (by specifying "FORMS" as an option to
    Makefile.PL below).

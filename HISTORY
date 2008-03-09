@@ -11,6 +11,10 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.23 (Released March 9, 2008)
+
+  Fix crash of Makefile.PL on Windows.
+
 New in 1.22 (Released February 29, 2008)
 
   Nothing.  Just a packaging fix.
