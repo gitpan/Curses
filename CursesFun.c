@@ -3382,17 +3382,19 @@ XS(XS_Curses_is_wintouched)
 
 /* curs_util */
 
-XS(XS_Curses_unctrl)
-{
+
+
+XS(XS_Curses_unctrl) {
+
     dXSARGS;
 #ifdef C_UNCTRL
     c_exactargs("unctrl", items, 1);
     {
-	chtype	ch	= c_sv2chtype(ST(0));
-	char *	ret	= unctrl(ch);
-	
-	ST(0) = sv_newmortal();
-	sv_setpv((SV*)ST(0), ret);
+        chtype const ch = c_sv2chtype(ST(0));
+        const char * const ret = unctrl(ch);
+    
+        ST(0) = sv_newmortal();
+        sv_setpv((SV*)ST(0), ret);
     }
     XSRETURN(1);
 #else
@@ -3400,6 +3402,8 @@ XS(XS_Curses_unctrl)
     XSRETURN(0);
 #endif
 }
+
+
 
 XS(XS_Curses_keyname)
 {

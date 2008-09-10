@@ -118,6 +118,12 @@ my $guess_cfg = {
     'ncurses' => [ ''                       , '-lncurses'                 ],
     'default' =>   'bsd'
   },
+  'dragonfly' => {
+    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
+    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'default' =>   'bsd'
+  },
+
   'hpux'      => [ ''                       , '-lcurses -ltermcap'        ],
 # See INSTALL file for information about a different Curses library on HPUX.
   'irix'      => {
@@ -131,7 +137,11 @@ my $guess_cfg = {
     'ncurses' => [ '-I/usr/include/ncurses' ,  '-lncurses'                ],
     'default' =>   'ncurses'
   },
-  'netbsd'    => [ ''                       , '-lcurses -ltermcap'        ],
+  'netbsd'   => {
+    'bsd'     => [ ''                       => '-lcurses -ltermcap'        ],
+    'ncurses' => [ ''                       => '-lncurses'                 ],
+    'default' =>   'ncurses'
+  },
   'next'      => [ ''                       , '-lcurses -ltermcap'        ],
   'openbsd'   => [ ''                       , '-lcurses -ltermcap'        ],  
   'os2'       => {
@@ -479,9 +489,12 @@ if (defined($inc) && defined($libs)) {
     if (!defined($libType)) {
         $libType = defaultLibTypeForOs($OSNAME);
     }
-} elsif (defined($inc) || defined($libs) || defined($libType)) {
+} elsif (defined($inc) || defined($libs)) {
     die("You must specify both CURSES_LDFLAGS and CURSES_CFLAGS " .
         "environment variables or neither.  ");
+} elsif (defined($libType)) {
+    die("If you specify CURSES_LIBTYPE, you must also specify " .
+        "CURSES_LDFLAGS and CURSES_CFLAGS");
 } else {
     guessAtCursesLocation(\$libType, \$inc, \$libs);
 }

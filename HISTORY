@@ -11,6 +11,17 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.24 (Released September 10, 2008)
+
+  Export KEY_RESIZE, KEY_EVENT.
+
+  For Netbsd, allow both Netbsd and BSD guesses via CURSES_LIBTYPE,
+  and default to Ncurses.  Used to guess only BSD.  From Ulrich Habel
+  rhaen@NetBSD.org .
+
+  Add guess capability for Dragonfly.  From Ulrich Habel
+  rhaen@NetBSD.org .
+
 New in 1.23 (Released March 9, 2008)
 
   Fix crash of Makefile.PL on Windows.

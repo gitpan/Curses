@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.23'; # Makefile.PL picks this up
+$VERSION = '1.24'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -154,18 +154,20 @@ tie $COLOR_PAIRS, Curses::Vars, 6;
     COLOR_YELLOW KEY_A1 KEY_A3 KEY_B2 KEY_BACKSPACE KEY_BEG KEY_BREAK
     KEY_BTAB KEY_C1 KEY_C3 KEY_CANCEL KEY_CATAB KEY_CLEAR KEY_CLOSE
     KEY_COMMAND KEY_COPY KEY_CREATE KEY_CTAB KEY_DC KEY_DL KEY_DOWN KEY_EIC
-    KEY_END KEY_ENTER KEY_EOL KEY_EOS KEY_EXIT KEY_F0 KEY_FIND KEY_HELP
+    KEY_END KEY_ENTER KEY_EOL KEY_EOS KEY_EVENT KEY_EXIT
+    KEY_F0 KEY_FIND KEY_HELP
     KEY_HOME KEY_IC KEY_IL KEY_LEFT KEY_LL KEY_MARK KEY_MAX KEY_MESSAGE
-    KEY_MIN KEY_MOVE KEY_NEXT KEY_NPAGE KEY_OPEN KEY_OPTIONS KEY_PPAGE
+    KEY_MOUSE KEY_MIN KEY_MOVE KEY_NEXT KEY_NPAGE
+    KEY_OPEN KEY_OPTIONS KEY_PPAGE
     KEY_PREVIOUS KEY_PRINT KEY_REDO KEY_REFERENCE KEY_REFRESH KEY_REPLACE
-    KEY_RESET KEY_RESTART KEY_RESUME KEY_RIGHT KEY_SAVE KEY_SBEG
+    KEY_RESET  KEY_RESIZE KEY_RESTART KEY_RESUME KEY_RIGHT KEY_SAVE KEY_SBEG
     KEY_SCANCEL KEY_SCOMMAND KEY_SCOPY KEY_SCREATE KEY_SDC KEY_SDL
     KEY_SELECT KEY_SEND KEY_SEOL KEY_SEXIT KEY_SF KEY_SFIND KEY_SHELP
     KEY_SHOME KEY_SIC KEY_SLEFT KEY_SMESSAGE KEY_SMOVE KEY_SNEXT
     KEY_SOPTIONS KEY_SPREVIOUS KEY_SPRINT KEY_SR KEY_SREDO KEY_SREPLACE
     KEY_SRESET KEY_SRIGHT KEY_SRSUME KEY_SSAVE KEY_SSUSPEND KEY_STAB
-    KEY_SUNDO KEY_SUSPEND KEY_UNDO KEY_UP KEY_MOUSE BUTTON1_RELEASED
-    BUTTON1_PRESSED BUTTON1_CLICKED BUTTON1_DOUBLE_CLICKED
+    KEY_SUNDO KEY_SUSPEND KEY_UNDO KEY_UP
+    BUTTON1_RELEASED BUTTON1_PRESSED BUTTON1_CLICKED BUTTON1_DOUBLE_CLICKED
     BUTTON1_TRIPLE_CLICKED BUTTON1_RESERVED_EVENT BUTTON2_RELEASED
     BUTTON2_PRESSED BUTTON2_CLICKED BUTTON2_DOUBLE_CLICKED
     BUTTON2_TRIPLE_CLICKED BUTTON2_RESERVED_EVENT BUTTON3_RELEASED
@@ -281,9 +283,10 @@ user wanted to call.
 Unfortunately, curses(3) predates varargs(3), so in C we were stuck
 with all the variants.  However, C<Curses> is a Perl interface, so we
 are free to "unify" these variants into one function.  The section
-L<"Supported Functions"> below lists all curses(3) function supported
-by C<Curses>, along with a column listing if it is I<unified>.  If
-so, it takes a varying number of arguments as follows:
+L<"Available Functions"> below lists all curses(3) functions C<Curses>
+makes available as Perl equivalents, along with a column listing if it
+is I<unified>.  If so, it takes a varying number of arguments as
+follows:
 
 =over 4
 
@@ -310,7 +313,7 @@ for an example of this.
 
 =head2 Objects
 
-Objects are supported.  Example:
+Objects work.  Example:
 
     $win = new Curses;
     $win->addstr(10, 10, 'foo');
@@ -318,7 +321,7 @@ Objects are supported.  Example:
     ...
 
 Any function that has been marked as I<unified> (see
-L<"Supported Functions"> below and L<"Unified Functions"> above)
+L<"Available Functions"> below and L<"Unified Functions"> above)
 can be called as a method for a Curses object.
 
 Do not use C<initscr()> if using objects, as the first call to get
@@ -361,9 +364,9 @@ script with:
 Any old application that still does not work should print an
 understandable error message explaining the problem.
 
-Some functions and variables are not supported by C<Curses>, even with
+Some functions and variables are not available through C<Curses>, even with
 the C<BEGIN> line.  They are listed under
-L<"curses(3) items not supported by Curses">.
+L<"curses(3) items not available through Curses">.
 
 The variables C<$stdscr> and C<$curscr> are also available as
 functions C<stdscr> and C<curscr>.  This is because of a Perl bug.
@@ -443,12 +446,12 @@ Probably many more.
 
 William Setzer <William_Setzer@ncsu.edu>
 
-=head1 SYNOPSIS OF PERL CURSES SUPPORT
+=head1 SYNOPSIS OF PERL CURSES AVAILABILITY
 
-=head2 Supported Functions
+=head2 Available Functions
 
-    Supported            Unified?     Supported via $OldCurses[*]
-    ---------            --------     ------------------------
+    Avaiable Function    Unified?     Available via $OldCurses[*]
+    -----------------    --------     ------------------------
     addch                  Yes        waddch mvaddch mvwaddch
     echochar               Yes        wechochar
     addchstr               Yes        waddchstr mvaddchstr mvwaddchstr
@@ -775,12 +778,12 @@ C<$Curses::OldCurses> must be set to a non-zero value before using the
 C<Curses> package.  See L<"Perl 4.X cursperl Compatibility"> for an
 example of this.
 
-=head2 Supported Variables
+=head2 Available Variables
 
     LINES                   COLS                    stdscr
     curscr                  COLORS                  COLOR_PAIRS
 
-=head2 Supported Constants
+=head2 Available Constants
 
     ERR                     OK                      ACS_BLOCK
     ACS_BOARD               ACS_BTEE                ACS_BULLET
@@ -806,7 +809,8 @@ example of this.
     KEY_CREATE              KEY_CTAB                KEY_DC
     KEY_DL                  KEY_DOWN                KEY_EIC
     KEY_END                 KEY_ENTER               KEY_EOL
-    KEY_EOS                 KEY_EXIT                KEY_F0
+    KEY_EOS                 KEY_EVENT               KEY_EXIT
+    KEY_F0
     KEY_FIND                KEY_HELP                KEY_HOME
     KEY_IC                  KEY_IL                  KEY_LEFT
     KEY_LL                  KEY_MARK                KEY_MAX
@@ -815,7 +819,8 @@ example of this.
     KEY_OPTIONS             KEY_PPAGE               KEY_PREVIOUS
     KEY_PRINT               KEY_REDO                KEY_REFERENCE
     KEY_REFRESH             KEY_REPLACE             KEY_RESET
-    KEY_RESTART             KEY_RESUME              KEY_RIGHT
+    KEY_RESIZE              KEY_RESTART             KEY_RESUME
+    KEY_RIGHT
     KEY_SAVE                KEY_SBEG                KEY_SCANCEL
     KEY_SCOMMAND            KEY_SCOPY               KEY_SCREATE
     KEY_SDC                 KEY_SDL                 KEY_SELECT
@@ -879,19 +884,19 @@ example of this.
     O_PASSOK                O_STATIC                O_NL_OVERLOAD
     O_BS_OVERLOAD           
 
-=head2 curses(3) functions not supported by C<Curses>
+=head2 curses(3) functions not available through C<Curses>
 
     tstp _putchar fullname scanw wscanw mvscanw mvwscanw ripoffline
     setupterm setterm set_curterm del_curterm restartterm tparm tputs
     putp vidputs vidattr mvcur tigetflag tigetnum tigetstr tgetent
     tgetflag tgetnum tgetstr tgoto tputs
 
-=head2 menu(3) functions not supported by C<Curses>
+=head2 menu(3) functions not available through C<Curses>
 
     set_item_init item_init set_item_term item_term set_menu_init
     menu_init set_menu_term menu_term
 
-=head2 form(3) functions not supported by C<Curses>
+=head2 form(3) functions not available through C<Curses>
 
     new_fieldtype free_fieldtype set_fieldtype_arg
     set_fieldtype_choice link_fieldtype set_form_init form_init

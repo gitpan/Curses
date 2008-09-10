@@ -791,6 +791,12 @@ XS(boot_Curses)
 #ifdef KEY_MOUSE
     C_NEWCS("KEY_MOUSE",                      KEY_MOUSE);
 #endif
+#ifdef KEY_RESIZE
+    C_NEWCS("KEY_RESIZE",                     KEY_RESIZE);
+#endif
+#ifdef KEY_EVENT
+    C_NEWCS("KEY_EVENT",                      KEY_EVENT);
+#endif
 #ifdef BUTTON1_RELEASED
     C_NEWCS("BUTTON1_RELEASED",               BUTTON1_RELEASED);
 #endif
