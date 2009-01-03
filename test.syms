@@ -189,17 +189,17 @@ EOHDR
 
 print OUTH 
     $panels ? "#define " : "#undef  ",
-    "C_PANELSUPPORT          /* Add in panel library support?             */",
+    "C_PANELSUPPORT          /* Add in panel library function?             */",
     "\n\n";
 
 print OUTH 
     $menus ? "#define " : "#undef  ",
-    "C_MENUSUPPORT           /* Add in menu library support?              */",
+    "C_MENUSUPPORT           /* Add in menu library function?              */",
     "\n\n";
 
 print OUTH 
     $forms ? "#define " : "#undef  ",
-    "C_FORMSUPPORT           /* Add in form library support?              */",
+    "C_FORMSUPPORT           /* Add in form library function?              */",
     "\n\n";
 
 # Some functions return either int or void, depending on what compiler

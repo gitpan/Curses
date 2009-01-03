@@ -7,7 +7,7 @@ use Curses;
 
 eval { new_panel() };
 if ($@ =~ /not defined by your vendor/) {
-    print STDERR "Curses was not compiled with panel support.\n";
+    print STDERR "Curses was not compiled with panel function.\n";
     exit 1;
 }
 

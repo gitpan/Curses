@@ -11,6 +11,13 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.26 (Released January 3, 2009)
+
+  newterm() is available and putwin() and getwin() work in newer Perl (with
+  PerlIO).  We now use PerlIO_findFile().
+
+1.25 doesn't exist (The name got burned in a CPAN upload mistake).
+
 New in 1.24 (Released September 10, 2008)
 
   Export KEY_RESIZE, KEY_EVENT.
@@ -160,7 +167,7 @@ New in 1.08 (November 2004)
 
 New in 1.07 (September 2004)
 
-  - Call to Perl_isa_sv() changed to isa_sv() because the former doesn't
+  - Call to Perl_sv_isa() changed to sv_isa() because the former doesn't
     work on some systems (causes a build failure).
 
 New in 1.06 (July 2001)
@@ -177,14 +184,14 @@ New in 1.06 (July 2001)
 
  o changed the "Curses->new()" function to be a bit less clever.
 
- o Support for libmenu!  Many thanks to Yury Pshenichny <yura at zp.ua>
+ o Works with libmenu!  Many thanks to Yury Pshenichny <yura at zp.ua>
    who did most of the actual work.
 
-   Update: Well, sort of support.  For some reason beyond my ken, it
+   Update: Well, sort of works.  For some reason beyond my ken, it
    doesn't work with Solaris (2.6) libmenu. (The items won't attach to
    the menu.)  ncurses menu, both 1.9.9 and 5.2, seem to work fine.
 
- o libform support added, too.  Ho hum.  ;)  This one does appear to
+ o Works with libform too.  Ho hum.  ;)  This one does appear to
    work with Solaris libform.
 
  o Added the following ncurses extension functions:
@@ -205,8 +212,8 @@ New in 1.06 (July 2001)
    attr_on()
    attr_set()
 
- o Between the functions supported and the functions listed in the
-   pod as not supported, those are all the ones I know about.
+ o Between the functions exposed and the functions listed in the
+   pod as not exposeded, those are all the ones I know about.
    Got any more?  Let me know.
 
  o Fixed 64 bit issue with getch() and possibly others, truncating

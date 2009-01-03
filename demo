@@ -24,7 +24,7 @@ addstr(2, 5, "bold  ");
 eval { attron(A_REVERSE) };
 addstr("bold+reverse");
 eval { attrset(A_NORMAL) };
-addstr("  normal  (if your curses supports these modes)");
+addstr("  normal  (if your curses has these modes)");
 
 addstr(6, 1, "do12345678901234567890n't worry be happy");
 eval { box($b, '|', '-') };

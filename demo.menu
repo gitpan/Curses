@@ -9,7 +9,7 @@ use Curses;
 
 eval { new_menu() };
 if ($@ =~ /not defined by your vendor/) {
-    print STDERR "Curses was not compiled with menu support.\n";
+    print STDERR "Curses was not compiled with menu function.\n";
     exit 1;
 }
 

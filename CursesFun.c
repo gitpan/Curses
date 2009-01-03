@@ -1278,42 +1278,26 @@ XS(XS_Curses_isendwin)
 #endif
 }
 
-/* newterm() has some complexities because of PerlIo.
-
-   IoIFP() returns a FILE * with some Perl cores, and PerlIo with
-   others.  We need FILE *.  One would think that on the PerlIo system,
-   there would be some way to call something that uses FILE *,
-   such as newterm(), but I haven't found one.
-
-   With some Perl cores, "FILE" is a macro that expands to "PerlIo".
-   That seems ridiculous, because something such as newterm() needs a
-   real FILE *, not just something called that.
-*/
-
-
 XS(XS_Curses_newterm)
 {
     dXSARGS;
 #ifdef C_NEWTERM
-#ifdef PERLIO_IS_STDIO
     c_exactargs("newterm", items, 3);
     {
 	char *	type	= ST(0) != &PL_sv_undef ? (char *)SvPV_nolen(ST(0)) : NULL;
 
-	FILE *	outfd	= IoIFP(sv_2io(ST(1)));
-	FILE *	infd	= IoIFP(sv_2io(ST(2)));
+    /* IoIFP() returns a FILE * with some Perl cores, and PerlIo with
+       others.  We need FILE *.  PerlIO_findFILE() takes either a FILE * or
+       PerlIo as input and returns a FILE *.
+    */
+	FILE *	outfd	= PerlIO_findFILE(IoIFP(sv_2io(ST(1))));
+	FILE *	infd	= PerlIO_findFILE(IoIFP(sv_2io(ST(2))));
 	SCREEN *	ret	= newterm(type, outfd, infd);
 	
 	ST(0) = sv_newmortal();
 	c_screen2sv(ST(0), ret);
     }
     XSRETURN(1);
-#else  /* PERLIO_IS_STDIO */
-    croak("You cannot use newterm() with this Perl interpreter core because "
-          "it uses PerlIo for file I/O, and the Curses library doesn't "
-          "know what to do with that");
-     /* See explanation in comments above */
-#endif
 #else
     c_fun_not_there("newterm");
     XSRETURN(0);
@@ -3484,7 +3468,8 @@ XS(XS_Curses_putwin)
     c_exactargs("putwin", items, 2);
     {
 	WINDOW *win	= c_sv2window(ST(0), 0);
-	FILE *	filep	= IoIFP(sv_2io(ST(1)));
+    /* See explanation of PerlIO_findFILE in newterm() */
+	FILE *	filep	= PerlIO_findFILE(IoIFP(sv_2io(ST(1))));
 	int	ret	= putwin(win, filep);
 	
 	ST(0) = sv_newmortal();
@@ -3503,7 +3488,8 @@ XS(XS_Curses_getwin)
 #ifdef C_GETWIN
     c_exactargs("getwin", items, 1);
     {
-	FILE *	filep	= IoIFP(sv_2io(ST(0)));
+    /* See explanation of PerlIO_findFILE in newterm() */
+	FILE *	filep	= PerlIO_findFILE(IoIFP(sv_2io(ST(0))));
 	WINDOW *	ret	= getwin(filep);
 	
 	ST(0) = sv_newmortal();
@@ -4280,7 +4266,7 @@ XS(XS_Curses_touchoverlap)
 }
 
 
-/* Panel support */
+/* Panel functions */
 
 XS(XS_Curses_new_panel)
 {
@@ -4568,7 +4554,7 @@ XS(XS_Curses_del_panel)
 }
 
 
-/* Menu support */
+/* Menu functions */
 
 /* menu_attributes */
 
@@ -5733,7 +5719,7 @@ XS(XS_Curses_menu_spacing)
 }
 
 
-/* Form support */
+/* Form functions */
 
 /* form_cursor */
 

@@ -160,9 +160,9 @@ then.
    perl demo
    perl gdc
    perl demo2       [stuff that has a 50/50 chance of showing up right]
-   perl demo.panel  [if you enabled panel support]
-   perl demo.menu   [if you enabled menu support]
-   perl demo.form   [if you enabled form support]
+   perl demo.panel  [if you enabled panel function]
+   perl demo.menu   [if you enabled menu function]
+   perl demo.form   [if you enabled form function]
 
    "gdc" is a digital clock ported from the "ncurses" distribution.
 
