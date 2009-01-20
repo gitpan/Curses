@@ -554,7 +554,7 @@ if ($forms and $form_inc !~ m{-I} and -f('/usr/include/form.h')) {
     print("file.\n");
 }
 
-my $clean = 'CursesDef.h c-config.h cdemo testsym testint testtyp';
+my $clean = 'CursesDef.h c-config.h cdemo testsym testint testtyp *.i *.s';
 my $realc = $gen
     ? 'list.syms Curses.pm ' . 
       'CursesFun.c CursesVar.c CursesCon.c CursesTyp.h CursesBoot.c'

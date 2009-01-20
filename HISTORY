@@ -11,6 +11,15 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.27 (Released January 20, 2009)
+
+  Extraneous .i and .s files in 1.26 removed.  'make clean' cleans all
+  .i and .s too.
+
+  'gen' directory is replaced by gen.tar file, so CPAN doesn't index
+  the stuff in there.  That directory is stuff for developing the Curses
+  package, not stuff for users.
+
 New in 1.26 (Released January 3, 2009)
 
   newterm() is available and putwin() and getwin() work in newer Perl (with
