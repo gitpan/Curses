@@ -182,6 +182,7 @@ XS(XS_Curses_Vars_STORE)
 {
     dXSARGS;
     {
+#ifdef ALLOW_VARS_STORE
 	int	num = (int)SvIV((SV*)SvRV(ST(0)));
 
 	switch (num) {
@@ -232,6 +233,25 @@ XS(XS_Curses_Vars_STORE)
 	    /* NOTREACHED */
 	}
 	ST(0) = &PL_sv_yes;
+#else
+    croak("Curses::Vars::STORE is not available in this version of "
+          "Curses.pm.  Setting of variables is not allowed in recent "
+          "Curses (C) libraries.");
+
+    /* In January 2010, we first saw a version of Ncurses that does not
+       allow setting of variables.  This has to do with making the library
+       re-entrant.  The variables do not exist, but code that refers to them
+       still works because the variable names are defined as macros that call
+       functions that retrieve the value.  For some of the variables, it
+       doesn't even make sense to set the variables, and we assume few programs
+       ever exploited this ability, so simply removed it by default for
+       everyone starting with the January 2010 release.
+    
+       If you have an old Ncurses library that allows setting of variables
+       and really want this function in Curses.pm, #define ALLOW_VARS_STORE
+       in your c-config.h.
+    */
+#endif
     }
     XSRETURN(1);
 }

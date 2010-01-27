@@ -25,7 +25,7 @@ then.
    file "c-config.h" in the current ("Curses") directory.  If not,
    copy "hints/c-none.h" to "c-config.h" in the current directory.
    Then edit "c-config.h" and follow the directions.  If you have to
-   "roll your own", be sure and save a copy.  A "make clean" will
+   "roll your own", be sure to save a copy.  A "make clean" will
    delete "c-config.h".  If you "rolled your own", please send me a
    copy so I can include it in future distributions (see
    "hints/c-isc.h" for an example of a user-contributed "c-config.h").
@@ -141,7 +141,7 @@ then.
 
    Alternatively, if you see that test.syms is picking the wrong
    values, you can edit "CursesDef.h" by hand and follow the
-   directions.  If you have to "roll your own", be sure and save a
+   directions.  If you have to "roll your own", be sure to save a
    copy.  A "make clean" will delete "CursesDef.h".
 
    `make' will then try to compile "Curses.c".  If you get any
@@ -241,8 +241,8 @@ in September 2007.  He gave these notes:
 
   - Set environment variables (for Perl Curses Makefile.PL):
 
-      CURSES_CFLAGS=-Ic:\dev\pdc33
-      CURSES_LDFLAGS=-Lc:\dev\pdc33 pdcurses.lib
+      CURSES_CFLAGS='-Ic:\dev\pdc33'
+      CURSES_LDFLAGS='-Lc:\dev\pdc33 pdcurses.lib'
     
   -  Build and Test
 

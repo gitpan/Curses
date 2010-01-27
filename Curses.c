@@ -131,21 +131,21 @@ static void
 c_fun_not_there(fn)
 char *fn;
 {
-    croak("Curses function '%s' is not defined by your vendor", fn);
+    croak("Curses function '%s' is not defined in your Curses library", fn);
 }
 
 static void
 c_var_not_there(fn)
 char *fn;
 {
-    croak("Curses variable '%s' is not defined by your vendor", fn);
+    croak("Curses variable '%s' is not defined in your Curses library", fn);
 }
 
 static void
 c_con_not_there(fn)
 char *fn;
 {
-    croak("Curses constant '%s' is not defined by your vendor", fn);
+    croak("Curses constant '%s' is not defined in your Curses library", fn);
 }
 
 /*

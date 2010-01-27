@@ -11,6 +11,14 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.28 (Released January 27, 2010)
+
+  Disable Curses::Var::STORE.  It doesn't work (doesn't even compile) with
+  newer Ncurses (due to updates to make Ncurses reentrant).  One can
+  re-enable it by defining ALLOW_VARS_STORE in c-config.h.
+
+  Improve "not provided by your vendor" message.
+
 New in 1.27 (Released January 20, 2009)
 
   Extraneous .i and .s files in 1.26 removed.  'make clean' cleans all

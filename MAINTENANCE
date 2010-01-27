@@ -34,11 +34,6 @@ Steps to release:
   - PAUSE will open the tarball automatically and index the packages it finds
     in there by name (Curses::Window, Curses::Screen, etc.).
 
-    It will find and index the package "Gen" and extract its README too.  I'm
-    pretty sure this is wrong -- this looks like it's just supposed to be a
-    private thing used in the build.  Someday, we should find a way to stop
-    this.
-
 
 For Bryan's test system:
 
