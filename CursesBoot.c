@@ -3,6 +3,8 @@
 **
 **  CursesBoot.c -- the bootstrap function
 **
+**  This is an inclusion for Curses.c.
+**
 **  Copyright (c) 1994-2000  William Setzer
 **
 **  You may distribute under the terms of either the Artistic License
@@ -402,6 +404,15 @@ XS(boot_Curses)
     C_NEWXS("Curses::field_arg",              XS_Curses_field_arg);
     C_NEWXS("Curses::form_request_name",      XS_Curses_form_request_name);
     C_NEWXS("Curses::form_request_by_name",   XS_Curses_form_request_by_name);
+
+    /* Combined Normal/Wide-Character Functions */
+
+    C_NEWXS("Curses::addstring",		XS_CURSES_addstring);
+    C_NEWXS("Curses::insstring",		XS_CURSES_insstring);
+    C_NEWXS("Curses::instring",			XS_CURSES_instring);
+    C_NEWXS("Curses::getchar",			XS_CURSES_getchar);
+    C_NEWXS("Curses::ungetchar",		XS_CURSES_ungetchar);
+    C_NEWXS("Curses::getstring",		XS_CURSES_getstring);
 
     /* Variables masquerading as functions */
 

@@ -75,32 +75,19 @@ In order to avoid this problem, use the alternate functions:
    inchnstr()
    innstr()
 
-which take an extra "size of buffer" argument.
+which take an extra "size of buffer" argument or the wide-character-aware
+getstring() and instring() versions.
 
 
 Known Problems
 --------------
-Wide characters
-
-   Screen positions get calculated wrong, i.e. based on the number of
-   bytes in a string instead of the number of characters.
-
-   You should debug this, fix it, and submit the fix for inclusion in
-   the next release of Perl Curses.
-
-   Note that unless you have and build for the wide-character-capable
-   Ncurses (named 'ncursesw'), wide characters won't work even this much.
-   
-
 NCurses
    getch() and getstr() don't work right under very old versions of
-   ncurses (around v1.8.5).  Please upgrade to a newer version.
+   ncurses (around v1.8.5).
 
-   panel_hidden() test is reversed in v1.9.9g.  Please upgrade to
-   a newer version.
+   panel_hidden() test is reversed in v1.9.9g.
 
-   Actually, there are several problems in v1.9.9g.  Please upgrade
-   to a newer version.
+   Actually, there are several problems in v1.9.9g.
 
 NETBSD
 

@@ -347,3 +347,9 @@ T  chtype
 T  MEVENT
 T  mmask_t
 T  SCREEN
+E  waddnwstr(stdscr,0,0)
+E  wget_wch(stdscr,0)
+E  wgetn_wstr(stdscr,0,0)
+E  winnwstr(stdscr,0,0)
+E  wins_nwstr(stdscr,0,0)
+E  unget_wch(0)

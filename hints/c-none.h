@@ -2,17 +2,17 @@
 #include <curses.h>
 
 /* Change <panel.h> below to the proper "include" file for panels. */
-#ifdef C_PANELSUPPORT
+#ifdef C_PANELFUNCTION
 #include <panel.h>
 #endif
 
 /* Change <menu.h> below to the proper "include" file for menus. */
-#ifdef C_MENUSUPPORT
+#ifdef C_MENUFUNCTION
 #include <menu.h>
 #endif
 
 /* Change <form.h> below to the proper "include" file for forms. */
-#ifdef C_FORMSUPPORT
+#ifdef C_FORMFUNCTION
 #include <form.h>
 #endif
 

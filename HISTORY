@@ -11,6 +11,17 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.29 (Released April 6, 2014)
+
+  Add an alternate set of functions (getchar, ungetchar, getstring,
+  instring, addstring, insstring) providing a more Perl-like interface,
+  converting from and to Perl strings (instead of passing data to the C
+  library verbatim) and using wide character functions if available in the
+  underlying curses library.
+
+  Written by Edgar FuÅﬂ, Mathematisches Institut der Uni Bonn,
+  <ef@math.uni-bonn.de>
+
 New in 1.28 (Released January 27, 2010)
 
   Disable Curses::Var::STORE.  It doesn't work (doesn't even compile) with

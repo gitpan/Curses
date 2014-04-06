@@ -3,6 +3,8 @@
 **
 **  CursesVar.c -- the variables
 **
+**  This is an inclusion for Curses.c
+**
 **  Copyright (c) 1994-2000  William Setzer
 **
 **  You may distribute under the terms of either the Artistic License

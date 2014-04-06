@@ -26,15 +26,15 @@
 
 #include <curses.h>
 
-#ifdef C_PANELSUPPORT
+#ifdef C_PANELFUNCTION
 #include <panel.h>
 #endif
 
-#ifdef C_MENUSUPPORT
+#ifdef C_MENUFUNCTION
 #include <menu.h>
 #endif
 
-#ifdef C_FORMSUPPORT
+#ifdef C_FORMFUNCTION
 #include <form.h>
 #endif
 
