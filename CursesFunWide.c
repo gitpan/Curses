@@ -2,6 +2,12 @@
 
 /* Combined Normal/Wide-Character Functions */
 
+/* April 2014, Edgar Fuﬂ, Mathematisches Institut der Universit‰t Bonn,
+   <ef@math.uni-bonn.de>
+*/
+
+
+
 XS(XS_CURSES_getchar) {
     dXSARGS;
     c_countargs("getchar", items, 0);

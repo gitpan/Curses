@@ -2,7 +2,41 @@
 
 
 /* Combined Normal/Wide-Character helper functions */
+
+/* April 2014, Edgar Fuﬂ, Mathematisches Institut der Universit‰t Bonn,
+  <ef@math.uni-bonn.de> 
+*/
+
 #include <wchar.h>
+
+#if HAVE_PERL_UVCHR_TO_UTF8
+  #define UVCHR_TO_UTF8 uvchr_to_utf8
+#elif HAVE_PERL_UV_TO_UTF8
+  #define UVCHR_TO_UTF8 uv_to_utf8
+#else
+  #error CursesWide.c cannot be compiled on this system; no uv[chr]_to_utf8
+#endif
+
+
+
+static UV
+utf8_to_uvchr_buf_x(U8 *     s,
+                    U8 *     end,
+                    STRLEN * lenP) {
+
+#if HAVE_PERL_UTF8_TO_UVCHR_BUF
+    return utf8_to_uvchr_buf(s, end, lenP);
+#elif HAVE_PERL_UTF8_TO_UVCHR
+    return utf8_to_uvchr(s, lenP);
+#elif HAVE_PERL_UTF8_TO_UV
+    return utf8_to_uv(s, end - s, lenP, 0);
+#else
+    #error CursesWide.c cannot compile because \
+           there is no utf8_to_uvchr_buf, etc.
+#endif
+}
+    
+
 
 static void
 c_wchar2sv(SV *    const sv,
@@ -18,7 +52,7 @@ c_wchar2sv(SV *    const sv,
         SvUTF8_off(sv);
     } else {
         char s[UTF8_MAXBYTES + 1] = { 0 };
-        char *s_end = (char *)uvchr_to_utf8((U8 *)s, wc);
+        char *s_end = (char *)UVCHR_TO_UTF8((U8 *)s, wc);
         *s_end = 0;
         sv_setpv(sv, s);
         SvPOK_on(sv);
@@ -58,7 +92,7 @@ c_wstr2sv(SV *      const sv,
         U8 *u8, *u8_p;
         u8 = (U8 *)sv_grow(sv, (ws_len + 1) * UTF8_MAXBYTES);
         for (ws_p = ws, u8_p = u8; *ws_p; ws_p++)
-            u8_p = uvchr_to_utf8(u8_p, *ws_p);
+            u8_p = UVCHR_TO_UTF8(u8_p, *ws_p);
         *u8_p = 0;
         SvCUR_set(sv, u8_p - u8);
         SvUTF8_on(sv);
@@ -90,7 +124,7 @@ c_sv2wchar(SV * const sv) {
         return WEOF;
     if (SvUTF8(sv)) {
         STRLEN len;
-        UV uv = utf8_to_uvchr_buf(s, s + s_len, &len);
+        UV uv = utf8_to_uvchr_buf_x(s, s + s_len, &len);
         if (len != s_len)
             return WEOF;
         return (wint_t) uv;
@@ -136,7 +170,7 @@ c_sv2bstr(SV *     const sv,
                 *bs_p++ = *s_p++;
             } else {
                 STRLEN len;
-                UV uv = utf8_to_uvchr_buf(s_p, s_end, &len);
+                UV uv = utf8_to_uvchr_buf_x(s_p, s_end, &len);
                 if (uv > 0xff) {
                     *need_free = 0;
                     *b_len = 0;
@@ -194,7 +228,7 @@ c_sv2wstr(SV *     const sv,
                 *ws_p++ = *s_p++;
             } else {
                 STRLEN len;
-                *ws_p++ = utf8_to_uvchr_buf(s_p, s_end, &len);
+                *ws_p++ = utf8_to_uvchr_buf_x(s_p, s_end, &len);
                 s_p += len;
             }
         }

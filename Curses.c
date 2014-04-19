@@ -73,10 +73,26 @@
    defined in Perl's CORE/pp.h via our inclusion of perl.h above.
 */
 
-#if PERL_REVISION > 5 || (PERL_REVISION == 5 && PERL_VERSION >= 16)
-  #define HAVE_PERL_UTF8 1
+#if PERL_VERSION >= 6
+#define HAVE_PERL_UTF8_TO_UV 1
+#define HAVE_PERL_UV_TO_UTF8 1
 #else
-  #define HAVE_PERL_UTF8 0
+#define HAVE_PERL_UTF8_TO_UV 0
+#define HAVE_PERL_UV_TO_UTF8 0
+#endif
+
+#if PERL_VERSION >= 7
+#define HAVE_PERL_UTF8_TO_UVCHR 1
+#define HAVE_PERL_UVCHR_TO_UTF8 1
+#else
+#define HAVE_PERL_UTF8_TO_UVCHR 0
+#define HAVE_PERL_UVCHR_TO_UTF8 0
+#endif
+
+#if PERL_VERSION >= 16 /* really 15.something */
+#define HAVE_PERL_UTF8_TO_UVCHR_BUF 1
+#else
+#define HAVE_PERL_UTF8_TO_UVCHR_BUF 0
 #endif
 
 /*
@@ -386,7 +402,9 @@ SV *sv;
 }
 
 
-#if HAVE_PERL_UTF8
+#if ((HAVE_PERL_UVCHR_TO_UTF8 || HAVE_PERL_UV_TO_UTF8) && \
+    (HAVE_PERL_UTF8_TO_UVCHR_BUF || HAVE_PERL_UTF8_TO_UVCHR || \
+     HAVE_PERL_UTF8_TO_UV))
   #include "CursesWide.c"
   #define HAVE_WIDE_SV_HELPER 1
 #else
