@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.28'; # Makefile.PL picks this up
+$VERSION = '1.30'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -72,9 +72,12 @@ sub DESTROY  { }
 
 sub AUTOLOAD {
     my $N = $AUTOLOAD;
-       $N =~ s/^.*:://;
+    $N =~ s/^.*:://;
 
-    croak "Curses constant '$N' is not defined by your vendor";
+    croak
+        "No '$N' in Curses module.  This could be because the Curses " .
+        "library for which it was built does not provide the associated " .
+        "functions.  ";
 }
 
 sub printw   { addstr(sprintf shift, @_) }
@@ -91,6 +94,8 @@ tie $COLOR_PAIRS, Curses::Vars, 6;
 
     LINES $LINES COLS $COLS stdscr $stdscr curscr $curscr COLORS $COLORS
     COLOR_PAIRS $COLOR_PAIRS
+
+    getchar getstring ungetchar instring addstring insstring
 
     addch echochar addchstr addchnstr addstr addnstr attroff attron attrset
     standend standout attr_get attr_off attr_on attr_set chgat COLOR_PAIR
@@ -307,6 +312,164 @@ variable C<$Curses::OldCurses> to a non-zero value before using the
 C<Curses> package.  See L<"Perl 4.X C<cursperl> Compatibility">
 for an example of this.
 
+=head2 Wide-Character-Aware Functions
+
+The following are the preferred functions for working with strings, though
+they don't follow the normal unified function naming convention (based on the
+names in the Curses library) described above.  Despite the naming, each
+corresponds to a Curses library function.  For example, a C<getchar>
+call performs a Curses library function in the C<getch> family.
+
+In addition to these functions, The C<Curses> module contains corresponding
+functions with the conventional naming (e.g. C<getch>); the duplication is for
+historical reasons.  The preferred functions were new in Curses 1.29 (April
+2014).  They use the wide character functions in the Curses library if
+available (falling back to using the traditional non-wide-character versions).
+They also have a more Perl-like interface, taking care of some gory details
+under the hood about which a Perl programmer shouldn't have to worry.
+
+The reason for two sets of string-handling functions is historical.  The
+original Curses Perl module predates Curses libraries that understand multiple
+byte character encodings.  Moreover, the module was designed to have a Perl
+interface that closely resembles the C interface syntactically and directly
+passes the internal byte representation of Perl strings to C code.  This was
+probably fine before Perl got Unicode function, but today, Perl stores strings
+internally in either Latin-1 or Unicode UTF-8 and the original module was not
+sensitive to which encoding was used.
+
+While most of the problems could be worked around in Perl code using the
+traditional interface, it's hard to get right and you need a
+wide-character-aware curses library (e.g. ncursesw) anyway to make it work
+properly.  Because existing consumers of the Curses module may be relying on
+the traditional behavior, Curses module designers couldn't simply modify the
+existing functions to understand wide characters and convert from and to Perl
+strings.
+
+None of these functions exist if Perl is older than 5.16.
+
+
+=head3 C<getchar>
+
+This calls C<wget_wch()>.  It returns a character -- more precisely, a
+one-character (not necessarily one-byte!) string holding the character -- for
+a normal key and a two-element list C<(undef, key-number)> for a function key.
+It returns C<undef> on error.
+
+If you don't expect function keys (i.e. with C<keypad(0))>, you can simply do
+
+=over 4
+
+	my $ch = getchar;
+	die "getchar failed" unless defined $ch;
+
+=back
+
+If you do expect function keys (i.e. with C<keypad(1)>), you can still assign
+the result to a scalar variable as above.  Because of of the way the comma
+operator works, that variable will receive either C<undef> or the string or
+the number, and you can decode it yourself.
+
+=over 4
+
+	my $ch = getchar;
+	die "getchar failed" unless defined $ch;
+	if (<$ch looks like a number >= 0x100>) {
+		<handle function key>
+	} else {
+		<handle normal key>
+	}
+
+=back
+
+or do
+
+=over 4
+
+	my ($ch, $key) = getchar;
+	if (defined $key) {
+		<handle function key $key>
+	} else if (defined $ch) {
+		<handle normal key $ch>
+	} else {
+		die "getchar failed";
+	}
+
+=back
+
+If C<wget_wch()> is not available (i.e. The Curses library does not understand
+wide characters), this calls C<wgetch()>, but returns the values described
+above nonetheless.  This can be a problem because with a multibyte character
+encoding like UTF-8, you will receive two one-character strings for a
+two-byte-character (e.g. "Å√" and "Å§" for "Å‰").  If you append
+these characters to a Perl string, that string may internally contain a valid
+UTF-8 encoding of a character, but Perl will not interpret it that way. Perl
+may even try to convert what it believes to be two characters to UTF-8, giving
+you four bytes.
+
+
+=head3 C<getstring>
+
+This calls C<wgetn_wstr> and returns a string or C<undef>.  It cannot return a
+function key value; the Curses library will itself interpret KEY_LEFT and
+KEY_BACKSPACE.
+
+If C<wgett_wstr()> is unavailable, this calls C<wgetstr()>.
+
+In both cases, the function allocates a buffer of fixed size to hold the
+result of the Curses library call.
+
+=over 4
+
+	my $s = getstring();
+	die "getstring failed" unless defined $s;
+
+=back
+
+
+=head3 C<addstring>/C<insstring>
+
+This adds/inserts the Perl string passed as an argument to the Curses window
+using C<waddnwstr()>/C<wins_nwstr()> or, if unavailable,
+C<waddnstr()>/C<winsnstr()>.  It returns a true value on success, false on
+failure.
+
+=over 4
+
+	addstring("HÅ‰llÅˆ, WÅˆrld") ||Å†die "addstring failed";
+
+=back
+
+=head3 C<instring>
+
+This returns a Perl string (or C<undef> on failure) holding the characters
+from the current cursor position up to the end of the line.  It uses
+C<winnwstr()> if available, and otherwise C<innstr()>.
+
+=over 4
+
+	my $s = instring();
+	die "instring failed" unless defined $s;
+
+=back
+
+=head3 C<ungetchar>
+
+This pushes one character (passed as a one-character Perl string) back to the
+input queue. It uses C<unget_wch()> or C<ungetch()>.  It returns a true value
+on success, false on failure.  It cannot push back a function key; the Curses
+library provides no way to push back function keys, only characters.
+
+=over 4
+
+	ungetchar("X") ||Å†die "ungetchar failed";
+
+=back
+
+The C<Curses> module provides no interface to the complex-character routines
+(C<wadd_wch()>, C<wadd_wchnstr()>, C<wecho_wchar()>, C<win_wch()>,
+C<win_wchnstr()>, C<wins_wch()>) because there is no sensible way of
+converting from Perl to a C C<cchar_t> or back.
+
 =head2 Objects
 
 Objects work.  Example:
@@ -342,7 +505,8 @@ In order to avoid this problem, use the alternate functions:
    inchnstr()
    innstr()
 
-which take an extra "size of buffer" argument.
+which take an extra "size of buffer" argument
+or the wide-character-aware getstring() and instring() versions.
 
 =head1 COMPATIBILITY
 
@@ -370,7 +534,7 @@ See the L<LIMITATIONS> section for details.
 =head2 Incompatibilities with previous versions of C<Curses>
 
 In previous versions of this software, some Perl functions took a different
-set of parameters than their C counterparts.  This is not true in the curretn
+set of parameters than their C counterparts.  This is not true in the current
 version.  You should now use C<getstr($str)> and C<getyx($y, $x)> instead of
 C<$str = getstr()> and C<($y, $x) = getyx()>.
 
@@ -394,20 +558,20 @@ This probably means that you didn't give the right arguments to a I<unified>
 function.  See the DESCRIPTION section on L<Unified Functions> for more
 information.
 
-=item * Curses function '%s' is not defined by your vendor at ...
+=item * Curses function '%s' is not defined in your Curses library at ...
 
 Your code has a call to a Perl C<Curses> function that your system's Curses
 library doesn't provide.
 
-=item * Curses variable '%s' is not defined by your vendor at ...
+=item * Curses variable '%s' is not defined in your Curses library at ...
 
 Your code has a Perl C<Curses> variable that your system's Curses library
 doesn't provide.
 
-=item * Curses constant '%s' is not defined by your vendor at ...
+=item * Curses constant '%s' is not defined in your Curses library at ...
 
-Your code has a C<Curses> constant that your system's Curses library doesn't
-provide.
+Your code references the specified C<Curses> constant, and your system's
+Curses library doesn't provide it.
 
 =item * Curses::Vars::FETCH called with bad index at ...
 
@@ -766,6 +930,17 @@ William Setzer <William_Setzer@ncsu.edu>
 C<$Curses::OldCurses> variable to a non-zero value before using the
 C<Curses> package.  See L<"Perl 4.X cursperl Compatibility"> for an
 example of this.
+
+=head2 Available Wide-Character-Aware Functions
+
+    Function    Uses wide-character call  Reverts to legacy call
+    --------    ------------------------  ----------------------
+    getchar     wget_wch                  wgetch
+    getstring   wgetn_wstr                wgetnstr
+    ungetchar   unget_wch                 ungetch
+    instring    winnwtr                   winnstr
+    addstring   waddnwstr                 waddnstr
+    insstring   wins_nwstr                winsnstr
 
 =head2 Available Variables
 

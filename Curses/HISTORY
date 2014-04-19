@@ -11,10 +11,11 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
-New in 1.30 (Released April 15, 2014)
+New in 1.30 (Released April 19, 2014)
 
-  Fix build failure: Don't provide the wide character functions if Perl is too
-  old to have the 'utf8_to_uvchr_buf' function they use.  Broken in 1.29.
+  Fix build failure: Use older substitutes if Perl is too old to have
+  the 'utf8_to_uvchr_buf' function they use; don't include the wide character
+  functions if Perl is even too old to have the substitutes.  Broken in 1.29.
 
   Fix "constant not provided by your vendor" message when you refer to a
   function that does not exist in the Curses module.

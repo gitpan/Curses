@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.29'; # Makefile.PL picks this up
+$VERSION = '1.30'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -72,9 +72,12 @@ sub DESTROY  { }
 
 sub AUTOLOAD {
     my $N = $AUTOLOAD;
-       $N =~ s/^.*:://;
+    $N =~ s/^.*:://;
 
-    croak "Curses constant '$N' is not defined by your vendor";
+    croak
+        "No '$N' in Curses module.  This could be because the Curses " .
+        "library for which it was built does not provide the associated " .
+        "functions.  ";
 }
 
 sub printw   { addstr(sprintf shift, @_) }
@@ -326,12 +329,12 @@ They also have a more Perl-like interface, taking care of some gory details
 under the hood about which a Perl programmer shouldn't have to worry.
 
 The reason for two sets of string-handling functions is historical.  The
-original Curses Perl module predates Curses libraries that understand wide
-(multibyte) characters.  Moreover, the module was designed to have a Perl
+original Curses Perl module predates Curses libraries that understand multiple
+byte character encodings.  Moreover, the module was designed to have a Perl
 interface that closely resembles the C interface syntactically and directly
 passes the internal byte representation of Perl strings to C code.  This was
 probably fine before Perl got Unicode function, but today, Perl stores strings
-internally in either Latin-1 or UTF-8 and the original module was not
+internally in either Latin-1 or Unicode UTF-8 and the original module was not
 sensitive to which encoding was used.
 
 While most of the problems could be worked around in Perl code using the
@@ -341,6 +344,9 @@ properly.  Because existing consumers of the Curses module may be relying on
 the traditional behavior, Curses module designers couldn't simply modify the
 existing functions to understand wide characters and convert from and to Perl
 strings.
+
+None of these functions exist if Perl is older than 5.16.
+
 
 =head3 C<getchar>
 
@@ -393,12 +399,12 @@ or do
 If C<wget_wch()> is not available (i.e. The Curses library does not understand
 wide characters), this calls C<wgetch()>, but returns the values described
 above nonetheless.  This can be a problem because with a multibyte character
-set like UTF-8, you will receive two one-character strings for a
+encoding like UTF-8, you will receive two one-character strings for a
 two-byte-character (e.g. "Å√" and "Å§" for "Å‰").  If you append
 these characters to a Perl string, that string may internally contain a valid
-UTF-8 multibyte character, but Perl will not interpret it that way. Perl may
-even try to convert what it believes to be two characters to UTF-8, giving you
-four bytes.
+UTF-8 encoding of a character, but Perl will not interpret it that way. Perl
+may even try to convert what it believes to be two characters to UTF-8, giving
+you four bytes.
 
 
 =head3 C<getstring>
@@ -407,7 +413,7 @@ This calls C<wgetn_wstr> and returns a string or C<undef>.  It cannot return a
 function key value; the Curses library will itself interpret KEY_LEFT and
 KEY_BACKSPACE.
 
-If C<wget_wch()> is unavailable, this calls C<wgetstr()>.
+If C<wgett_wstr()> is unavailable, this calls C<wgetstr()>.
 
 In both cases, the function allocates a buffer of fixed size to hold the
 result of the Curses library call.
@@ -552,20 +558,20 @@ This probably means that you didn't give the right arguments to a I<unified>
 function.  See the DESCRIPTION section on L<Unified Functions> for more
 information.
 
-=item * Curses function '%s' is not defined by your vendor at ...
+=item * Curses function '%s' is not defined in your Curses library at ...
 
 Your code has a call to a Perl C<Curses> function that your system's Curses
 library doesn't provide.
 
-=item * Curses variable '%s' is not defined by your vendor at ...
+=item * Curses variable '%s' is not defined in your Curses library at ...
 
 Your code has a Perl C<Curses> variable that your system's Curses library
 doesn't provide.
 
-=item * Curses constant '%s' is not defined by your vendor at ...
+=item * Curses constant '%s' is not defined in your Curses library at ...
 
-Your code has a C<Curses> constant that your system's Curses library doesn't
-provide.
+Your code references the specified C<Curses> constant, and your system's
+Curses library doesn't provide it.
 
 =item * Curses::Vars::FETCH called with bad index at ...
 
