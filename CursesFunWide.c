@@ -35,7 +35,7 @@ XS(XS_CURSES_getchar) {
     int key = wgetch(win);
     if (key == ERR) {
         XSRETURN_UNDEF;
-    } else if (key < KEY_CODE_YES) {
+    } else if (key < KEY_MIN) {
         ST(0) = sv_newmortal();
         c_wchar2sv(ST(0), key);
         XSRETURN(1);

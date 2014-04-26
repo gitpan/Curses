@@ -11,6 +11,14 @@ The module has always been distributed via CPAN.
 Curses itself is much older than the Perl implementation.  Curses was
 originally only a C programming library.
 
+New in 1.31 (Released April 26, 2014)
+
+  Fix compile failure with some Curses libraries, introduced in
+  1.29 - undefined KEY_CODE_YES.
+
+  Fix documentation: wide character functions exist back to Perl 5.6,
+  not 5.16.
+
 New in 1.30 (Released April 19, 2014)
 
   Fix build failure: Use older substitutes if Perl is too old to have

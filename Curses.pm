@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.30'; # Makefile.PL picks this up
+$VERSION = '1.31'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -345,7 +345,7 @@ the traditional behavior, Curses module designers couldn't simply modify the
 existing functions to understand wide characters and convert from and to Perl
 strings.
 
-None of these functions exist if Perl is older than 5.16.
+None of these functions exist if Perl is older than 5.6.
 
 
 =head3 C<getchar>
