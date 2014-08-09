@@ -102,6 +102,11 @@ my $form_libs = $ENV{'CURSES_FORM_LDFLAGS'} || '';
 #    If you are having trouble compiling under Solaris, try various
 #    combinations of "-I/usr/include" and "-DSYSV=1" in $inc to see if
 #    it fixes things.
+#
+#    David Nelson reports in July 2014 that Solaris 11 no longer needs
+#    -L /usr/ccs/lib and also has Ncurses installed; in particular, it
+#    has a /usr/include/ncurses/ncurses.h.  (So generic Ncurses compile
+#    (options are fine on Solaris 11).
 
 ##   OS            default guess for $inc      default guess for $libs
 #
@@ -241,12 +246,23 @@ sub guessAtCursesLocation($$$) {
 
     # We need to move away from the inflexible $guess_cfg thing.  For
     # starters, we don't use it when the system looks like one with
-    # wide-character Ncurses.
+    # wide-character Ncurses.  Next, we make a similar special case out of
+    # ncurses (14.07.09) but leave the $guess_cfg code otherwise undisturbed
+    # (so there is dead ncurses-related code in the $guess-cfg code).
 
     if (-f('/usr/include/ncursesw/ncurses.h')) {
         $$incR = '-I/usr/include/ncursesw';
         $$libsR = '-lncursesw';
         $$libtypR = 'ncursesw';
+    } elsif (-f('/usr/include/ncurses/ncurses.h')) {
+        # This tests only for a particular form of Ncurses installation.
+        # There are, unfortunately, some systems (most Linux, I believe)
+        # that put Ncurses in the default search directories, so e.g. they
+        # have /usr/include/ncurses.h.  Such systems are handled by code
+        # below.
+        $$incR = '-I/usr/include/ncurses';
+        $$libsR = '-lncurses';
+        $$libtypR = 'ncurses';
     } else {
         my $guess1 = $guess_cfg->{$OSNAME};
         my $libtyp;
@@ -266,7 +282,7 @@ sub guessAtCursesLocation($$$) {
             print STDERR <<"EOW";
 
 I'm sorry, but I could not make a good guess for the includes and
-libraries that are needed.  You will need to set the CURSES_
+libraries that are needed.  You'll need to set the CURSES_
 environment variables as described in the INSTALL file.
 OSNAME=$OSNAME
 EOW

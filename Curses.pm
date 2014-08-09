@@ -51,7 +51,7 @@ sub DESTROY { }
 
 package Curses;
 
-$VERSION = '1.31'; # Makefile.PL picks this up
+$VERSION = '1.32'; # Makefile.PL picks this up
 
 use Carp;
 require Exporter;
@@ -247,6 +247,8 @@ EOS
 
 __END__
 
+=encoding Latin1
+
 =head1 NAME
 
 Curses - terminal screen handling and optimization
@@ -435,7 +437,7 @@ failure.
 
 =over 4
 
-	addstring("Hällö, Wörld") || die "addstring failed";
+	addstring("Hällö, Wörld") || die "addstring failed";
 
 =back
 
@@ -461,7 +463,7 @@ library provides no way to push back function keys, only characters.
 
 =over 4
 
-	ungetchar("X") || die "ungetchar failed";
+	ungetchar("X") || die "ungetchar failed";
 
 =back
 
@@ -603,8 +605,8 @@ William Setzer <William_Setzer@ncsu.edu>
 
 =head2 Available Functions
 
-    Avaiable Function    Unified?     Available via $OldCurses[*]
-    -----------------    --------     ------------------------
+    Available Function   Unified?     Available via $OldCurses[*]
+    ------------------   --------     ------------------------
     addch                  Yes        waddch mvaddch mvwaddch
     echochar               Yes        wechochar
     addchstr               Yes        waddchstr mvaddchstr mvwaddchstr

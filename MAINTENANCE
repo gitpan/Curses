@@ -18,15 +18,19 @@ Steps to release:
 
   - Make a tarball with something like this:
 
-    tar --file=/tmp/Curses-1.07.tgz --gzip --create Curses-1.07
+    $ tar --file=/tmp/Curses-1.07.tgz --gzip --create Curses-1.07
 
-  - Upload via pause.perl.org.  Use "upload a file to CPAN" link.
-    You have to login to make that link appear.
+  - Upload via pause.perl.org.  Use "upload a file to CPAN" link.  You have to
+    login to make that link appear.  PAUSE gives you various options for
+    uploading, tells you how to follow the progress of the uploading and
+    indexing, and sends you emails about it.
 
-    It goes into CPAN in the directory belonging to the user who
-    uploaded it.  PAUSE gives you various options for uploading, tells
-    you how to follow the progress of the uploading and indexing, and
-    sends you emails about it.
+    Or do:
+
+       $ cpan-upload-http -user ... -mailto ... /tmp/Curses-1.07.tgz
+       (Get cpan-upload-http from CPAN)
+
+    It goes into CPAN in the directory belonging to the user who uploaded it.
 
   - PAUSE will automatically extract the README file from the tarball
     and install it as e.g. Curses-1.07.readme
